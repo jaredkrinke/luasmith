@@ -23,16 +23,20 @@ function append(t, i)
 	t[#t + 1] = i
 end
 
-function copy(t)
-	r = {}
-	for k, v in pairs(t) do
-		r[k] = v
+function merge(source, dest)
+	for k, v in pairs(source) do
+		dest[k] = v
 	end
+end
+
+function copy(t)
+	local r = {}
+	merge(t, r)
 	return r
 end
 
 function map(t, f)
-	r = {}
+	local r = {}
 	for k, v in pairs(t) do
 		r[k] = f(v)
 	end
@@ -40,7 +44,7 @@ function map(t, f)
 end
 
 function concatenate(a, b)
-	r = {}
+	local r = {}
 	for k, v in pairs(a) do
 		r[k] = v
 	end
@@ -48,6 +52,42 @@ function concatenate(a, b)
 		append(r, v)
 	end
 	return r
+end
+
+-- String helpers
+function lines(str)
+	local i = 0
+	return function ()
+		if i > #str then
+			return nil
+		else
+			local j = string.find(str, "\n", i)
+			if j then
+				local result = string.sub(str, i, j - 1)
+				i = j + 1
+				return result
+			else
+				local result =  string.sub(str, i)
+				i = #str + 1
+				return result
+			end
+		end
+	end
+end
+
+-- (Not quite) YAML
+function parseYaml(yaml)
+	local o = {}
+	for line in lines(yaml) do
+		-- TODO: Trim
+		-- TODO: Quotes (and escaped quotes)
+		-- TODO: Arrays
+		local _, _, k, v = string.find(line, "^(.-): *(.+)")
+		if k and v then
+			o[k] = v
+		end
+	end
+	return o
 end
 
 -- File system helpers
@@ -128,12 +168,12 @@ end
 -- TODO: Consider supporting multiple outputs
 function createTransformNode(transform, pattern)
 	return createProcessingNode(function (changes)
-			newChanges = {}
+			local newChanges = {}
 			for _, change in pairs(changes) do
 				local changeType = change.changeType
 				local newChange = change
 				if changeType ~= "delete" then
-					newItem = copy(change.item)
+					local newItem = copy(change.item)
 					transform(newItem)
 					newChange = {
 						changeType = changeType,
@@ -191,8 +231,16 @@ end
 -- Transform nodes
 processMarkdown = function ()
 	return createTransformNode(function (item)
-		-- TODO: Front matter
+		-- .md -> .html
 		item.path = string.gsub(item.path, "%.md$", ".html")
+
+		-- Extract front matter
+		local i, j, frontmatter = string.find(item.content, "^%-%-%-\n(.-)\n%-%-%-\n")
+		if i and j and frontmatter then
+			merge(parseYaml(frontmatter), item)
+			item.content = string.sub(item.content, j + 1)
+		end
+
 		item.content = markdownToHtml(item.content)
 	end,
 	"%.md$")
