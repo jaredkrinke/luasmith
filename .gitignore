@@ -1,0 +1,5 @@
+*.swp
+*.o
+lssg
+test/
+main.h
