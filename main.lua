@@ -116,7 +116,7 @@ function createProcessingNode(process, pattern)
 					append(excludedChanges, change)
 				end
 			end
-			return concatenate(excludedChanges, process(includedChanges))
+			return concatenate(excludedChanges, process(includedChanges) or {})
 		end
 	end
 
@@ -189,12 +189,14 @@ writeToDestination = function (dir, pattern)
 end
 
 -- Transform nodes
---processMarkdown = function ()
---	return createTransformNode(function (item)
---		-- TODO
---		item.parsed = true
---	end)
---end
+processMarkdown = function ()
+	return createTransformNode(function (item)
+		-- TODO: Front matter
+		item.path = string.gsub(item.path, "%.md$", ".html")
+		item.content = markdownToHtml(item.content)
+	end,
+	"%.md$")
+end
 
 -- Entry point
 function process(nodes)
@@ -207,7 +209,7 @@ end
 -- Run
 process({
 	readFromSource("content"),
---	processMarkdown(),
+	processMarkdown(),
 	writeToDestination("out", "^[^_]"),
 })
 

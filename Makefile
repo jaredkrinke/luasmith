@@ -1,4 +1,6 @@
 CC=cc
+OBJS=main.o md4c/src/entity.o md4c/src/md4c.o md4c/src/md4c-html.o
+CFLAGS=-I lua -I md4c/src
 
 all: lssg
 
@@ -9,8 +11,8 @@ main.h: main.lua
 	cat $< |sed -f stringify.sed > $@
 
 main.o: main.c main.h
-	$(CC) -I lua -c main.c
+	$(CC) $(CFLAGS) -c main.c
 
-lssg: main.o lua/liblua.a
+lssg: $(OBJS) lua/liblua.a
 	$(CC) -o lssg $^ -lm
 
