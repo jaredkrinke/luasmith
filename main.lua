@@ -102,17 +102,32 @@ function writeFile(path, content)
 end
 
 -- Processing node helpers
--- TOOD: Input filters
-function createProcessingNode(process)
+function createProcessingNode(process, pattern)
+	local p = process
+	if pattern then
+		-- Input pattern was supplied; only process selected changes
+		p = function (changes)
+			local includedChanges = {}
+			local excludedChanges = {}
+			for _, change in pairs(changes) do
+				if string.match(change.item.path, pattern) then
+					append(includedChanges, change)
+				else
+					append(excludedChanges, change)
+				end
+			end
+			return concatenate(excludedChanges, process(includedChanges))
+		end
+	end
+
 	return {
-		process = process,
+		process = p,
 	}
 end
 
 -- TODO: Consider supporting multiple outputs
-function createTransformNode(transform)
-	return {
-		process = function (changes)
+function createTransformNode(transform, pattern)
+	return createProcessingNode(function (changes)
 			newChanges = {}
 			for _, change in pairs(changes) do
 				local changeType = change.changeType
@@ -129,15 +144,14 @@ function createTransformNode(transform)
 			end
 			return newChanges
 		end,
-	}
+		pattern)
 end
 
 -- TODO: Aggregate nodes
 
 -- Source/sink nodes
 readFromSource = function (dir)
-	return {
-		process = function (changes)
+	return createProcessingNode(function (changes)
 			-- TODO: Check for differences from last run
 			newChanges = map(enumerateFiles(dir), function (path)
 				return {
@@ -150,13 +164,11 @@ readFromSource = function (dir)
 			end)
 
 			return concatenate(changes, newChanges)
-		end,
-	}
+		end)
 end
 
-writeToDestination = function (dir)
-	return {
-		process = function (changes)
+writeToDestination = function (dir, pattern)
+	return createProcessingNode(function (changes)
 			local dirsMade = {}
 			for _, change in pairs(changes) do
 				-- TODO: Handle deletes
@@ -173,7 +185,7 @@ writeToDestination = function (dir)
 				end
 			end
 		end,
-	}
+		pattern)
 end
 
 -- Transform nodes
@@ -196,6 +208,6 @@ end
 process({
 	readFromSource("content"),
 --	processMarkdown(),
-	writeToDestination("out"),
+	writeToDestination("out", "^[^_]"),
 })
 
