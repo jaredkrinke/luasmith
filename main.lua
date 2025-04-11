@@ -37,7 +37,7 @@ end
 
 function map(t, f)
 	local r = {}
-	for k, v in pairs(t) do
+	for k, v in ipairs(t) do
 		r[k] = f(v)
 	end
 	return r
@@ -45,10 +45,10 @@ end
 
 function concatenate(a, b)
 	local r = {}
-	for k, v in pairs(a) do
+	for k, v in ipairs(a) do
 		r[k] = v
 	end
-	for _, v in pairs(b) do
+	for _, v in ipairs(b) do
 		append(r, v)
 	end
 	return r
@@ -127,11 +127,10 @@ end
 
 function createDirectory(dir)
 	-- TODO: Obviously doesn't handle spaces
-	print("Create directory: " .. dir)
 	os.execute("mkdir -p " .. dir)
 end
 
-function enumerateFilesRecursive(prefixLength, dir, files)
+local function enumerateFilesRecursive(prefixLength, dir, files)
 	for name in io.popen("ls " .. dir):lines() do
 		local path = pathJoin(dir, name)
 		if isDirectory(path) then
@@ -151,9 +150,18 @@ end
 
 function readFile(path)
 	local f = io.open(path, "rb")
+	if f == nil then
+		error("Could not open file: " .. path)
+	end
+
 	local content = f:read("*a")
 	f:close()
 	return content
+end
+
+themeDirectory = "."
+function readThemeFile(path)
+	return readFile(pathJoin(themeDirectory, path))
 end
 
 function writeFile(path, content)
@@ -170,7 +178,7 @@ function createProcessingNode(process, pattern)
 		p = function (changes)
 			local includedChanges = {}
 			local excludedChanges = {}
-			for _, change in pairs(changes) do
+			for _, change in ipairs(changes) do
 				if string.match(change.item.path, pattern) then
 					append(includedChanges, change)
 				else
@@ -190,7 +198,7 @@ end
 function createTransformNode(transform, pattern)
 	return createProcessingNode(function (changes)
 			local newChanges = {}
-			for _, change in pairs(changes) do
+			for _, change in ipairs(changes) do
 				local changeType = change.changeType
 				local newChange = change
 				if changeType ~= "delete" then
@@ -231,7 +239,7 @@ end
 writeToDestination = function (dir, pattern)
 	return createProcessingNode(function (changes)
 			local dirsMade = {}
-			for _, change in pairs(changes) do
+			for _, change in ipairs(changes) do
 				-- TODO: Handle deletes
 				local ct = change.changeType
 				if ct == "create" or ct == "update" then
@@ -270,21 +278,20 @@ processMarkdown = function ()
 		end
 
 		item.content = markdownToHtml(item.content)
-		print(format(item))
 	end,
 	"%.md$")
 end
 
 applyTemplates = function(templates)
 	local compiled = {}
-	for _, pair in pairs(templates) do
+	for _, pair in ipairs(templates) do
 		append(compiled, { pair[1], etlua.compile(pair[2]) })
 	end
 
 	return createTransformNode(function (item)
 		local path = item.path
 		local matchingTemplate = nil
-		for _, pair in pairs(compiled) do
+		for _, pair in ipairs(compiled) do
 			-- Note: Last matching template wins
 			if string.find(path, pair[1]) then
 				matchingTemplate = pair[2]
@@ -297,30 +304,28 @@ applyTemplates = function(templates)
 	end)
 end
 
--- Entry point
-function process(nodes)
+-- Top-level logic
+function build(nodes)
 	changes = {}
-	for _, node in pairs(nodes) do
+	for _, node in ipairs(nodes) do
 		changes = node.process(changes)
 	end
 end
 
--- Run
-templateDefault = [[
-<html>
-<head><title><%= title %></title></head>
-<body>
-<%- content %>
-</body>
-</html>
-]]
+-- Entry point
+if #args < 2 then
+	print("\nUsage: " .. args[1] .. " <THEME_NAME | THEME_PATH>\n")
+	print("The theme (which configures the build pipeline) can either be specified as the name of a theme (foo => themes/foo.lua) or the path to a custom theme (Lua script file).")
+	print("")
+	os.exit(-1)
+end
 
-process({
-	readFromSource("content"),
-	processMarkdown(),
-	applyTemplates({
-		{ "%.html$", templateDefault },
-	}),
-	writeToDestination("out", "^[^_]"),
-})
+local userScriptFile = args[2]
+if not string.find(userScriptFile, "%.lua$") then
+	-- Use built-in theme, relative to executable
+	userScriptFile = pathJoin(pathJoin(pathDirectory(args[1]), "themes"), userScriptFile .. ".lua")
+end
+
+themeDirectory = pathDirectory(userScriptFile)
+load(readFile(userScriptFile), userScriptFile, "t")()
 

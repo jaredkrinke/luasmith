@@ -59,7 +59,8 @@ void l_load_library(lua_State* L, const char* name, const char* script) {
 	lua_setglobal(L, name);
 }
 
-int main() {
+int main(int argc, const char** argv) {
+	int i;
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
 
@@ -68,6 +69,17 @@ int main() {
 
 	/* Load libraries */
 	l_load_library(L, "etlua", STRINGIFIED_ETLUA);
+
+	/* Expose command line arguments */
+	lua_createtable(L, argc, 0);
+
+	for (i = 0; i < argc; i++) {
+		lua_pushinteger(L, i + 1);
+		lua_pushstring(L, argv[i]);
+		lua_settable(L, -3);
+	}
+
+	lua_setglobal(L, "args");
 
 	/* Run main.lua */
 	if (luaL_dostring(L, STRINGIFIED_MAIN) != LUA_OK) {
