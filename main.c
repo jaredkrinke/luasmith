@@ -5,7 +5,10 @@
 #include <lualib.h>
 #include <lauxlib.h>
 #include <md4c-html.h>
-#include "main.h"
+
+/* Compile in Lua scripts */
+#include "main.lua.h"
+#include "etlua.lua.h"
 
 typedef struct {
 	lua_State* L;
@@ -48,6 +51,14 @@ int l_markdown_to_html(lua_State* L) {
 	}
 }
 
+void l_load_library(lua_State* L, const char* name, const char* script) {
+	if (luaL_dostring(L, script) != LUA_OK) {
+		printf("PANIC (%s): %s\n", name, lua_tostring(L, 1));
+	}
+
+	lua_setglobal(L, name);
+}
+
 int main() {
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
@@ -55,8 +66,11 @@ int main() {
 	/* Register helper functions */
 	lua_register(L, "markdownToHtml", &l_markdown_to_html);
 
+	/* Load libraries */
+	l_load_library(L, "etlua", STRINGIFIED_ETLUA);
+
 	/* Run main.lua */
-	if (luaL_dostring(L, STRINGIFIED_SCRIPT) != LUA_OK) {
+	if (luaL_dostring(L, STRINGIFIED_MAIN) != LUA_OK) {
 		printf("PANIC: %s\n", lua_tostring(L, 1));
 	}
 

@@ -275,6 +275,28 @@ processMarkdown = function ()
 	"%.md$")
 end
 
+applyTemplates = function(templates)
+	local compiled = {}
+	for _, pair in pairs(templates) do
+		append(compiled, { pair[1], etlua.compile(pair[2]) })
+	end
+
+	return createTransformNode(function (item)
+		local path = item.path
+		local matchingTemplate = nil
+		for _, pair in pairs(compiled) do
+			-- Note: Last matching template wins
+			if string.find(path, pair[1]) then
+				matchingTemplate = pair[2]
+			end
+		end
+
+		if matchingTemplate then
+			item.content = matchingTemplate(item)
+		end
+	end)
+end
+
 -- Entry point
 function process(nodes)
 	changes = {}
@@ -284,9 +306,21 @@ function process(nodes)
 end
 
 -- Run
+templateDefault = [[
+<html>
+<head><title><%= title %></title></head>
+<body>
+<%- content %>
+</body>
+</html>
+]]
+
 process({
 	readFromSource("content"),
 	processMarkdown(),
+	applyTemplates({
+		{ "%.html$", templateDefault },
+	}),
 	writeToDestination("out", "^[^_]"),
 })
 

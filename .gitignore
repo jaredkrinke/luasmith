@@ -1,5 +1,5 @@
 *.swp
 *.o
+*.lua.h
 lssg
 test/
-main.h
