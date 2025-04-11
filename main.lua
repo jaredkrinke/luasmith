@@ -19,6 +19,18 @@ function format(v)
 end
 
 -- Helpers
+function stringToNumber(str)
+	return 0 + str
+end
+
+function countIterations(iterator)
+	local count = 0
+	for _ in iterator do
+		count = count + 1
+	end
+	return count
+end
+
 function append(t, i)
 	t[#t + 1] = i
 end
@@ -121,6 +133,10 @@ function pathDirectory(path)
 	return dir or ""
 end
 
+function computePathToRoot(path)
+	return string.rep("../", countIterations(string.gmatch(pathDirectory(path), "/")))
+end
+
 function isDirectory(f)
 	return "directory" == io.popen("stat -c %F " .. f):read()
 end
@@ -171,6 +187,17 @@ function writeFile(path, content)
 end
 
 -- Processing node helpers
+function createChange(changeType, item)
+	if not item.pathToRoot then
+		item.pathToRoot = computePathToRoot(item.path)
+	end
+
+	return {
+		changeType = changeType,
+		item = item,
+	}
+end
+
 function createProcessingNode(process, pattern)
 	local p = process
 	if pattern then
@@ -204,10 +231,7 @@ function createTransformNode(transform, pattern)
 				if changeType ~= "delete" then
 					local newItem = copy(change.item)
 					transform(newItem)
-					newChange = {
-						changeType = changeType,
-						item = newItem,
-					}
+					newChange = createChange(changeType, newItem)
 				end
 				append(newChanges, newChange)
 			end
@@ -219,17 +243,28 @@ end
 -- TODO: Aggregate nodes
 
 -- Source/sink nodes
+injectFiles = function (files)
+	return createProcessingNode(function (changes)
+		newChanges = {}
+		for path, content in pairs(files) do
+			-- TODO: Detect differences, probably via hash
+			append(newChanges, createChange("create", {
+				path = path,
+				content = content
+			}))
+		end
+		return concatenate(changes, newChanges)
+	end)
+end
+
 readFromSource = function (dir)
 	return createProcessingNode(function (changes)
 			-- TODO: Check for differences from last run
 			newChanges = map(enumerateFiles(dir), function (path)
-				return {
-					changeType = "create",
-					item = {
-						path = path,
-						content = readFile(pathJoin(dir, path)),
-					},
-				}
+				return createChange("create", {
+					path = path,
+					content = readFile(pathJoin(dir, path)),
+				})
 			end)
 
 			return concatenate(changes, newChanges)
@@ -309,6 +344,17 @@ function build(nodes)
 	changes = {}
 	for _, node in ipairs(nodes) do
 		changes = node.process(changes)
+	end
+end
+
+-- Formatting helpers
+local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
+function formatDate(date)
+	local _, _, year, month, day = string.find(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
+	if year and month and day then
+		return months[stringToNumber(month)] .. " " .. stringToNumber(day) .. ", " .. year
+	else
+		error("Failed to parse date: " .. date)
 	end
 end
 

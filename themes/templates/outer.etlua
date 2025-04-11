@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title><%= title %></title>
+<% if description then %><meta name="description" content="<%= description %>" /><% end %>
+<% if keywords then %><meta name="keywords" content="<%= table.concat(keywords, ",") %>" /><% end %>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<link rel="stylesheet" href="<%= pathToRoot %>style.css" />
+</head>
+<body>
+<main>
+<%- content %>
+</main>
+</body>
+</html>

@@ -1,6 +1,10 @@
-<html>
-<head><title><%= title %></title></head>
-<body>
+<article>
+<header>
+<h1><a href="<%= pathToRoot %><%= path %>"><%= title %></a></h1>
+<p><%- htmlifyDate(date) %></p>
+</header>
 <%- content %>
-</body>
-</html>
+<footer>
+<p>&crarr; <a href="<%= pathToRoot %>index.html">Back to home</a></p>
+</footer>
+</article>
