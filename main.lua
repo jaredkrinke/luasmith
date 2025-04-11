@@ -54,6 +54,21 @@ function concatenate(a, b)
 	return r
 end
 
+-- TODO: Needed?
+function chainEnvironment(parent)
+	local e = {}
+	setmetatable(e, {
+		__index = function (table, key)
+			local r = rawget(table, key)
+			if r then
+				return r
+			end
+			return parent[key]
+		end,
+	})
+	return e
+end
+
 -- String helpers
 function lines(str)
 	local i = 0
@@ -75,7 +90,13 @@ function lines(str)
 	end
 end
 
--- (Not quite) YAML
+-- Frontmatter parsing
+function parseLua(lua)
+	local o = {}
+	load(lua, "frontmatter", "t", o)()
+	return o
+end
+
 function parseYaml(yaml)
 	local o = {}
 	for line in lines(yaml) do
@@ -234,14 +255,22 @@ processMarkdown = function ()
 		-- .md -> .html
 		item.path = string.gsub(item.path, "%.md$", ".html")
 
-		-- Extract front matter
+		-- Parse YAML frontmatter
 		local i, j, frontmatter = string.find(item.content, "^%-%-%-\n(.-)\n%-%-%-\n")
 		if i and j and frontmatter then
 			merge(parseYaml(frontmatter), item)
 			item.content = string.sub(item.content, j + 1)
+		else
+			-- Parse Lua frontmatter
+			i, j, frontmatter = string.find(item.content, "^%[%[\n(.-)\n%]%]\n")
+			if i and j and frontmatter then
+				merge(parseLua(frontmatter), item)
+				item.content = string.sub(item.content, j + 1)
+			end
 		end
 
 		item.content = markdownToHtml(item.content)
+		print(format(item))
 	end,
 	"%.md$")
 end
