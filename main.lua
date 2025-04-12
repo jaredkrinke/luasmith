@@ -164,7 +164,7 @@ function createDirectory(dir)
 end
 
 local function enumerateFilesRecursive(prefixLength, dir, files)
-	for name in io.popen("ls " .. dir):lines() do
+	for _, name in ipairs(listDirectory(dir)) do
 		local path = pathJoin(dir, name)
 		if isDirectory(path) then
 			enumerateFilesRecursive(prefixLength, path, files)
