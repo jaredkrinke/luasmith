@@ -158,10 +158,6 @@ function computePathToRoot(path)
 	return string.rep("../", countIterations(string.gmatch(path, "/")))
 end
 
-function isDirectory(f)
-	return "directory" == io.popen("stat -c %F " .. f):read()
-end
-
 function createDirectory(dir)
 	-- TODO: Obviously doesn't handle spaces
 	os.execute("mkdir -p " .. dir)

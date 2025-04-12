@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <lua.h>
 #include <lualib.h>
 #include <lauxlib.h>
@@ -9,6 +10,9 @@
 /* Compile in Lua scripts */
 #include "main.lua.h"
 #include "etlua.lua.h"
+
+#define TRUE 1
+#define FALSE 0
 
 void append_internal(const MD_CHAR* str, MD_SIZE size, void* o) {
 	/* TODO: Reuse a single buffer instead of allocating each time */
@@ -43,6 +47,20 @@ int l_markdown_to_html(lua_State* L) {
 	}
 }
 
+int l_is_directory(lua_State* L) {
+	struct stat s;
+	int  result = lstat(lua_tostring(L, 1), &s);
+
+	lua_pop(L, 1);
+	if (result == 0) {
+		lua_pushboolean(L, (s.st_mode & S_IFMT) == S_IFDIR);
+		return 1;
+	}
+
+	lua_pushboolean(L, FALSE);
+	return 1;
+}
+
 void l_load_library(lua_State* L, const char* name, const char* script) {
 	if (luaL_dostring(L, script) != LUA_OK) {
 		printf("PANIC (%s): %s\n", name, lua_tostring(L, 1));
@@ -58,6 +76,7 @@ int main(int argc, const char** argv) {
 
 	/* Register helper functions */
 	lua_register(L, "markdownToHtml", &l_markdown_to_html);
+	lua_register(L, "isDirectory", &l_is_directory);
 
 	/* Load libraries */
 	l_load_library(L, "etlua", STRINGIFIED_ETLUA);
