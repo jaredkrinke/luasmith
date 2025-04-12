@@ -91,10 +91,18 @@ function chainEnvironment(parent)
 	return e
 end
 
+function collect(iter)
+	local result = {}
+	for item in iter do
+		append(result, item)
+	end
+	return result
+end
+
 -- Formatting helpers
 local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
 function formatDate(date)
-	local _, _, year, month, day = string.find(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
+	local year, month, day = string.match(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
 	if year and month and day then
 		return months[stringToNumber(month)] .. " " .. stringToNumber(day) .. ", " .. year
 	else
@@ -103,13 +111,17 @@ function formatDate(date)
 end
 
 -- String helpers
-function lines(str)
+function charAt(str, i)
+	return string.sub(str, i, i)
+end
+
+function split(str, separator)
 	local i = 0
 	return function ()
 		if i > #str then
 			return nil
 		else
-			local j = string.find(str, "\n", i)
+			local j = string.find(str, separator, i)
 			if j then
 				local result = string.sub(str, i, j - 1)
 				i = j + 1
@@ -123,6 +135,22 @@ function lines(str)
 	end
 end
 
+function lines(str)
+	return split(str, "\n")
+end
+
+function trim(str)
+	return string.match(str, "^%s*(.-)%s*$")
+end
+
+function unquote(str)
+	if charAt(str, 1) == "\"" and charAt(str, #str) == "\"" then
+		return string.gsub(string.sub(str, 2, -2), [[\"]], [["]])
+	else
+		return str
+	end
+end
+
 -- Frontmatter parsing
 function parseLua(lua)
 	local o = {}
@@ -130,15 +158,23 @@ function parseLua(lua)
 	return o
 end
 
+local function parseYamlValue(v)
+	local trimmed = trim(v)
+
+	-- Check if array
+	if charAt(trimmed, 1) == "[" and charAt(trimmed, #trimmed) == "]" then
+		return map(collect(split(string.sub(trimmed, 2, -2), ",")), parseYamlValue)
+	else
+		return unquote(trimmed)
+	end
+end
+
 function parseYaml(yaml)
 	local o = {}
 	for line in lines(yaml) do
-		-- TODO: Trim
-		-- TODO: Quotes (and escaped quotes)
-		-- TODO: Arrays
-		local _, _, k, v = string.find(line, "^(.-): *(.+)")
+		local k, v = string.match(line, "^(.-):(.+)")
 		if k and v then
-			o[k] = v
+			o[k] = parseYamlValue(v)
 		end
 	end
 	return o
@@ -150,7 +186,7 @@ function pathJoin(a, b)
 end
 
 function pathDirectory(path)
-	local _, _, dir = string.find(path, "(.*)/")
+	local dir = string.match(path, "(.*)/")
 	return dir or ""
 end
 
