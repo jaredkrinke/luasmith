@@ -10,42 +10,34 @@
 #include "main.lua.h"
 #include "etlua.lua.h"
 
-typedef struct {
-	lua_State* L;
-	int count;
-} md4c_data_t;
-
 void append_internal(const MD_CHAR* str, MD_SIZE size, void* o) {
 	/* TODO: Reuse a single buffer instead of allocating each time */
-	md4c_data_t* data = (md4c_data_t*)o;
+	lua_State* L = (lua_State*)o;
 	char* s = strndup(str, size); /* Ensure null-terminated */
 
-	lua_pushstring(data->L, s);
+	lua_pushstring(L, s);
 	free(s);
-	data->count++;
+	lua_concat(L, 2);
 }
 
 int l_markdown_to_html(lua_State* L) {
 	const char *input = lua_tostring(L, 1);
-	md4c_data_t data;
 	int result = -1;
 
-	data.L = L;
-	data.count = 0;
+	lua_pushstring(L, "");
 
 	result = md_html(
 		input, strlen(input),
 		&append_internal,
-		&data,
+		L,
 		MD_FLAG_TABLES | MD_FLAG_STRIKETHROUGH | MD_FLAG_PERMISSIVEATXHEADERS,
 		0);
 
 	if (result == 0) {
-		lua_concat(L, data.count);
 		return 1;
 	}
 	else {
-		lua_pop(L, data.count);
+		lua_pop(L, 1);
 		luaL_error(L, "Markdown parsing failed!");
 		return 0;
 	}
