@@ -155,7 +155,7 @@ function pathDirectory(path)
 end
 
 function computePathToRoot(path)
-	return string.rep("../", countIterations(string.gmatch(pathDirectory(path), "/")))
+	return string.rep("../", countIterations(string.gmatch(path, "/")))
 end
 
 function isDirectory(f)
