@@ -9,15 +9,15 @@ lua/liblua.a: lua
 
 main.lua.h: main.lua
 	echo "#define STRINGIFIED_MAIN \\" > $@
-	cat $> |sed -f stringify.sed >> $@
+	cat main.lua |sed -f stringify.sed >> $@
 
 etlua.lua.h: etlua/etlua.lua
 	echo "#define STRINGIFIED_ETLUA \\" > $@
-	cat $> |sed -f stringify.sed >> $@
+	cat etlua/etlua.lua |sed -f stringify.sed >> $@
 
 main.o: main.c main.lua.h etlua.lua.h
 	$(CC) $(CFLAGS) -c main.c
 
 lssg: $(OBJS) lua/liblua.a
-	$(CC) -o lssg $> -lm
+	$(CC) -o lssg $(OBJS) lua/liblua.a -lm
 
