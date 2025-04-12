@@ -107,18 +107,35 @@ int l_list_directory(lua_State* L) {
 	}
 }
 
-void l_load_library(lua_State* L, const char* name, const char* script) {
-	if (luaL_dostring(L, script) != LUA_OK) {
-		printf("PANIC (%s): %s\n", name, lua_tostring(L, 1));
+int l_run(lua_State* L, const char* name, const char* script, int message_handler_index) {
+	int result;
+
+	luaL_loadbuffer(L, script, strlen(script), name);
+	result = lua_pcall(L, 0, LUA_MULTRET, message_handler_index);
+	if (result != LUA_OK) {
+		printf("*** ERROR ***\n%s\n", lua_tostring(L, -1));
 	}
 
-	lua_setglobal(L, name);
+	return result;
+}
+
+void l_load_library(lua_State* L, const char* name, const char* script, int message_handler_index) {
+	if (l_run(L, name, script, message_handler_index) == LUA_OK) {
+		lua_setglobal(L, name);
+	}
 }
 
 int main(int argc, const char** argv) {
+	int message_handler_index;
 	int i;
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
+
+	/* Load debug.traceback for stack tracing */
+	lua_getglobal(L, "debug");
+	lua_pushstring(L, "traceback");
+	lua_gettable(L, 1);
+	message_handler_index = lua_gettop(L);
 
 	/* Register helper functions */
 	lua_register(L, "markdownToHtml", &l_markdown_to_html);
@@ -127,7 +144,7 @@ int main(int argc, const char** argv) {
 	lua_register(L, "mkdir", &l_mkdir);
 
 	/* Load libraries */
-	l_load_library(L, "etlua", STRINGIFIED_ETLUA);
+	l_load_library(L, "etlua", STRINGIFIED_ETLUA, message_handler_index);
 
 	/* Expose command line arguments */
 	lua_createtable(L, argc, 0);
@@ -141,9 +158,7 @@ int main(int argc, const char** argv) {
 	lua_setglobal(L, "args");
 
 	/* Run main.lua */
-	if (luaL_dostring(L, STRINGIFIED_MAIN) != LUA_OK) {
-		printf("PANIC: %s\n", lua_tostring(L, 1));
-	}
+	l_run(L, "main.lua", STRINGIFIED_MAIN, message_handler_index);
 
 	lua_close(L);
 	return 0;
