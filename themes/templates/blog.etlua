@@ -3,6 +3,6 @@
 </header>
 <ul>
 <% for i, item in ipairs(sortBy(items, "date", true)) do -%>
-<li><a href="<%= item.pathToRoot %><%= item.path %>"><%= item.title %></a> (<%- htmlifyDate(item.date) %>)</li>
+<li><a href="<%= item.path %>"><%= item.title %></a> (<%- htmlifyDate(item.date) %>)</li>
 <% end -%>
 </ul>
