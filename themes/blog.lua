@@ -11,8 +11,10 @@ build({
 		["style.css"] = readThemeFile("css/blog.css"),
 	}),
 	processMarkdown(),
+	aggregate("index.html", "%.html$"),
 	applyTemplates({
 		{ "%.html$", readThemeFile("templates/post.etlua") },
+		{ "^index.html$", readThemeFile("templates/blog.etlua") },
 	}),
 	applyTemplates({ { "%.html$", readThemeFile("templates/outer.etlua") } }),
 	writeToDestination("out", "^[^_]"),

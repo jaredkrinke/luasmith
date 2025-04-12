@@ -55,6 +55,16 @@ function map(t, f)
 	return r
 end
 
+function sortBy(t, property, descending)
+	local sorted = copy(t)
+	if descending then
+		table.sort(sorted, function (a, b) return a[property] > b[property] end)
+	else
+		table.sort(sorted, function (a, b) return a[property] < b[property] end)
+	end
+	return sorted
+end
+
 function concatenate(a, b)
 	local r = {}
 	for k, v in ipairs(a) do
@@ -79,6 +89,17 @@ function chainEnvironment(parent)
 		end,
 	})
 	return e
+end
+
+-- Formatting helpers
+local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
+function formatDate(date)
+	local _, _, year, month, day = string.find(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
+	if year and month and day then
+		return months[stringToNumber(month)] .. " " .. stringToNumber(day) .. ", " .. year
+	else
+		error("Failed to parse date: " .. date)
+	end
 end
 
 -- String helpers
@@ -240,7 +261,24 @@ function createTransformNode(transform, pattern)
 		pattern)
 end
 
--- TODO: Aggregate nodes
+function createAggregateNode(aggregate, pattern)
+	-- TODO: Cache inputs from previous runs
+	return createProcessingNode(function (changes)
+			-- Find items
+			local items = {}
+			for _, change in ipairs(changes) do
+				if change.changeType ~= "delete" then
+					append(items, change.item)
+				end
+			end
+
+			-- Run aggregation
+			local outputItems = aggregate(items)
+			local newChanges = map(outputItems, function (item) return createChange("create", item) end)
+			return concatenate(changes, newChanges)
+		end,
+		pattern)
+end
 
 -- Source/sink nodes
 injectFiles = function (files)
@@ -277,7 +315,7 @@ writeToDestination = function (dir, pattern)
 			for _, change in ipairs(changes) do
 				-- TODO: Handle deletes
 				local ct = change.changeType
-				if ct == "create" or ct == "update" then
+				if ct == "create" then
 					local item = change.item
 					local localPath = pathJoin(dir, item.path)
 					local localDir = pathDirectory(localPath)
@@ -317,6 +355,7 @@ processMarkdown = function ()
 	"%.md$")
 end
 
+-- TODO: Should templates be able to include frontmatter?
 applyTemplates = function(templates)
 	local compiled = {}
 	for _, pair in ipairs(templates) do
@@ -339,22 +378,24 @@ applyTemplates = function(templates)
 	end)
 end
 
+-- Aggregate nodes
+aggregate = function (path, pattern)
+	return createAggregateNode(function (items)
+			return {
+				{
+					path = path,
+					items = items,
+				},
+			}
+		end,
+		pattern)
+end
+
 -- Top-level logic
 function build(nodes)
 	changes = {}
 	for _, node in ipairs(nodes) do
 		changes = node.process(changes)
-	end
-end
-
--- Formatting helpers
-local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
-function formatDate(date)
-	local _, _, year, month, day = string.find(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
-	if year and month and day then
-		return months[stringToNumber(month)] .. " " .. stringToNumber(day) .. ", " .. year
-	else
-		error("Failed to parse date: " .. date)
 	end
 end
 

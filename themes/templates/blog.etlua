@@ -1,0 +1,12 @@
+<ul>
+<% for i, item in ipairs(sortBy(items, "date", true)) do %>
+<% if i > 5 then break end %>
+<li><article>
+<header>
+<h1><a href="<%= item.pathToRoot %><%= item.path %>"><%= item.title %></a></h1>
+<p><%- htmlifyDate(item.date) %></p>
+</header>
+<p><%= item.description %></p>
+</article></li>
+<% end %>
+</ul>
