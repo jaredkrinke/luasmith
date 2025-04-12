@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <lua.h>
@@ -61,6 +62,16 @@ int l_is_directory(lua_State* L) {
 	return 1;
 }
 
+int l_mkdir(lua_State* L) {
+	if (mkdir(lua_tostring(L, 1), 0777) == -1) {
+		/* Ignore "already exists" errors */
+		if (errno != EEXIST) {
+			luaL_error(L, "Failed to create directory!");
+		}
+	}
+	return 0;
+}
+
 int l_list_directory(lua_State* L) {
 	DIR* d = opendir(lua_tostring(L, 1));
 	if (d) {
@@ -113,6 +124,7 @@ int main(int argc, const char** argv) {
 	lua_register(L, "markdownToHtml", &l_markdown_to_html);
 	lua_register(L, "isDirectory", &l_is_directory);
 	lua_register(L, "listDirectory", &l_list_directory);
+	lua_register(L, "mkdir", &l_mkdir);
 
 	/* Load libraries */
 	l_load_library(L, "etlua", STRINGIFIED_ETLUA);

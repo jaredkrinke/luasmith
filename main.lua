@@ -159,8 +159,23 @@ function computePathToRoot(path)
 end
 
 function createDirectory(dir)
-	-- TODO: Obviously doesn't handle spaces
-	os.execute("mkdir -p " .. dir)
+	-- Create parent directories as needed
+	local last = #dir
+	local i = 1
+	while true do
+		local slash = string.find(dir, "/", i, true)
+		if slash then
+			mkdir(string.sub(dir, 1, slash - 1))
+			if slash == last then
+				return
+			else
+				i = slash + 1
+			end
+		else
+			mkdir(dir)
+			break
+		end
+	end
 end
 
 local function enumerateFilesRecursive(prefixLength, dir, files)
