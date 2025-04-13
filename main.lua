@@ -19,35 +19,23 @@ function format(v)
 end
 
 -- Helpers
-function stringToNumber(str)
-	return 0 + str
-end
-
-function countIterations(iterator)
-	local count = 0
-	for _ in iterator do
-		count = count + 1
-	end
-	return count
-end
-
-function append(t, i)
+function table.append(t, i)
 	t[#t + 1] = i
 end
 
-function merge(source, dest)
+function table.merge(source, dest)
 	for k, v in pairs(source) do
 		dest[k] = v
 	end
 end
 
-function copy(t)
+function table.copy(t)
 	local r = {}
-	merge(t, r)
+	table.merge(t, r)
 	return r
 end
 
-function map(t, f)
+function table.map(t, f)
 	local r = {}
 	for k, v in ipairs(t) do
 		r[k] = f(v)
@@ -55,8 +43,8 @@ function map(t, f)
 	return r
 end
 
-function sortBy(t, property, descending)
-	local sorted = copy(t)
+function table.sortBy(t, property, descending)
+	local sorted = table.copy(t)
 	if descending then
 		table.sort(sorted, function (a, b) return a[property] > b[property] end)
 	else
@@ -65,15 +53,33 @@ function sortBy(t, property, descending)
 	return sorted
 end
 
-function concatenate(a, b)
+function table.concatenate(a, b)
 	local r = {}
 	for k, v in ipairs(a) do
 		r[k] = v
 	end
 	for _, v in ipairs(b) do
-		append(r, v)
+		table.append(r, v)
 	end
 	return r
+end
+
+iterator = {}
+
+function iterator.count(iterator)
+	local count = 0
+	for _ in iterator do
+		count = count + 1
+	end
+	return count
+end
+
+function iterator.collect(iterator)
+	local result = {}
+	for item in iterator do
+		table.append(result, item)
+	end
+	return result
 end
 
 -- TODO: Needed?
@@ -91,31 +97,16 @@ function chainEnvironment(parent)
 	return e
 end
 
-function collect(iter)
-	local result = {}
-	for item in iter do
-		append(result, item)
-	end
-	return result
-end
-
--- Formatting helpers
-local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
-function formatDate(date)
-	local year, month, day = string.match(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
-	if year and month and day then
-		return months[stringToNumber(month)] .. " " .. stringToNumber(day) .. ", " .. year
-	else
-		error("Failed to parse date: " .. date)
-	end
-end
-
 -- String helpers
-function charAt(str, i)
+function string.ToNumber(str)
+	return 0 + str
+end
+
+function string.charAt(str, i)
 	return string.sub(str, i, i)
 end
 
-function split(str, separator)
+function string.split(str, separator)
 	local i = 0
 	return function ()
 		if i > #str then
@@ -135,43 +126,43 @@ function split(str, separator)
 	end
 end
 
-function lines(str)
-	return split(str, "\n")
+function string.lines(str)
+	return string.split(str, "\n")
 end
 
-function trim(str)
+function string.trim(str)
 	return string.match(str, "^%s*(.-)%s*$")
 end
 
-function unquote(str)
-	if charAt(str, 1) == "\"" and charAt(str, #str) == "\"" then
+-- Frontmatter parsing
+local function parseLua(lua)
+	local o = {}
+	load(lua, "frontmatter", "t", o)()
+	return o
+end
+
+local function unquote(str)
+	if string.charAt(str, 1) == "\"" and string.charAt(str, #str) == "\"" then
 		return string.gsub(string.sub(str, 2, -2), [[\"]], [["]])
 	else
 		return str
 	end
 end
 
--- Frontmatter parsing
-function parseLua(lua)
-	local o = {}
-	load(lua, "frontmatter", "t", o)()
-	return o
-end
-
 local function parseYamlValue(v)
-	local trimmed = trim(v)
+	local trimmed = string.trim(v)
 
 	-- Check if array
-	if charAt(trimmed, 1) == "[" and charAt(trimmed, #trimmed) == "]" then
-		return map(collect(split(string.sub(trimmed, 2, -2), ",")), parseYamlValue)
+	if string.charAt(trimmed, 1) == "[" and string.charAt(trimmed, #trimmed) == "]" then
+		return table.map(iterator.collect(string.split(string.sub(trimmed, 2, -2), ",")), parseYamlValue)
 	else
 		return unquote(trimmed)
 	end
 end
 
-function parseYaml(yaml)
+local function parseYaml(yaml)
 	local o = {}
-	for line in lines(yaml) do
+	for line in string.lines(yaml) do
 		local k, v = string.match(line, "^(.-):(.+)")
 		if k and v then
 			o[k] = parseYamlValue(v)
@@ -181,58 +172,59 @@ function parseYaml(yaml)
 end
 
 -- File system helpers
-function pathJoin(a, b)
+fs = {}
+
+function fs.join(a, b)
 	return a .. "/" .. b
 end
 
-function pathDirectory(path)
+function fs.directory(path)
 	local dir = string.match(path, "(.*)/")
 	return dir or ""
 end
 
-function computePathToRoot(path)
-	return string.rep("../", countIterations(string.gmatch(path, "/")))
-end
-
-function createDirectory(dir)
+function fs.createDirectory(dir)
 	-- Create parent directories as needed
 	local last = #dir
 	local i = 1
 	while true do
 		local slash = string.find(dir, "/", i, true)
 		if slash then
-			mkdir(string.sub(dir, 1, slash - 1))
+			_mkdir(string.sub(dir, 1, slash - 1))
 			if slash == last then
 				return
 			else
 				i = slash + 1
 			end
 		else
-			mkdir(dir)
+			_mkdir(dir)
 			break
 		end
 	end
 end
 
+fs.listDirectory = _listDirectory
+fs.isDirectory = _isDirectory
+
 local function enumerateFilesRecursive(prefixLength, dir, files)
-	for _, name in ipairs(listDirectory(dir)) do
-		local path = pathJoin(dir, name)
-		if isDirectory(path) then
+	for _, name in ipairs(fs.listDirectory(dir)) do
+		local path = fs.join(dir, name)
+		if fs.isDirectory(path) then
 			enumerateFilesRecursive(prefixLength, path, files)
 		else
-			append(files, string.sub(path, prefixLength + 1))
+			table.append(files, string.sub(path, prefixLength + 1))
 		end
 	end
 end
 
-function enumerateFiles(dir)
+function fs.enumerateFiles(dir)
 	local prefixLength = #dir + 1
 	files = {}
 	enumerateFilesRecursive(prefixLength, dir, files)
 	return files
 end
 
-function readFile(path)
+function fs.readFile(path)
 	local f = io.open(path, "rb")
 	if f == nil then
 		error("Could not open file: " .. path)
@@ -243,15 +235,19 @@ function readFile(path)
 	return content
 end
 
-themeDirectory = "."
-function readThemeFile(path)
-	return readFile(pathJoin(themeDirectory, path))
+local themeDirectory = "."
+function fs.readThemeFile(path)
+	return fs.readFile(fs.join(themeDirectory, path))
 end
 
-function writeFile(path, content)
+function fs.writeFile(path, content)
 	local f = io.open(path, "wb")
 	f:write(content)
 	f:close()
+end
+
+local function computePathToRoot(path)
+	return string.rep("../", iterator.count(string.gmatch(path, "/")))
 end
 
 -- Processing node helpers
@@ -275,12 +271,12 @@ function createProcessingNode(process, pattern)
 			local excludedChanges = {}
 			for _, change in ipairs(changes) do
 				if string.match(change.item.path, pattern) then
-					append(includedChanges, change)
+					table.append(includedChanges, change)
 				else
-					append(excludedChanges, change)
+					table.append(excludedChanges, change)
 				end
 			end
-			return concatenate(excludedChanges, process(includedChanges) or {})
+			return table.concatenate(excludedChanges, process(includedChanges) or {})
 		end
 	end
 
@@ -297,11 +293,11 @@ function createTransformNode(transform, pattern)
 				local changeType = change.changeType
 				local newChange = change
 				if changeType ~= "delete" then
-					local newItem = copy(change.item)
+					local newItem = table.copy(change.item)
 					transform(newItem)
 					newChange = createChange(changeType, newItem)
 				end
-				append(newChanges, newChange)
+				table.append(newChanges, newChange)
 			end
 			return newChanges
 		end,
@@ -315,14 +311,14 @@ function createAggregateNode(aggregate, pattern)
 			local items = {}
 			for _, change in ipairs(changes) do
 				if change.changeType ~= "delete" then
-					append(items, change.item)
+					table.append(items, change.item)
 				end
 			end
 
 			-- Run aggregation
 			local outputItems = aggregate(items)
-			local newChanges = map(outputItems, function (item) return createChange("create", item) end)
-			return concatenate(changes, newChanges)
+			local newChanges = table.map(outputItems, function (item) return createChange("create", item) end)
+			return table.concatenate(changes, newChanges)
 		end,
 		pattern)
 end
@@ -333,26 +329,26 @@ injectFiles = function (files)
 		newChanges = {}
 		for path, content in pairs(files) do
 			-- TODO: Detect differences, probably via hash
-			append(newChanges, createChange("create", {
+			table.append(newChanges, createChange("create", {
 				path = path,
 				content = content
 			}))
 		end
-		return concatenate(changes, newChanges)
+		return table.concatenate(changes, newChanges)
 	end)
 end
 
 readFromSource = function (dir)
 	return createProcessingNode(function (changes)
 			-- TODO: Check for differences from last run
-			newChanges = map(enumerateFiles(dir), function (path)
+			newChanges = table.map(fs.enumerateFiles(dir), function (path)
 				return createChange("create", {
 					path = path,
-					content = readFile(pathJoin(dir, path)),
+					content = fs.readFile(fs.join(dir, path)),
 				})
 			end)
 
-			return concatenate(changes, newChanges)
+			return table.concatenate(changes, newChanges)
 		end)
 end
 
@@ -364,13 +360,13 @@ writeToDestination = function (dir, pattern)
 				local ct = change.changeType
 				if ct == "create" then
 					local item = change.item
-					local localPath = pathJoin(dir, item.path)
-					local localDir = pathDirectory(localPath)
+					local localPath = fs.join(dir, item.path)
+					local localDir = fs.directory(localPath)
 					if not dirsMade[localDir] then
-						createDirectory(localDir)
+						fs.createDirectory(localDir)
 						dirsMade[localDir] = true
 					end
-					writeFile(localPath, item.content)
+					fs.writeFile(localPath, item.content)
 				end
 			end
 		end,
@@ -378,6 +374,9 @@ writeToDestination = function (dir, pattern)
 end
 
 -- Transform nodes
+markdown = {}
+markdown.toHtml = _markdownToHtml
+
 processMarkdown = function ()
 	return createTransformNode(function (item)
 		-- .md -> .html
@@ -386,18 +385,18 @@ processMarkdown = function ()
 		-- Parse YAML frontmatter
 		local i, j, frontmatter = string.find(item.content, "^%-%-%-\n(.-)\n%-%-%-\n")
 		if i and j and frontmatter then
-			merge(parseYaml(frontmatter), item)
+			table.merge(parseYaml(frontmatter), item)
 			item.content = string.sub(item.content, j + 1)
 		else
 			-- Parse Lua frontmatter
 			i, j, frontmatter = string.find(item.content, "^%[%[\n(.-)\n%]%]\n")
 			if i and j and frontmatter then
-				merge(parseLua(frontmatter), item)
+				table.merge(parseLua(frontmatter), item)
 				item.content = string.sub(item.content, j + 1)
 			end
 		end
 
-		item.content = markdownToHtml(item.content)
+		item.content = markdown.toHtml(item.content)
 	end,
 	"%.md$")
 end
@@ -406,7 +405,7 @@ end
 applyTemplates = function(templates)
 	local compiled = {}
 	for _, pair in ipairs(templates) do
-		append(compiled, { pair[1], etlua.compile(pair[2]) })
+		table.append(compiled, { pair[1], etlua.compile(pair[2]) })
 	end
 
 	return createTransformNode(function (item)
@@ -457,9 +456,9 @@ end
 local userScriptFile = args[2]
 if not string.find(userScriptFile, "%.lua$") then
 	-- Use built-in theme, relative to executable
-	userScriptFile = pathJoin(pathJoin(pathDirectory(args[1]), "themes"), userScriptFile .. ".lua")
+	userScriptFile = fs.join(fs.join(fs.directory(args[1]), "themes"), userScriptFile .. ".lua")
 end
 
-themeDirectory = pathDirectory(userScriptFile)
-load(readFile(userScriptFile), userScriptFile, "t")()
+themeDirectory = fs.directory(userScriptFile)
+load(fs.readFile(userScriptFile), userScriptFile, "t")()
 

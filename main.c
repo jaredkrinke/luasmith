@@ -107,7 +107,7 @@ int l_list_directory(lua_State* L) {
 	}
 }
 
-int l_run(lua_State* L, const char* name, const char* script, int message_handler_index) {
+int lua_run(lua_State* L, const char* name, const char* script, int message_handler_index) {
 	int result;
 
 	luaL_loadbuffer(L, script, strlen(script), name);
@@ -119,8 +119,8 @@ int l_run(lua_State* L, const char* name, const char* script, int message_handle
 	return result;
 }
 
-void l_load_library(lua_State* L, const char* name, const char* script, int message_handler_index) {
-	if (l_run(L, name, script, message_handler_index) == LUA_OK) {
+void lua_load_library(lua_State* L, const char* name, const char* script, int message_handler_index) {
+	if (lua_run(L, name, script, message_handler_index) == LUA_OK) {
 		lua_setglobal(L, name);
 	}
 }
@@ -138,13 +138,13 @@ int main(int argc, const char** argv) {
 	message_handler_index = lua_gettop(L);
 
 	/* Register helper functions */
-	lua_register(L, "markdownToHtml", &l_markdown_to_html);
-	lua_register(L, "isDirectory", &l_is_directory);
-	lua_register(L, "listDirectory", &l_list_directory);
-	lua_register(L, "mkdir", &l_mkdir);
+	lua_register(L, "_markdownToHtml", &l_markdown_to_html);
+	lua_register(L, "_isDirectory", &l_is_directory);
+	lua_register(L, "_listDirectory", &l_list_directory);
+	lua_register(L, "_mkdir", &l_mkdir);
 
 	/* Load libraries */
-	l_load_library(L, "etlua", STRINGIFIED_ETLUA, message_handler_index);
+	lua_load_library(L, "etlua", STRINGIFIED_ETLUA, message_handler_index);
 
 	/* Expose command line arguments */
 	lua_createtable(L, argc, 0);
@@ -158,7 +158,7 @@ int main(int argc, const char** argv) {
 	lua_setglobal(L, "args");
 
 	/* Run main.lua */
-	l_run(L, "main.lua", STRINGIFIED_MAIN, message_handler_index);
+	lua_run(L, "main.lua", STRINGIFIED_MAIN, message_handler_index);
 
 	lua_close(L);
 	return 0;

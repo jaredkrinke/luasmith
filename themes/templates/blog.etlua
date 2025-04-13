@@ -2,7 +2,7 @@
 <h1>TODO: Title</h1>
 </header>
 <ul>
-<% for i, item in ipairs(sortBy(items, "date", true)) do -%>
+<% for i, item in ipairs(table.sortBy(items, "date", true)) do -%>
 <li><a href="<%= item.path %>"><%= item.title %></a> (<%- htmlifyDate(item.date) %>)</li>
 <% end -%>
 </ul>
