@@ -21,9 +21,11 @@ build({
 		["style.css"] = fs.readThemeFile("css/blog.css"),
 	}),
 	processMarkdown(),
-	aggregate("index.html", "%.html$"),
+	aggregate("index.html", "^posts/.+%.html$"),
+	createIndexes(function (tag) return "posts/" .. tag .. "/index.html" end, "keywords", "^posts/.+%.html$"),
 	applyTemplates({
 		{ "%.html$", fs.readThemeFile("templates/post.etlua") },
+		{ "^posts/.-/index.html$", fs.readThemeFile("templates/tag.etlua") },
 		{ "^index.html$", fs.readThemeFile("templates/blog.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("templates/outer.etlua") } }),

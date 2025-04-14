@@ -437,6 +437,38 @@ aggregate = function (path, pattern)
 		pattern)
 end
 
+createIndexes = function (createIndexPath, property, pattern)
+	return createAggregateNode(function (items)
+			-- Create groups
+			local groups = {}
+			for _, item in ipairs(items) do
+				local key = item[property]
+				if key then
+					-- Support single value or multiple
+					local set = key
+					if type(key) == "string" then
+						set = { key }
+					end
+
+					for _, k in ipairs(set) do
+						if not groups[k] then
+							groups[k] = {}
+						end
+						table.append(groups[k], item)
+					end
+				end
+			end
+
+			-- Create index items
+			local results = {}
+			for key, group in pairs(groups) do
+				table.append(results, { path = createIndexPath(key), key = key, items = group })
+			end
+			return results
+		end,
+		pattern)
+end
+
 -- Top-level logic
 function build(nodes)
 	changes = {}
