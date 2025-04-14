@@ -37,7 +37,7 @@ int l_markdown_to_html(lua_State* L) {
 		&append_internal,
 		L,
 		MD_FLAG_TABLES | MD_FLAG_STRIKETHROUGH | MD_FLAG_PERMISSIVEATXHEADERS,
-		0);
+		MD_HTML_FLAG_TRANSLATE_MD_LINKS);
 
 	if (result == 0) {
 		return 1;
