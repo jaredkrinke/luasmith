@@ -1,0 +1,35 @@
+<%- headerStart(self)%>
+<nav>
+<strong>Topics:&nbsp;</strong>
+<ul>
+<% -- Sort tags by frequency
+   -- TODO: Could be cached or computed during index creation...
+   local grouped = table.groupBy(items, "tags")
+   local groups = {}
+   for k, v in pairs(grouped) do table.append(groups, { key = k, count = #v }) end
+   for i, g in ipairs(table.sortBy(groups, "count", true)) do
+    if i > 4 then break end -%>
+<li><a href="posts/<%= g.key %>/index.html"><%= g.key %></a></li>
+<% end -%>
+<li><a href="posts/index.html">&hellip;</a></li>
+</ul>
+</nav>
+<%- headerEnd %>
+<main>
+<ul>
+<% for i, item in ipairs(table.sortBy(items, "date", true)) do -%>
+<%  if i > 5 then break end -%>
+<li><article>
+<header>
+<h1><a href="<%= item.path %>"><%= item.title %></a></h1>
+<%- htmlifyDate(item.date) %>
+</header>
+<p><%= item.description %></p>
+</article>
+</li>
+<% end -%>
+</ul>
+<footer>
+<p>&rarr; <a href="posts/index.html">See all articles</a> or subscribe to the <a href="feed.xml">Atom feed</a></p>
+</footer>
+</main>

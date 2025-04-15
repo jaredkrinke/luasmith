@@ -1,0 +1,24 @@
+<%- headerStart(self) %>
+<nav>
+<strong>Topics:&nbsp;</strong>
+<ul>
+<% for _, g in ipairs(groups) do -%>
+<% if key == g.key then %><li><%= g.key %></li><% else %><li><a href="<%= pathToRoot %>posts/<%= g.key %>/index.html"><%= g.key %></a></li><% end %>
+<% end -%>
+</ul>
+</nav>
+<%- headerEnd %>
+<main>
+<ul>
+<% for i, item in ipairs(table.sortBy(items, "date", true)) do -%>
+<li><article>
+<header>
+<h1><a href="<%= pathToRoot%><%= item.path %>"><%= item.title %></a></h1>
+<%- htmlifyDate(item.date) %>
+</header>
+<p><%= item.description %></p>
+</article>
+</li>
+<% end -%>
+</ul>
+</main>

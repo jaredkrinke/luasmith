@@ -1,0 +1,22 @@
+<%- headerStart(self) %>
+<nav>
+<strong>Topics:&nbsp;</strong>
+<ul>
+<% for _, tag in ipairs(tags) do -%>
+<li><a href="<%= pathToRoot %>posts/<%= tag %>/index.html"><%= tag %></a></li>
+<% end -%>
+</ul>
+</nav>
+<%- headerEnd %>
+<main>
+<article>
+<header>
+<h1><a href="<%= pathToRoot %><%= path %>"><%= title %></a></h1>
+<%- htmlifyDate(date) %>
+</header>
+<%- content %>
+<footer>
+<p>&crarr; <a href="<%= pathToRoot %>index.html">Back to home</a></p>
+</footer>
+</article>
+</main>

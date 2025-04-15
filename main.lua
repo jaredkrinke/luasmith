@@ -537,7 +537,7 @@ end
 local userScriptFile = args[2]
 if not string.find(userScriptFile, "%.lua$") then
 	-- Use built-in theme, relative to executable
-	userScriptFile = fs.join(fs.join(fs.directory(args[1]), "themes"), userScriptFile .. ".lua")
+	userScriptFile = fs.join(fs.join(fs.join(fs.directory(args[1]), "themes"), userScriptFile), "theme.lua")
 end
 
 themeDirectory = fs.directory(userScriptFile)
