@@ -1,0 +1,30 @@
+<%- headerStart(self)%>
+<nav>
+<strong>Topics:&nbsp;</strong>
+<ul>
+<% -- Sort tags by frequency
+   local grouped = table.groupBy(items, "tags")
+   local groups = {}
+   for k, _ in pairs(grouped) do table.append(groups, k) end
+   table.sort(groups)
+   for _, g in ipairs(groups) do -%>
+<li><a href="<%= pathToRoot %>posts/<%= g %>/index.html"><%= g %></a></li>
+<% end -%>
+</ul>
+</nav>
+<%- headerEnd %>
+<main>
+<ul>
+<% for i, item in ipairs(table.sortBy(items, "date", true)) do -%>
+<li><article>
+<header>
+<h1><a href="<%= pathToRoot %><%= item.path %>"><%= item.title %></a></h1>
+<%- htmlifyDate(item.date) %>
+</header>
+<p><%= item.description %></p>
+</article>
+</li>
+<% end -%>
+</ul>
+</main>
+

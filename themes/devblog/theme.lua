@@ -68,12 +68,15 @@ return {
 	deriveMetadata({ tags = deriveTags }, "^posts/.+%.html$"),
 	aggregate("index.html", "^posts/.+%.html$"), -- TODO: allow optional metadata
 	injectMetadata({ description = site.subtitle }, "^index.html$"),
+	aggregate("posts/index.html", "^posts/.+%.html$"), -- TODO: allow optional metadata
+	injectMetadata({ description = "All posts since the beginning of time" }, "^posts/index.html$"),
 	createIndexes(function (tag) return "posts/" .. tag .. "/index.html" end, "tags", "^posts/.+%.html$"),
 	deriveMetadata({ title = function (item) return site.title .. ": Posts tagged with: " .. item.key end }, "^posts/.-/index.html$"),
 	injectMetadata({ site = site }),
 	applyTemplates({
 		{ "%.html$", fs.readThemeFile("post.etlua") },
 		{ "^posts/.-/index.html$", fs.readThemeFile("index.etlua") },
+		{ "^posts/index.html$", fs.readThemeFile("archive.etlua") },
 		{ "^index.html$", fs.readThemeFile("root.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
