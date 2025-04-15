@@ -15,7 +15,7 @@ function htmlifyDate(date)
 end
 
 -- Build pipeline
-build({
+return {
 	readFromSource("content"),
 	injectFiles({
 		["style.css"] = fs.readThemeFile("css/blog.css"),
@@ -29,6 +29,6 @@ build({
 		{ "^index.html$", fs.readThemeFile("templates/blog.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("templates/outer.etlua") } }),
-	writeToDestination("out", "^[^_]"),
-})
+	writeToDestination("out"),
+}
 

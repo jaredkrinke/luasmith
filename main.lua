@@ -53,6 +53,28 @@ function table.sortBy(t, property, descending)
 	return sorted
 end
 
+function table.groupBy(t, key)
+	local groups = {}
+	for _, item in ipairs(t) do
+		local keyValue = item[key]
+		if keyValue then
+			-- Support single value or multiple
+			local set = keyValue
+			if type(keyValue) == "string" then
+				set = { keyValue }
+			end
+
+			for _, k in ipairs(set) do
+				if not groups[k] then
+					groups[k] = {}
+				end
+				table.append(groups[k], item)
+			end
+		end
+	end
+	return groups
+end
+
 function table.concatenate(a, b)
 	local r = {}
 	for k, v in ipairs(a) do
@@ -294,6 +316,7 @@ function createTransformNode(transform, pattern)
 				local newChange = change
 				if changeType ~= "delete" then
 					local newItem = table.copy(change.item)
+					newItem.self = newItem
 					transform(newItem)
 					newChange = createChange(changeType, newItem)
 				end
@@ -401,6 +424,22 @@ processMarkdown = function ()
 	"%.md$")
 end
 
+injectMetadata = function (properties, pattern)
+	return createTransformNode(function (item)
+			table.merge(properties, item)
+		end,
+		pattern)
+end
+
+deriveMetadata = function (derivations, pattern)
+	return createTransformNode(function (item)
+			for key, f in pairs(derivations) do
+				item[key] = f(item)
+			end
+		end,
+		pattern)
+end
+
 -- TODO: Should templates be able to include frontmatter?
 applyTemplates = function(templates)
 	local compiled = {}
@@ -439,30 +478,26 @@ end
 
 createIndexes = function (createIndexPath, property, pattern)
 	return createAggregateNode(function (items)
-			-- Create groups
-			local groups = {}
-			for _, item in ipairs(items) do
-				local key = item[property]
-				if key then
-					-- Support single value or multiple
-					local set = key
-					if type(key) == "string" then
-						set = { key }
-					end
-
-					for _, k in ipairs(set) do
-						if not groups[k] then
-							groups[k] = {}
-						end
-						table.append(groups[k], item)
-					end
-				end
+			local groups = table.groupBy(items, property)
+			local groupList = {}
+			for key, group in pairs(groups) do
+				table.append(groupList, {
+					key = key,
+					count = #group,
+				})
 			end
+
+			table.sort(groupList, function (a, b) return a.key < b.key end)
 
 			-- Create index items
 			local results = {}
 			for key, group in pairs(groups) do
-				table.append(results, { path = createIndexPath(key), key = key, items = group })
+				table.append(results, {
+					path = createIndexPath(key),
+					key = key,
+					items = group,
+					groups = groupList,
+				})
 			end
 			return results
 		end,
@@ -492,5 +527,6 @@ if not string.find(userScriptFile, "%.lua$") then
 end
 
 themeDirectory = fs.directory(userScriptFile)
-load(fs.readFile(userScriptFile), userScriptFile, "t")()
+local pipeline = load(fs.readFile(userScriptFile), userScriptFile, "t")()
+build(pipeline)
 
