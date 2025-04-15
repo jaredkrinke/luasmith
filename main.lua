@@ -396,6 +396,20 @@ writeToDestination = function (dir, pattern)
 		pattern)
 end
 
+omitWhen = function (test, pattern)
+	return createProcessingNode(function (changes)
+		local newChanges = {}
+		for _, change in ipairs(changes) do
+			-- TODO: How does this work for caching?
+			if not (change.changeType == "create" and test(change.item)) then
+				table.append(newChanges, change)
+			end
+		end
+		return newChanges
+	end,
+	pattern)
+end
+
 -- Transform nodes
 markdown = {}
 markdown.toHtml = _markdownToHtml
