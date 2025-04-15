@@ -37,6 +37,7 @@ end
 local site = {
 	title = "Schemescape",
 	subtitle = "Development log of a life-long coder",
+	url = "https://log.schemescape.com/",
 }
 
 -- Partials
@@ -66,6 +67,8 @@ return {
 	processMarkdown(),
 	omitWhen(function (item) return item.draft end),
 	deriveMetadata({ tags = deriveTags }, "^posts/.+%.html$"),
+	-- TODO: Cache index?
+	aggregate("feed.xml", "^posts/.+%.html$"),
 	aggregate("index.html", "^posts/.+%.html$"), -- TODO: allow optional metadata
 	injectMetadata({ description = site.subtitle }, "^index.html$"),
 	aggregate("posts/index.html", "^posts/.+%.html$"), -- TODO: allow optional metadata
@@ -77,6 +80,7 @@ return {
 		{ "%.html$", fs.readThemeFile("post.etlua") },
 		{ "^posts/.-/index.html$", fs.readThemeFile("index.etlua") },
 		{ "^posts/index.html$", fs.readThemeFile("archive.etlua") },
+		{ "^feed.xml$", fs.readThemeFile("feed.etlua") },
 		{ "^index.html$", fs.readThemeFile("root.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
