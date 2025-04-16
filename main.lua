@@ -246,15 +246,28 @@ function fs.enumerateFiles(dir)
 	return files
 end
 
-function fs.readFile(path)
+function fs.tryReadFile(path)
 	local f = io.open(path, "rb")
 	if f == nil then
-		error("Could not open file: " .. path)
+		return nil
 	end
 
 	local content = f:read("*a")
 	f:close()
 	return content
+end
+
+function fs.readFile(path)
+	return fs.tryReadFile(path) or error("Could not open file: " .. path)
+end
+
+function fs.tryLoadFile(path)
+	local content = fs.tryReadFile(path)
+	if content then
+		return load(content, path, "t")
+	else
+		return nil
+	end
 end
 
 local themeDirectory = "."

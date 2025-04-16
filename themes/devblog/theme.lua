@@ -46,10 +46,15 @@ end
 
 -- Site metadata
 local site = {
-	title = "Schemescape",
-	subtitle = "Development log of a life-long coder",
-	url = "https://log.schemescape.com/",
+	title = "Untitled",
+	subtitle = "You should set title, subtitle, and url in site.lua",
+	url = "https://example.com/",
 }
+
+local siteOverrides = fs.tryLoadFile("content/site.lua")
+if siteOverrides then
+	table.merge(siteOverrides(), site)
+end
 
 -- Partials
 headerStart = etlua.compile(
@@ -98,5 +103,4 @@ return {
 	normalize, -- TODO: Remove!
 	writeToDestination("out"),
 }
-
 
