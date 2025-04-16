@@ -1,13 +1,24 @@
 -- Helpers
 local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
 
-function formatDate(date)
-	local year, month, day = string.match(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
+function parseYamlDate(str)
+	local year, month, day = string.match(str, "^(%d%d%d%d)-(%d%d)-(%d%d)")
+	local hour, minute = string.match(string.sub(str, 11), "%d%d:%d%d")
 	if year and month and day then
-		return months[string.ToNumber(month)] .. " " .. string.ToNumber(day) .. ", " .. year
+		return year, month, day, hour, minute
 	else
-		error("Failed to parse date: " .. date)
+		error("Failed to parse date: " .. str)
 	end
+end
+
+function formatDate(str)
+	local year, month, day = parseYamlDate(str)
+	return months[string.toNumber(month)] .. " " .. string.toNumber(day) .. ", " .. year
+end
+
+function yamlDateToIso(str)
+	local year, month, day, hour, minute = parseYamlDate(str)
+	return year .. "-" .. month .. "-" .. day .. "T" .. (hour or "00") .. ":" .. (minute or "00") .. ":00.000Z"
 end
 
 function escapeQuotes(str)

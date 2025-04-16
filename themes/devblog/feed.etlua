@@ -1,6 +1,6 @@
 <% local posts = table.sortBy(items, "date", true) -%>
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom" xmlns:xml="http://www.w3.org/XML/1998/namespace">
+<feed xmlns="http://www.w3.org/2005/Atom">
 <title><%= site.title %></title>
 <id><%= site.url %></id>
 <link rel="self" href="<%= site.url .. "feed.xml" %>"/>
@@ -8,17 +8,16 @@
 <author>
 <name><%= site.title %></name>
 </author>
-<updated><%= posts[1].date %></updated>
+<updated><%= yamlDateToIso(posts[1].date) %></updated>
 
 <% for i, post in ipairs(posts) do -%>
-<% if i > 5 then break end -%>
+<% if i > 30 then break end -%>
 <entry>
 <title><%= post.title %></title>
 <id><%= site.url .. post.path %></id>
 <link rel="alternate" href="<%= site.url .. post.path %>"/>
-<updated><%= post.date %></updated>
+<updated><%= yamlDateToIso(post.date) %></updated>
 <summary type="text"><%= post.description %></summary>
-<content type="html" xml:base="<%= site.url .. post.path %>"><%= post.content %></content>
 </entry>
 <% end -%>
 </feed>

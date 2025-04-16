@@ -120,7 +120,7 @@ function chainEnvironment(parent)
 end
 
 -- String helpers
-function string.ToNumber(str)
+function string.toNumber(str)
 	return 0 + str
 end
 
