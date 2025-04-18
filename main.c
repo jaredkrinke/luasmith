@@ -17,12 +17,8 @@
 #define FALSE 0
 
 void append_internal(const MD_CHAR* str, MD_SIZE size, void* o) {
-	/* TODO: Reuse a single buffer instead of allocating each time */
 	lua_State* L = (lua_State*)o;
-	char* s = strndup(str, size); /* Ensure null-terminated */
-
-	lua_pushstring(L, s);
-	free(s);
+	lua_pushlstring(L, str, size);
 	lua_concat(L, 2);
 }
 
