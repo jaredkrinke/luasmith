@@ -427,6 +427,47 @@ end
 markdown = {}
 markdown.toHtml = _markdownToHtml
 
+local function sluggify(slugs, html)
+	-- NOTE: Sadly, this hack only supports ASCII
+
+	-- Remove HTML (elements and entities) and disallowed characters, change to
+	-- lowercase, and replace spaces with hyphens
+	local result = html
+	result = string.gsub(result, "<.->", "")
+	result = string.gsub(result, "&.-;", "")
+	result = string.gsub(result, "[^a-zA-Z0-9 _%-]", "")
+	result = string.lower(result)
+	result = string.gsub(result, " ", "-")
+
+	-- Check for duplicates and make unique
+	local seenBefore = slugs[result]
+	if seenBefore then
+		slugs[result] = seenBefore + 1
+		result = result .. "-" .. seenBefore
+	else
+		slugs[result] = 1
+	end
+	return result
+end
+
+local function postProcessMarkdown(content)
+	local result = ""
+	local position = 1
+	local slugs = {}
+	while true do
+		local i, j, inner = string.find(content, "<h[1-6]>(.-)</h[1-6]>", position)
+		if i then
+			local id = sluggify(slugs, inner)
+			result = result .. string.sub(content, position, i + 2) .. " id=\"" .. id .. "\">" .. string.sub(content, i + 4, j)
+			position = j + 1
+		else
+			result = result .. string.sub(content, position)
+			return result
+		end
+	end
+	return result
+end
+
 processMarkdown = function ()
 	return createTransformNode(function (item)
 		-- .md -> .html
@@ -447,6 +488,10 @@ processMarkdown = function ()
 		end
 
 		item.content = markdown.toHtml(item.content)
+
+		-- TODO: This is a quick hack to add ids to headers. Ideally, this
+		-- would be integrated into md4c, and written in C.
+		item.content = postProcessMarkdown(item.content)
 	end,
 	"%.md$")
 end
