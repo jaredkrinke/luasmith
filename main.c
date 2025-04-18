@@ -37,7 +37,6 @@ int l_markdown_to_html(lua_State* L) {
 		&append_internal,
 		L,
 		(	0
-			| MD_FLAG_PERMISSIVEATXHEADERS
 			| MD_FLAG_PERMISSIVEURLAUTOLINKS
 			| MD_FLAG_PERMISSIVEEMAILAUTOLINKS
 			| MD_FLAG_TABLES
