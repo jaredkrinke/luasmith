@@ -80,7 +80,7 @@ int l_list_directory(lua_State* L) {
 		int i;
 		lua_createtable(L, 20, 0);
 
-		for (i = 1; e = readdir(d);) {
+		for (i = 1; (e = readdir(d));) {
 			/* Filter out "." and ".." */
 			if (e->d_name[0] == '.') {
 				char c = e->d_name[1];
