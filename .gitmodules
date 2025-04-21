@@ -3,7 +3,7 @@
 	url = https://github.com/jaredkrinke/lua
 [submodule "md4c"]
 	path = md4c
-	url = https://tildegit.org/scms/md4c.git
+	url = https://github.com/jaredkrinke/md4c.git
 [submodule "etlua"]
 	path = etlua
 	url = https://github.com/leafo/etlua.git
