@@ -9,14 +9,14 @@ OBJS=main.o $(MD4C_OBJS) $(LUA_OBJS)
 LUA_CFLAGS=-DLUA_COMPAT_ALL -DLUA_USE_POSIX
 CFLAGS=$(MYCFLAGS) -I lua -I md4c/src $(LUA_CFLAGS)
 
-all: lssg
+all: luasmith
 
 clean:
 	rm lua/*.o
 	rm md4c/src/*.o
 	rm *.o
 	rm *.lua.h
-	rm lssg
+	rm luasmith
 
 main.lua.h: main.lua
 	echo "#define STRINGIFIED_MAIN \\" > $@
@@ -29,6 +29,6 @@ etlua.lua.h: etlua/etlua.lua
 main.o: main.c main.lua.h etlua.lua.h
 	$(CC) $(CFLAGS) -c main.c
 
-lssg: $(OBJS)
-	$(CC) -o lssg $(OBJS) -lm
+luasmith: $(OBJS)
+	$(CC) -o luasmith $(OBJS) -lm
 

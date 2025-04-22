@@ -12,7 +12,7 @@ return {
 }
 ```
 
-Note that no Markdown processing is done whatsoever. You can try this trivial example out by compiling luasmith, going into the `sample` directory, and running `../lssg tutorial1.lua`.
+Note that no Markdown processing is done whatsoever. You can try this trivial example out by compiling luasmith, going into the `sample` directory, and running `../luasmith tutorial1.lua`.
 
 ### Process Markdown
 To actually convert Markdown to HTML, just add the `processMarkdown()` node (as in `sample/tutorial2.lua`):

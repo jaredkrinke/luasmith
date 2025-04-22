@@ -1,6 +1,6 @@
 *.swp
 *.o
 *.lua.h
-lssg
+luasmith
 test/
 sample/out/
