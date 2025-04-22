@@ -24,14 +24,14 @@ local template = [[
 
 return {
 	readFromSource("content"),
-    processMarkdown(),
-    applyTemplates({
-        -- The first item in each pair is a pattern to match item paths
-        -- The second item in each pair is the etlua template string itself
-        -- If an item's path matches multiple entries, the last match wins
+	processMarkdown(),
+	applyTemplates({
+		-- The first item in each pair is a pattern to match item paths
+		-- The second item in each pair is the etlua template string itself
+		-- If an item's path matches multiple entries, the last match wins
 
-        -- The Lua pattern below means "ends with '.html'"
-        { "%.html$", template },
-    }),
+		-- The Lua pattern below means "ends with '.html'"
+		{ "%.html$", template },
+	}),
 	writeToDestination("out"),
 }

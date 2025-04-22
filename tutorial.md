@@ -21,9 +21,9 @@ To actually convert Markdown to HTML, just add the `processMarkdown()` node (as 
 return {
 	readFromSource("content"),
 
-    -- Convert Markdown files to HTML fragments
-    processMarkdown(),
-    
+	-- Convert Markdown files to HTML fragments
+	processMarkdown(),
+	
 	writeToDestination("out"),
 }
 ```
@@ -58,15 +58,15 @@ local template = [[
 
 return {
 	readFromSource("content"),
-    processMarkdown(),
-    applyTemplates({
-        -- The first item in each pair is a pattern to match item paths
-        -- The second item in each pair is the etlua template string itself
-        -- If an item's path matches multiple entries, the last match wins
+	processMarkdown(),
+	applyTemplates({
+		-- The first item in each pair is a pattern to match item paths
+		-- The second item in each pair is the etlua template string itself
+		-- If an item's path matches multiple entries, the last match wins
 
-        -- The Lua pattern below means "ends with '.html'"
-        { "%.html$", template },
-    }),
+		-- The Lua pattern below means "ends with '.html'"
+		{ "%.html$", template },
+	}),
 	writeToDestination("out"),
 }
 ```
@@ -97,11 +97,11 @@ local template = [[
 return {
 	readFromSource("content"),
 
-    -- Inject arbitrary files: key is the path and value is the content
-    injectFiles({ ["style.css"] = css }),
+	-- Inject arbitrary files: key is the path and value is the content
+	injectFiles({ ["style.css"] = css }),
 
-    processMarkdown(),
-    applyTemplates({ { "%.html$", template } }),
+	processMarkdown(),
+	applyTemplates({ { "%.html$", template } }),
 	writeToDestination("out"),
 }
 ```
@@ -138,18 +138,18 @@ body { max-width: 40em; margin: auto; }
 
 return {
 	readFromSource("content"),
-    injectFiles({ ["style.css"] = css }),
-    processMarkdown(),
+	injectFiles({ ["style.css"] = css }),
+	processMarkdown(),
 
-    -- Aggregate into an item of path, including a new property
-    -- named `items` of all items matching the pattern
-    aggregate("index.html", "%.html$"),
+	-- Aggregate into an item of path, including a new property
+	-- named `items` of all items matching the pattern
+	aggregate("index.html", "%.html$"),
 
-    -- Apply a template to list the blog posts
-    applyTemplates({ { "^index%.html$", index } }),
+	-- Apply a template to list the blog posts
+	applyTemplates({ { "^index%.html$", index } }),
 
-    -- Finally, wrap each HTML fragment in a document
-    applyTemplates({ { "%.html$", outer } }),
+	-- Finally, wrap each HTML fragment in a document
+	applyTemplates({ { "%.html$", outer } }),
 
 	writeToDestination("out"),
 }

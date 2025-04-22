@@ -20,10 +20,10 @@ local template = [[
 return {
 	readFromSource("content"),
 
-    -- Inject arbitrary files: key is the path and value is the content
-    injectFiles({ ["style.css"] = css }),
+	-- Inject arbitrary files: key is the path and value is the content
+	injectFiles({ ["style.css"] = css }),
 
-    processMarkdown(),
-    applyTemplates({ { "%.html$", template } }),
+	processMarkdown(),
+	applyTemplates({ { "%.html$", template } }),
 	writeToDestination("out"),
 }

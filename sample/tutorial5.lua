@@ -26,18 +26,18 @@ body { max-width: 40em; margin: auto; }
 
 return {
 	readFromSource("content"),
-    injectFiles({ ["style.css"] = css }),
-    processMarkdown(),
+	injectFiles({ ["style.css"] = css }),
+	processMarkdown(),
 
-    -- Aggregate into an item of path, including a new property
-    -- named `items` of all items matching the pattern
-    aggregate("index.html", "%.html$"),
+	-- Aggregate into an item of path, including a new property
+	-- named `items` of all items matching the pattern
+	aggregate("index.html", "%.html$"),
 
-    -- Apply a template to list the blog posts
-    applyTemplates({ { "^index%.html$", index } }),
+	-- Apply a template to list the blog posts
+	applyTemplates({ { "^index%.html$", index } }),
 
-    -- Finally, wrap each HTML fragment in a document
-    applyTemplates({ { "%.html$", outer } }),
+	-- Finally, wrap each HTML fragment in a document
+	applyTemplates({ { "%.html$", outer } }),
 
 	writeToDestination("out"),
 }
