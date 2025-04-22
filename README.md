@@ -5,7 +5,7 @@ Most of the heavy lifting in luasmith is done by [md4c](https://github.com/mity/
 
 Note that luasmith is more of a proof-of-concept that, while functional, shouldn't be relied upon to take over the world.
 
-To get a feel for luasmith, either [read over the design](#design) or [go through the tutorial](tutorial.md).
+To get a feel for luasmith, either [read over the design](#design) or [go through the tutorial](docs/tutorial.md).
 
 ## Supported Platforms
 Currently, luasmith is only tested on Linux and NetBSD. It should work on generic POSIX platforms. It has not been tested on Windows yet.
@@ -38,7 +38,7 @@ Note that the built-in templates assume Markdown files contain metadata in front
 If you want to customize the site's appearance or functionality, just copy an existing theme directory and start modifying the templates and/or `theme.lua` script.
 
 ## Example / Tutorial
-See [tutorial.md](tutorial.md) for a tutorial that starts from scratch with a trivial pipeline and builds it up into a simple blog theme.
+See [docs/tutorial.md](docs/tutorial.md) for a tutorial that starts from scratch with a trivial pipeline and builds it up into a simple blog theme.
 
 ## API Documentation
 TODO
