@@ -41,5 +41,5 @@ If you want to customize the site's appearance or functionality, just copy an ex
 See [docs/tutorial.md](docs/tutorial.md) for a tutorial that starts from scratch with a trivial pipeline and builds it up into a simple blog theme.
 
 ## API Documentation
-TODO
+See [docs/api.md](docs/api.md) for detailed information on helper functions, processing nodes, etc.
 
