@@ -12,11 +12,11 @@ CFLAGS=$(MYCFLAGS) -I lua -I md4c/src $(LUA_CFLAGS)
 all: luasmith
 
 clean:
-	rm lua/*.o
-	rm md4c/src/*.o
-	rm *.o
-	rm *.lua.h
-	rm luasmith
+	rm -f lua/*.o
+	rm -f md4c/src/*.o
+	rm -f *.o
+	rm -f *.lua.h
+	rm -f luasmith
 
 main.lua.h: main.lua
 	echo "#define STRINGIFIED_MAIN \\" > $@
