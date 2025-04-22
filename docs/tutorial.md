@@ -1,6 +1,8 @@
 # luasmith Tutorial
 In this tutorial, we'll start with a trivial pipeline and build it up into a simple blog theme. See [../README.md](../README.md) for an overview of luasmith.
 
+For an example of input content, look at the `sample/content/` directory.
+
 ### Trivial/Identity Pipeline
 Here's a pipeline that essentially just copies from `content/` to `out/`:
 
