@@ -1,8 +1,0 @@
-<header>
-<h1><%= key %> </h1>
-</header>
-<ul>
-<% for i, item in ipairs(table.sortBy(items, "date", true)) do -%>
-<li><a href="<%= item.path %>"><%= item.title %></a> (<%- htmlifyDate(item.date) %>)</li>
-<% end -%>
-</ul>

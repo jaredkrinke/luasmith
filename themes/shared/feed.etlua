@@ -1,0 +1,23 @@
+<% local posts = table.sortBy(items, "date", true) -%>
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+<title><%= site.title %></title>
+<id><%= site.url %></id>
+<link rel="self" href="<%= site.url .. "feed.xml" %>"/>
+<link rel="alternate" href="<%= site.url %>"/>
+<author>
+<name><%= site.title %></name>
+</author>
+<updated><%= shared.yamlDateToIso(posts[1].date) %></updated>
+
+<% for i, post in ipairs(posts) do -%>
+<% if i > 30 then break end -%>
+<entry>
+<title><%= post.title %></title>
+<id><%= site.url .. post.path %></id>
+<link rel="alternate" href="<%= site.url .. post.path %>"/>
+<updated><%= shared.yamlDateToIso(post.date) %></updated>
+<summary type="text"><%= post.description %></summary>
+</entry>
+<% end -%>
+</feed>

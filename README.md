@@ -10,6 +10,34 @@ To get a feel for luasmith, either [read over the design](#design) or [go throug
 ## Supported Platforms
 Currently, luasmith is only tested on Linux and NetBSD. It should work on generic POSIX platforms. It has not been tested on Windows yet.
 
+## Quickstart
+To create a minimal blog:
+
+1. Download binary package or clone and compile with `make`
+2. Create an input directory named `content/`
+3. Add `content/site.lua` returning a table containing `title` (site title) and `url` (root URL for the site--used for RSS)
+4. Add Markdown files (with `title` and `date` in frontmatter)
+5. Run `./luasmith blog` (this will read from `content/` and output to `out/`)
+6. Open `out/index.html` to view the site
+7. Optionally, upload it somewhere!
+
+For step 4, use this Markdown file as a template (it uses YAML frontmatter):
+
+```md
+---
+title: Title of the post
+date: 2025-04-22
+---
+# Post heading
+Content goes here. Note you can [link to other posts](foobar.md).
+```
+
+## Themes
+Built in themes:
+
+* `blog`: a minimal blog theme
+* `md2blog`: an opinionated (and slightly less minimal) blog theme (following the structure of [md2blog](https://jaredkrinke.github.io/md2blog/))
+
 ## Architecture
 luasmith is designed around the concept of a "theme", which is basically a processing pipeline, probably including some templates (and perhaps static assets). You run the tool by providing a either the path to a Lua script or the name of a built-in theme:
 
@@ -20,7 +48,7 @@ luasmith is designed around the concept of a "theme", which is basically a proce
 or for a built-in theme under you only supply a name, and that is internally expanded to `<path to luasmith>/themes/<name of theme>/theme.lua`:
 
 ```
-./luasmith devblog
+./luasmith blog
 ```
 
 ### Under the Hood

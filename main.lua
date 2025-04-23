@@ -275,6 +275,11 @@ function fs.readThemeFile(path)
 	return fs.readFile(fs.join(themeDirectory, path))
 end
 
+function fs.loadThemeFile(path)
+	local p = fs.join(themeDirectory, path)
+	return load(fs.readFile(p), p, "t")
+end
+
 function fs.writeFile(path, content)
 	local f = io.open(path, "wb")
 	f:write(content)

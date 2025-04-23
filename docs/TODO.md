@@ -1,3 +1,3 @@
 * Create initial release
-* New blog theme: X/horizontal overflow in code blocks CSS
+* Consider having nil in etlua templates trigger an error or warning
 

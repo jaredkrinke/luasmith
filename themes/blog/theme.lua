@@ -1,34 +1,36 @@
--- Helpers
-local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
-function formatDate(date)
-	local year, month, day = string.match(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
-	if year and month and day then
-		return months[string.ToNumber(month)] .. " " .. string.ToNumber(day) .. ", " .. year
-	else
-		error("Failed to parse date: " .. date)
-	end
-end
+shared = fs.loadThemeFile("../shared/shared.lua")()
 
+-- Helpers
 local htmlDateTemplate = etlua.compile([[<time datetime="<%= short %>"><%= long %></time>]])
 function htmlifyDate(date)
-	return htmlDateTemplate({ short = date, long = formatDate(date) })
+	return htmlDateTemplate({ short = date, long = shared.formatDate(date) })
+end
+
+-- Site metadata
+local site = {
+	title = "Untitled",
+	url = "https://example.com/",
+}
+
+local siteOverrides = fs.tryLoadFile("content/site.lua")
+if siteOverrides then
+	table.merge(siteOverrides(), site)
 end
 
 -- Build pipeline
 return {
 	readFromSource("content"),
-	injectFiles({
-		["style.css"] = fs.readThemeFile("css/blog.css"),
-	}),
+	injectFiles({ ["style.css"] = fs.readThemeFile("style.css"), }),
 	processMarkdown(),
-	aggregate("index.html", "^posts/.+%.html$"),
-	createIndexes(function (tag) return "posts/" .. tag .. "/index.html" end, "keywords", "^posts/.+%.html$"),
+	aggregate("feed.xml", "%.html$"),
+	aggregate("index.html", "%.html$"),
+	injectMetadata({ site = site }),
 	applyTemplates({
-		{ "%.html$", fs.readThemeFile("templates/post.etlua") },
-		{ "^posts/.-/index.html$", fs.readThemeFile("templates/tag.etlua") },
-		{ "^index.html$", fs.readThemeFile("templates/blog.etlua") },
+		{ "%.html$", fs.readThemeFile("post.etlua") },
+		{ "^feed.xml$", fs.readThemeFile("../shared/feed.etlua") },
+		{ "^index.html$", fs.readThemeFile("blog.etlua") },
 	}),
-	applyTemplates({ { "%.html$", fs.readThemeFile("templates/outer.etlua") } }),
+	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
 	writeToDestination("out"),
 }
 
