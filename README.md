@@ -8,7 +8,7 @@ Note that luasmith is more of a proof-of-concept that, while functional, shouldn
 To get a feel for luasmith, either [read over the design](#design) or [go through the tutorial](docs/tutorial.md).
 
 ## Supported Platforms
-Currently, luasmith is only tested on Linux and NetBSD. It should work on generic POSIX platforms. It has not been tested on Windows yet.
+Currently, luasmith is only tested on **Linux** and **NetBSD**. It should work on generic **POSIX** platforms. It has not been tested on Windows yet.
 
 ## Quickstart
 To create a minimal blog:
