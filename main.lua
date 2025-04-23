@@ -592,7 +592,7 @@ end
 -- Entry point
 if #args < 2 then
 	print("\nUsage: " .. args[1] .. " <THEME_NAME | THEME_PATH>\n")
-	print("The theme (which configures the build pipeline) can either be specified as the name of a theme (foo => themes/foo.lua) or the path to a custom theme (Lua script file).")
+	print("The theme (which configures the build pipeline) can either be specified as the name of a theme (foo => themes/foo/theme.lua) or the path to a custom theme (Lua script file).")
 	print("")
 	os.exit(-1)
 end
