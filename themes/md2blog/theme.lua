@@ -1,33 +1,13 @@
+shared = fs.loadThemeFile("../shared.lua")()
+
 -- Helpers
-local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
-
-function parseYamlDate(str)
-	local year, month, day = string.match(str, "^(%d%d%d%d)-(%d%d)-(%d%d)")
-	local hour, minute = string.match(string.sub(str, 11), "%d%d:%d%d")
-	if year and month and day then
-		return year, month, day, hour, minute
-	else
-		error("Failed to parse date: " .. str)
-	end
-end
-
-function formatDate(str)
-	local year, month, day = parseYamlDate(str)
-	return months[string.toNumber(month)] .. " " .. string.toNumber(day) .. ", " .. year
-end
-
-function yamlDateToIso(str)
-	local year, month, day, hour, minute = parseYamlDate(str)
-	return year .. "-" .. month .. "-" .. day .. "T" .. (hour or "00") .. ":" .. (minute or "00") .. ":00.000Z"
-end
-
 function escapeQuotes(str)
 	return string.gsub(str, "\"", [[\"]])
 end
 
 local htmlDateTemplate = etlua.compile([[<p><time datetime="<%= short %>"><%= long %></time></p>]])
 function htmlifyDate(date)
-	return htmlDateTemplate({ short = string.sub(date, 1, 10), long = formatDate(date) })
+	return htmlDateTemplate({ short = string.sub(date, 1, 10), long = shared.formatDate(date) })
 end
 
 -- Derive keywords from explicit keywords as well as directory
@@ -96,7 +76,7 @@ return {
 		{ "%.html$", fs.readThemeFile("post.etlua") },
 		{ "^posts/.-/index.html$", fs.readThemeFile("index.etlua") },
 		{ "^posts/index.html$", fs.readThemeFile("archive.etlua") },
-		{ "^feed.xml$", fs.readThemeFile("feed.etlua") },
+		{ "^feed.xml$", fs.readThemeFile("../shared/feed.etlua") },
 		{ "^index.html$", fs.readThemeFile("root.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),

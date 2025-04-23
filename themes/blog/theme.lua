@@ -1,4 +1,4 @@
-shared = fs.loadThemeFile("../shared/shared.lua")()
+shared = fs.loadThemeFile("../shared.lua")()
 
 -- Helpers
 local htmlDateTemplate = etlua.compile([[<time datetime="<%= short %>"><%= long %></time>]])
