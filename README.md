@@ -39,13 +39,13 @@ Built in themes:
 * `md2blog`: an opinionated (and slightly less minimal) blog theme (following the structure of [md2blog](https://jaredkrinke.github.io/md2blog/))
 
 ## Architecture
-luasmith is designed around the concept of a "theme", which is basically a processing pipeline, probably including some templates (and perhaps static assets). You run the tool by providing a either the path to a Lua script or the name of a built-in theme:
+luasmith is designed around the concept of a "theme", which is basically a processing pipeline, probably including some templates (and perhaps static assets). You run the tool by providing either the path to a Lua script or the name of a built-in theme:
 
 ```
 ./luasmith theme.lua
 ```
 
-or for a built-in theme under you only supply a name, and that is internally expanded to `<path to luasmith>/themes/<name of theme>/theme.lua`:
+For a built-in theme you only supply a name, and that is internally expanded to `<path to luasmith>/themes/<name of theme>/theme.lua`:
 
 ```
 ./luasmith blog
