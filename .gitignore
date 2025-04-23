@@ -1,6 +1,7 @@
 *.swp
 *.o
 *.lua.h
+*.tar.gz
 luasmith
 test/
 sample/out/
