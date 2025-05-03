@@ -1,13 +1,36 @@
 # luasmith
 **luasmith** is a small, simple, and flexible [static site generator](https://en.wikipedia.org/wiki/Static_site_generator) that is similar in design to [Metalsmith](https://metalsmith.io/), but much smaller because it's built on top of [Lua](https://www.lua.org/) and C instead of JavaScript and Node.js.
 
+## Show me the code!
+See [the tutorial](docs/tutorial.md) for more, but here's an example that converts Markdown to HTML and adds the page's title to the resulting HTML:
+
+```lua
+-- Minimal HTML template (used below)
+local outer = [[
+<html>
+  <head><title><%= title %></title></head>
+  <body><%- content %></body>
+</html>
+]]
+
+-- Read content/*.md, convert to HTML,
+-- apply template, write to out/*.html
+return {
+  readFromSource("content"),
+  processMarkdown(),
+  applyTemplates({ { "%.html$", outer } }),
+  writeToDestination("out"),
+}
+```
+
+## Summary
 Most of the heavy lifting in luasmith is done by [md4c](https://github.com/mity/md4c) ([patched](https://github.com/jaredkrinke/md4c/commit/fc4cac5277b060450d93b06a67397388defa358d) for relative links), [Lua](https://www.lua.org/), and [etlua](https://github.com/leafo/etlua).
 
 Note that luasmith is more of a proof-of-concept that, while functional, shouldn't be relied upon to take over the world.
 
 To get a feel for luasmith, either [read over the design](#design) or [go through the tutorial](docs/tutorial.md).
 
-## Supported Platforms
+### Supported platforms
 Currently, luasmith is only tested on **Linux** and **NetBSD**. It should work on generic **POSIX** platforms. It has not been tested on Windows yet.
 
 ## Quickstart
@@ -16,7 +39,7 @@ To create a minimal blog:
 1. Download binary package or clone and compile with `make`
 2. Create an input directory named `content/`
 3. Add `content/site.lua` returning a table containing `title` (site title) and `url` (root URL for the site--used for RSS)
-4. Add Markdown files (with `title` and `date` in frontmatter)
+4. Add Markdown files (with `title`, `description`,  and `date` in frontmatter)
 5. Run `./luasmith blog` (this will read from `content/` and output to `out/`)
 6. Open `out/index.html` to view the site
 7. Optionally, upload it somewhere!
@@ -26,6 +49,7 @@ For step 4, use this Markdown file as a template (it uses YAML frontmatter):
 ```md
 ---
 title: Title of the post
+description: Short description of the post (for the Atom feed).
 date: 2025-04-22
 ---
 # Post heading
