@@ -74,6 +74,6 @@ There are a few different kinds of processing nodes in luasmith (number of input
 
 ### Aggregate Nodes
 * `aggregate(path, pattern)` creates a new item at `path` with empty `content`, but with an `items` property that is an array of all items matched by `pattern`
-* `createIndexes(createPath, property, pattern)` creates multiple new "index", one for each unique value of the property `property` on items matching `pattern`, at the path computed by `createPath(value)`; the "index" item format includes `{ key = <the unique value>, items = <array of items with that value>, groups = <map of unique values to items for ALL unique values> }`
+* `createIndexes(createPath, property, pattern)` creates multiple new "index" items, one for each unique value of the property `property` on items matching `pattern`, at the path computed by `createPath(value)`; the "index" item format includes `{ key = <the unique value>, items = <array of items with that value>, groups = <map of unique values to items for ALL unique values> }`
 
 Note: `aggregate()` can be easily used to create a blog index/home page with a list of posts. `createIndexes()` can be used to create e.g. "keyword index" pages.
