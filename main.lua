@@ -291,7 +291,7 @@ local function computePathToRoot(path)
 end
 
 -- Processing node helpers
-function createItem(item)
+function initializeItem(item)
 	if not item.pathToRoot then
 		item.pathToRoot = computePathToRoot(item.path)
 	end
@@ -329,7 +329,7 @@ function createTransformNode(transform, pattern)
 				local newItem = table.copy(item)
 				newItem.self = newItem
 				transform(newItem)
-				table.append(newItems, createItem(newItem))
+				table.append(newItems, initializeItem(newItem))
 			end
 			return newItems
 		end,
@@ -347,7 +347,7 @@ function createAggregateNode(aggregate, pattern)
 
 			-- Run aggregation
 			local outputItems = aggregate(items)
-			local newItems = table.map(outputItems, function (item) return createItem(item) end)
+			local newItems = table.map(outputItems, initializeItem)
 			return table.concatenate(inputItems, newItems)
 		end,
 		pattern)
@@ -359,7 +359,7 @@ injectFiles = function (files)
 		newItems = {}
 		for path, content in pairs(files) do
 			-- TODO: Detect differences, probably via hash
-			table.append(newItems, createItem({
+			table.append(newItems, initializeItem({
 				path = path,
 				content = content
 			}))
@@ -372,7 +372,7 @@ readFromSource = function (dir)
 	return createProcessingNode(function (items)
 			-- TODO: Check for differences from last run
 			newItems = table.map(fs.enumerateFiles(dir), function (path)
-				return createItem({
+				return initializeItem({
 					path = path,
 					content = fs.readFile(fs.join(dir, path)),
 				})
