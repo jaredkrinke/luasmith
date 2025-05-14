@@ -291,32 +291,28 @@ local function computePathToRoot(path)
 end
 
 -- Processing node helpers
-function createChange(changeType, item)
+function createItem(item)
 	if not item.pathToRoot then
 		item.pathToRoot = computePathToRoot(item.path)
 	end
-
-	return {
-		changeType = changeType,
-		item = item,
-	}
+	return item
 end
 
 function createProcessingNode(process, pattern)
 	local p = process
 	if pattern then
-		-- Input pattern was supplied; only process selected changes
-		p = function (changes)
-			local includedChanges = {}
-			local excludedChanges = {}
-			for _, change in ipairs(changes) do
-				if string.match(change.item.path, pattern) then
-					table.append(includedChanges, change)
+		-- Input pattern was supplied; only process selected items
+		p = function (items)
+			local includedItems = {}
+			local excludedItems = {}
+			for _, item in ipairs(items) do
+				if string.match(item.path, pattern) then
+					table.append(includedItems, item)
 				else
-					table.append(excludedChanges, change)
+					table.append(excludedItems, item)
 				end
 			end
-			return table.concatenate(excludedChanges, process(includedChanges) or {})
+			return table.concatenate(excludedItems, process(includedItems) or {})
 		end
 	end
 
@@ -327,103 +323,92 @@ end
 
 -- TODO: Consider supporting multiple outputs
 function createTransformNode(transform, pattern)
-	return createProcessingNode(function (changes)
-			local newChanges = {}
-			for _, change in ipairs(changes) do
-				local changeType = change.changeType
-				local newChange = change
-				if changeType ~= "delete" then
-					local newItem = table.copy(change.item)
-					newItem.self = newItem
-					transform(newItem)
-					newChange = createChange(changeType, newItem)
-				end
-				table.append(newChanges, newChange)
+	return createProcessingNode(function (items)
+			local newItems = {}
+			for _, item in ipairs(items) do
+				local newItem = table.copy(item)
+				newItem.self = newItem
+				transform(newItem)
+				table.append(newItems, createItem(newItem))
 			end
-			return newChanges
+			return newItems
 		end,
 		pattern)
 end
 
 function createAggregateNode(aggregate, pattern)
 	-- TODO: Cache inputs from previous runs
-	return createProcessingNode(function (changes)
+	return createProcessingNode(function (inputItems)
 			-- Find items
 			local items = {}
-			for _, change in ipairs(changes) do
-				if change.changeType ~= "delete" then
-					table.append(items, change.item)
-				end
+			for _, item in ipairs(inputItems) do
+				table.append(items, item)
 			end
 
 			-- Run aggregation
 			local outputItems = aggregate(items)
-			local newChanges = table.map(outputItems, function (item) return createChange("create", item) end)
-			return table.concatenate(changes, newChanges)
+			local newItems = table.map(outputItems, function (item) return createItem(item) end)
+			return table.concatenate(inputItems, newItems)
 		end,
 		pattern)
 end
 
 -- Source/sink nodes
 injectFiles = function (files)
-	return createProcessingNode(function (changes)
-		newChanges = {}
+	return createProcessingNode(function (items)
+		newItems = {}
 		for path, content in pairs(files) do
 			-- TODO: Detect differences, probably via hash
-			table.append(newChanges, createChange("create", {
+			table.append(newItems, createItem({
 				path = path,
 				content = content
 			}))
 		end
-		return table.concatenate(changes, newChanges)
+		return table.concatenate(items, newItems)
 	end)
 end
 
 readFromSource = function (dir)
-	return createProcessingNode(function (changes)
+	return createProcessingNode(function (items)
 			-- TODO: Check for differences from last run
-			newChanges = table.map(fs.enumerateFiles(dir), function (path)
-				return createChange("create", {
+			newItems = table.map(fs.enumerateFiles(dir), function (path)
+				return createItem({
 					path = path,
 					content = fs.readFile(fs.join(dir, path)),
 				})
 			end)
 
-			return table.concatenate(changes, newChanges)
+			return table.concatenate(items, newItems)
 		end)
 end
 
 writeToDestination = function (dir, pattern)
-	return createProcessingNode(function (changes)
+	return createProcessingNode(function (items)
 			local dirsMade = {}
-			for _, change in ipairs(changes) do
+			for _, item in ipairs(items) do
 				-- TODO: Handle deletes
-				local ct = change.changeType
-				if ct == "create" then
-					local item = change.item
-					local localPath = fs.join(dir, item.path)
-					local localDir = fs.directory(localPath)
-					if not dirsMade[localDir] then
-						fs.createDirectory(localDir)
-						dirsMade[localDir] = true
-					end
-					fs.writeFile(localPath, item.content)
+				local localPath = fs.join(dir, item.path)
+				local localDir = fs.directory(localPath)
+				if not dirsMade[localDir] then
+					fs.createDirectory(localDir)
+					dirsMade[localDir] = true
 				end
+				fs.writeFile(localPath, item.content)
 			end
 		end,
 		pattern)
 end
 
 omitWhen = function (test, pattern)
-	return createProcessingNode(function (changes)
-		local newChanges = {}
-		for _, change in ipairs(changes) do
+	return createProcessingNode(function (items)
+		local newItems = {}
+		for _, item in ipairs(items) do
 			-- TODO: How does this work for caching?
-			if not (change.changeType == "create" and test(change.item)) then
-				table.append(newChanges, change)
+			if not test(item) then
+				table.append(newItems, item)
 			end
 		end
-		return newChanges
+		return newItems
 	end,
 	pattern)
 end
@@ -583,9 +568,9 @@ end
 
 -- Top-level logic
 function build(nodes)
-	changes = {}
+	items = {}
 	for _, node in ipairs(nodes) do
-		changes = node.process(changes)
+		items = node.process(items)
 	end
 end
 
