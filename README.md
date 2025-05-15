@@ -24,7 +24,7 @@ return {
 ```
 
 ## Summary
-Most of the heavy lifting in luasmith is done by [md4c](https://github.com/mity/md4c) ([patched](https://github.com/jaredkrinke/md4c/commit/fc4cac5277b060450d93b06a67397388defa358d) for relative links), [Lua](https://www.lua.org/), and [etlua](https://github.com/leafo/etlua).
+Most of the heavy lifting in luasmith is done by [md4c](https://github.com/mity/md4c) ([patched](https://github.com/jaredkrinke/md4c/commit/fc4cac5277b060450d93b06a67397388defa358d) for relative links), [Lua](https://www.lua.org/), and [etlua](https://github.com/leafo/etlua). TODO: Mention ldump, MD5 implementation, etc.
 
 Note that luasmith is more of a proof-of-concept that, while functional, shouldn't be relied upon to take over the world.
 

@@ -47,6 +47,7 @@ Items in luasmith are represented as Lua tables, with a few known keys:
 * `path` the path (relative to the input/output root) of the item
 * `pathToRoot` the path *from* the item *to* the root (useful for relative references)
 * `content` the content of the item/file, represented as a Lua string (note that Lua strings can contain binary data)
+* `self` is the object itself, in case it needs to be passed to helper functions
 
 Additional properties can be added by simply setting additional key-value pairs on the item's table.
 

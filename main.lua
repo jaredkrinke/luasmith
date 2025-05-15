@@ -291,6 +291,13 @@ local function computePathToRoot(path)
 end
 
 -- Processing node helpers
+local caches = {}
+function createCache()
+	local cache = {}
+	table.append(caches, cache)
+	return cache
+end
+
 function initializeItem(item)
 	if not item.pathToRoot then
 		item.pathToRoot = computePathToRoot(item.path)
@@ -298,6 +305,12 @@ function initializeItem(item)
 	return item
 end
 
+-- TODO: Cache the hash itself?
+--function computeHash(o)
+--	return _computeHash(ldump(o))
+--end
+
+-- TODO: How to identify processing nodes across runs? Hash code (incl. dependencies) and use index?
 function createProcessingNode(process, pattern)
 	local p = process
 	if pattern then
@@ -323,13 +336,21 @@ end
 
 -- TODO: Consider supporting multiple outputs
 function createTransformNode(transform, pattern)
+	local cache = createCache()
 	return createProcessingNode(function (items)
 			local newItems = {}
 			for _, item in ipairs(items) do
-				local newItem = table.copy(item)
-				newItem.self = newItem
-				transform(newItem)
-				table.append(newItems, initializeItem(newItem))
+				local newItem = cache[item]
+				if not newItem then
+					newItem = table.copy(item)
+					-- Temporarily add "self" key that points to the object itself
+					newItem.self = newItem
+					transform(newItem)
+					newItem.self = nil
+					initializeItem(newItem)
+					cache[item] = newItem
+				end
+				table.append(newItems, newItem)
 			end
 			return newItems
 		end,
@@ -369,13 +390,28 @@ injectFiles = function (files)
 end
 
 readFromSource = function (dir)
+	local cache = createCache()
 	return createProcessingNode(function (items)
 			-- TODO: Check for differences from last run
 			newItems = table.map(fs.enumerateFiles(dir), function (path)
-				return initializeItem({
-					path = path,
-					content = fs.readFile(fs.join(dir, path)),
-				})
+				local cacheEntry = cache[path]
+				local item = nil
+				if cacheEntry then
+					-- TODO: Check mtime
+					item = cacheEntry.item
+				else
+					item = initializeItem({
+						path = path,
+						content = fs.readFile(fs.join(dir, path)),
+					})
+
+					cache[path] = {
+						-- TODO: mtime
+						item = item,
+					}
+				end
+
+				return item
 			end)
 
 			return table.concatenate(items, newItems)
@@ -591,4 +627,39 @@ end
 themeDirectory = fs.directory(userScriptFile)
 local pipeline = load(fs.readFile(userScriptFile), userScriptFile, "t")()
 build(pipeline)
+
+-- TODO: Remove! This is for testing only!
+os.execute("rm -rf out")
+build(pipeline)
+--local function hexify(s)
+--	local result = ""
+--	local bytes = {string.byte(s, 1, #s)}
+--	for _, byte in ipairs(bytes) do
+--		result = result .. string.format("%x", byte)
+--	end
+--	return result
+--end
+--
+--local function serialize(o)
+--	-- TODO: Theoretically this makes loading faster, but is that what we should optimize?
+--	return string.dump(load(ldump(o)))
+--end
+--
+--local function deserialize(b)
+--	return load(b)()
+--end
+--
+--local a = { 1, 2, 3 }
+--local b = { 1, 2, 3 }
+--print(a)
+--print(b)
+--
+--print(hexify(_computeHash(serialize(a))))
+--print(hexify(_computeHash(serialize(b))))
+--
+--local c = deserialize(serialize(a))
+--print(format(c))
+
+-- TODO: Unfortunately, serializing the cache takes longer than recreating everything from scratch!
+print(#ldump(caches))
 

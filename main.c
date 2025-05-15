@@ -8,10 +8,12 @@
 #include <lualib.h>
 #include <lauxlib.h>
 #include <md4c-html.h>
+#include <md5.h>
 
 /* Compile in Lua scripts */
 #include "main.lua.h"
 #include "etlua.lua.h"
+#include "ldump.lua.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -108,6 +110,15 @@ int l_list_directory(lua_State* L) {
 	}
 }
 
+int l_compute_hash(lua_State* L) {
+	char md5[16];
+
+	md5String(lua_tostring(L, 1), (uint8_t*)&md5);
+	lua_pushlstring(L, &md5[0], 16);
+
+	return 1;
+}
+
 int lua_run(lua_State* L, const char* name, const char* script, int message_handler_index) {
 	int result;
 
@@ -143,9 +154,11 @@ int main(int argc, const char** argv) {
 	lua_register(L, "_isDirectory", &l_is_directory);
 	lua_register(L, "_listDirectory", &l_list_directory);
 	lua_register(L, "_mkdir", &l_mkdir);
+	lua_register(L, "_computeHash", &l_compute_hash);
 
 	/* Load libraries */
 	lua_load_library(L, "etlua", STRINGIFIED_ETLUA, message_handler_index);
+	lua_load_library(L, "ldump", STRINGIFIED_LDUMP, message_handler_index);
 
 	/* Expose command line arguments */
 	lua_createtable(L, argc, 0);

@@ -7,3 +7,9 @@
 [submodule "etlua"]
 	path = etlua
 	url = https://github.com/leafo/etlua.git
+[submodule "md5-c"]
+	path = md5-c
+	url = https://github.com/MilchRatchet/md5-c.git
+[submodule "ldump"]
+	path = ldump
+	url = git@github.com:jaredkrinke/ldump.git
