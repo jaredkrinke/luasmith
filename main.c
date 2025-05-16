@@ -9,6 +9,10 @@
 #include <lauxlib.h>
 #include <md4c-html.h>
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 /* Compile in Lua scripts */
 #include "main.lua.h"
 #include "etlua.lua.h"
@@ -50,6 +54,12 @@ int l_markdown_to_html(lua_State* L) {
 	}
 }
 
+#ifdef WIN32
+int l_is_directory(lua_State* L) {
+	lua_pushboolean(L, (GetFileAttributes(lua_tostring(L, 1)) & FILE_ATTRIBUTE_DIRECTORY) ? TRUE : FALSE);
+	return 1;
+}
+#else
 int l_is_directory(lua_State* L) {
 	struct stat s;
 	int  result = lstat(lua_tostring(L, 1), &s);
@@ -62,9 +72,15 @@ int l_is_directory(lua_State* L) {
 	lua_pushboolean(L, FALSE);
 	return 1;
 }
+#endif
 
 int l_mkdir(lua_State* L) {
-	if (mkdir(lua_tostring(L, 1), 0777) == -1) {
+	if (mkdir(
+			lua_tostring(L, 1)
+#ifndef WIN32
+			, 0777
+#endif
+			) == -1) {
 		/* Ignore "already exists" errors */
 		if (errno != EEXIST) {
 			luaL_error(L, "Failed to create directory!");

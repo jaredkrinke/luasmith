@@ -6,7 +6,7 @@ LUA_OBJS=lua/lapi.o lua/lcode.o lua/lctype.o lua/ldebug.o lua/ldo.o lua/ldump.o 
 MD4C_OBJS=md4c/src/entity.o md4c/src/md4c.o md4c/src/md4c-html.o
 OBJS=main.o $(MD4C_OBJS) $(LUA_OBJS)
 
-LUA_CFLAGS=-DLUA_COMPAT_ALL -DLUA_USE_POSIX
+LUA_CFLAGS=-DLUA_COMPAT_ALL #-DLUA_USE_POSIX
 CFLAGS=$(MYCFLAGS) -I lua -I md4c/src $(LUA_CFLAGS)
 
 all: luasmith
@@ -27,7 +27,7 @@ etlua.lua.h: etlua/etlua.lua
 	cat etlua/etlua.lua |sed -f stringify.sed >> $@
 
 main.o: main.c main.lua.h etlua.lua.h
-	$(CC) $(CFLAGS) -c main.c
+	$(CC) $(CFLAGS) -c main.c -o main.o
 
 luasmith: $(OBJS)
 	$(CC) -o luasmith $(OBJS) -lm
