@@ -17,7 +17,7 @@
 <id><%= site.url .. post.path %></id>
 <link rel="alternate" href="<%= site.url .. post.path %>"/>
 <updated><%= shared.yamlDateToIso(post.date) %></updated>
-<summary type="text"><%= post.description %></summary>
+<summary type="text"><%= post.description or post.title %></summary>
 </entry>
 <% end -%>
 </feed>
