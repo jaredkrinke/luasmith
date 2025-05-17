@@ -473,24 +473,35 @@ local function postProcessMarkdown(content)
 	return result
 end
 
+local function parseFrontmatter(item)
+	-- Parse YAML frontmatter
+	local i, j, frontmatter = string.find(item.content, "^%-%-%-\n(.-)\n%-%-%-\n")
+	if i and j and frontmatter then
+		table.merge(parseYaml(frontmatter), item)
+		item.content = string.sub(item.content, j + 1)
+	else
+		-- Parse Lua frontmatter
+		i, j, frontmatter = string.find(item.content, "^%[%[\n(.-)\n%]%]\n")
+		if i and j and frontmatter then
+			table.merge(parseLua(frontmatter), item)
+			item.content = string.sub(item.content, j + 1)
+		end
+	end
+end
+
+extractFrontmatter = function (pattern)
+	return createTransformNode(function (item)
+		parseFrontmatter(item)
+	end, pattern)
+end
+
 processMarkdown = function ()
 	return createTransformNode(function (item)
 		-- .md -> .html
 		item.path = string.gsub(item.path, "%.md$", ".html")
 
-		-- Parse YAML frontmatter
-		local i, j, frontmatter = string.find(item.content, "^%-%-%-\n(.-)\n%-%-%-\n")
-		if i and j and frontmatter then
-			table.merge(parseYaml(frontmatter), item)
-			item.content = string.sub(item.content, j + 1)
-		else
-			-- Parse Lua frontmatter
-			i, j, frontmatter = string.find(item.content, "^%[%[\n(.-)\n%]%]\n")
-			if i and j and frontmatter then
-				table.merge(parseLua(frontmatter), item)
-				item.content = string.sub(item.content, j + 1)
-			end
-		end
+		-- Parse frontmatter
+		parseFrontmatter(item)
 
 		item.content = markdown.toHtml(item.content)
 

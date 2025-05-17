@@ -17,9 +17,12 @@ if siteOverrides then
 	table.merge(siteOverrides(), site)
 end
 
+local source = args[3] or "content"
+local destination = args[4] or "out"
+
 -- Build pipeline
 return {
-	readFromSource("content"),
+	readFromSource(source),
 	injectFiles({ ["style.css"] = fs.readThemeFile("style.css"), }),
 	processMarkdown(),
 	aggregate("feed.xml", "%.html$"),
@@ -31,6 +34,6 @@ return {
 		{ "^index.html$", fs.readThemeFile("blog.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
-	writeToDestination("out"),
+	writeToDestination(destination),
 }
 
