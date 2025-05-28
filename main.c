@@ -16,22 +16,41 @@
 #define TRUE 1
 #define FALSE 0
 
-void append_internal(const MD_CHAR* str, MD_SIZE size, void* o) {
-	lua_State* L = (lua_State*)o;
+/* md4c provides substrings and they need to be concatenated into a final
+ * result. Note that Lua's string concatenation isn't optimized for repeated
+ * concatenation, so rather than concatenating each string together, gather the
+ * strings into a list and use table.concat (which is optimized for this case).
+ * */
+typedef struct {
+	lua_State* L;
+	int index;
+} append_state;
+
+void push_internal(const MD_CHAR* str, MD_SIZE size, void* o) {
+	append_state* state = (append_state*)o;
+	lua_State* L = state->L;
+
+	/* Append to table, i.e. t[#t + 1] = str */
+	lua_pushinteger(L, ++state->index);
 	lua_pushlstring(L, str, size);
-	lua_concat(L, 2);
+	lua_settable(L, -3);
 }
 
 int l_markdown_to_html(lua_State* L) {
 	const char *input = lua_tostring(L, 1);
 	int result = -1;
+	append_state state = { L, 0 };
 
-	lua_pushstring(L, "");
+	lua_getglobal(L, "table");
+	lua_getfield(L, -1, "concat");
+
+	/* Append strings to temporary table */
+	lua_newtable(L);
 
 	result = md_html(
 		input, strlen(input),
-		&append_internal,
-		L,
+		&push_internal,
+		&state,
 		(	0
 			| MD_FLAG_PERMISSIVEURLAUTOLINKS
 			| MD_FLAG_PERMISSIVEEMAILAUTOLINKS
@@ -41,10 +60,12 @@ int l_markdown_to_html(lua_State* L) {
 		MD_HTML_FLAG_TRANSLATE_MD_LINKS);
 
 	if (result == 0) {
+		/* Call table.concat */
+		lua_call(L, 1, 1);
 		return 1;
 	}
 	else {
-		lua_pop(L, 1);
+		lua_pop(L, 2);
 		luaL_error(L, "Markdown parsing failed!");
 		return 0;
 	}
