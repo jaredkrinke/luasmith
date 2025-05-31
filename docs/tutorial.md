@@ -159,5 +159,16 @@ return {
 
 There you go! Now you've got a barebones blog.
 
+### Bonus: validate internal links
+Just add in the `checkLinks()` node to check that relative links are not broken:
+
+```lua
+return {
+	...
+	checkLinks(), -- Check for broken links
+	writeToDestination("out"),
+}
+```
+
 ### Beyond the Tutorial
 Poke around the included themes in `themes/` for further inspiration.

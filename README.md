@@ -19,6 +19,7 @@ return {
   readFromSource("content"),
   processMarkdown(),
   applyTemplates({ { "%.html$", outer } }),
+  checkLinks(),
   writeToDestination("out"),
 }
 ```
