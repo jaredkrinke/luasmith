@@ -154,7 +154,7 @@ int l_chtml_info_index(lua_State* L) {
 		const char* value = NULL;
 		size_t value_size = 0;
 
-		if (STRCMP_STATIC("html", field) == 0) {
+		if (STRCMP_STATIC("event", field) == 0) {
 			switch (info->event) {
 			   case CHTML_EVENT_OTHER: lua_pushstring(L, "other"); break;
 			   case CHTML_EVENT_TAG_ENTER: lua_pushstring(L, "enter"); break;
@@ -164,7 +164,11 @@ int l_chtml_info_index(lua_State* L) {
 			}
 		}
 		else {
-			if (STRCMP_STATIC("tag", field) == 0) {
+			if (STRCMP_STATIC("html", field) == 0) {
+				value = info->html;
+				value_size = info->html_size;
+			}
+			else if (STRCMP_STATIC("tag", field) == 0) {
 				value = info->ctx->tag;
 				value_size = info->ctx->tag_size;
 			}
@@ -212,7 +216,12 @@ int l_parse_html(lua_State* L) {
 	const char* html = lua_tostring(L, 1);
 	lua_setfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT_HANDLER);
 
-	parse_html(html, process_html_event, L);
+	if (html) {
+		parse_html(html, process_html_event, L);
+	}
+	else {
+		luaL_error(L, "Non-string passed to _parseHtml(html, callback)!");
+	}
 
 	/* Clear event object */
 	lua_getfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT);

@@ -11,13 +11,14 @@
 <updated><%= shared.yamlDateToIso(posts[1].date) %></updated>
 
 <% for i, post in ipairs(posts) do -%>
-<% if i > 30 then break end -%>
+<% if i > 5 then break end -%>
 <entry>
 <title><%= post.title %></title>
 <id><%= site.url .. post.path %></id>
 <link rel="alternate" href="<%= site.url .. post.path %>"/>
 <updated><%= shared.yamlDateToIso(post.date) %></updated>
 <summary type="text"><%= post.description or post.title %></summary>
+<content type="html"><%= shared.atomifyItemContent(post, site.url) %></content>
 </entry>
 <% end -%>
 </feed>

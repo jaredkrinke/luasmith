@@ -21,8 +21,36 @@ local function yamlDateToIso(str)
 	return year .. "-" .. month .. "-" .. day .. "T" .. (hour or "00") .. ":" .. (minute or "00") .. ":00.000Z"
 end
 
+-- Atom feed helpers
+local function atomRepathItemContent(item, prefix)
+	local parts = {}
+	local pathFromRoot = fs.directory(item.path)
+	_parseHtml(item.content, function (event)
+		local part = event.html
+
+		-- Repath relative links, if needed
+		if pathFromRoot ~= "" and event.attribute and event.value
+			and((event.tag == "a" and event.attribute == "href") -- Check for links
+			or (event.tag == "link" and event.attribute == "href")
+			or (event.tag == "script" and event.attribute == "src")
+			or (event.tag == "img" and event.attribute == "src"))
+			and not string.find(event.value, ":") -- Local/relative links only
+		then
+			part = event.attribute .. "=\"" .. (prefix or "") .. fs.join(pathFromRoot, event.value) .. "\""
+		end
+
+		table.append(parts, part)
+	end)
+	return table.concat(parts)
+end
+
+function atomifyItemContent(item, siteUrl)
+	return atomRepathItemContent(item, siteUrl)
+end
+
 return {
-	yamlDateToIso = yamlDateToIso,
+	atomifyItemContent = atomifyItemContent,
 	formatDate = formatDate,
+	yamlDateToIso = yamlDateToIso,
 }
 

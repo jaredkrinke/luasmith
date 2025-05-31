@@ -61,6 +61,7 @@ return {
 		["css/style.css"] = fs.readThemeFile("style.css"),
 	}),
 	processMarkdown(),
+	normalize, -- TODO: Remove! This is only for testing!
 	omitWhen(function (item) return item.draft end),
 	deriveMetadata({ tags = deriveTags }, "^posts/.+%.html$"),
 	-- TODO: Cache index?
@@ -80,7 +81,6 @@ return {
 		{ "^index.html$", fs.readThemeFile("root.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
-	normalize, -- TODO: Remove!
 	checkLinks(),
 	writeToDestination("out"),
 }
