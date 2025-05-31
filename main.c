@@ -17,8 +17,9 @@
 #define TRUE 1
 #define FALSE 0
 
-#define LUA_CHTML_EVENT "chtml_event"
-#define LUA_CHTML_EVENT_HANDLER "chtml_event_handler"
+#define STRCMP_STATIC(stat, dyn) strncmp(stat, (dyn), sizeof(stat))
+
+/* md4c interface */
 
 /* md4c provides substrings and they need to be concatenated into a final
  * result. Note that Lua's string concatenation isn't optimized for repeated
@@ -74,6 +75,8 @@ int l_markdown_to_html(lua_State* L) {
 		return 0;
 	}
 }
+
+/* File system interface */
 
 int l_is_directory(lua_State* L) {
 	struct stat s;
@@ -133,48 +136,75 @@ int l_list_directory(lua_State* L) {
 	}
 }
 
-void lua_push_string_or_nil(lua_State* L, const char* str, size_t size) {
-	if (str) {
-		lua_pushlstring(L, str, size);
+/* chtml interface */
+#define LUA_CHTML_EVENT "chtml_event"
+#define LUA_CHTML_EVENT_HANDLER "chtml_event_handler"
+
+typedef struct {
+	chtml_event_t event;
+	const char* html;
+	size_t html_size;
+	const chtml_context_t* ctx;
+} chtml_info_t;
+
+int l_chtml_info_index(lua_State* L) {
+	chtml_info_t* info = *((chtml_info_t**)lua_touserdata(L, 1));
+	if (info) {
+		const char* field = lua_tostring(L, 2);
+		const char* value = NULL;
+		size_t value_size = 0;
+
+		if (STRCMP_STATIC("html", field) == 0) {
+			switch (info->event) {
+			   case CHTML_EVENT_OTHER: lua_pushstring(L, "other"); break;
+			   case CHTML_EVENT_TAG_ENTER: lua_pushstring(L, "enter"); break;
+			   case CHTML_EVENT_TAG_EXIT: lua_pushstring(L, "exit"); break;
+			   case CHTML_EVENT_ATTRIBUTE: lua_pushstring(L, "attribute"); break;
+			   default: lua_pushnil(L); break;
+			}
+		}
+		else {
+			if (STRCMP_STATIC("tag", field) == 0) {
+				value = info->ctx->tag;
+				value_size = info->ctx->tag_size;
+			}
+			else if (STRCMP_STATIC("attribute", field) == 0) {
+				value = info->ctx->attribute;
+				value_size = info->ctx->attribute_size;
+			}
+			else if (STRCMP_STATIC("value", field) == 0) {
+				value = info->ctx->value;
+				value_size = info->ctx->value_size;
+			}
+
+			if (value) {
+				lua_pushlstring(L, value, value_size);
+			}
+			else {
+				lua_pushnil(L);
+			}
+		}
+
+		return 1;
 	}
 	else {
-		lua_pushnil(L);
+		luaL_error(L, "Attempt to index non-userdata chtml event!");
+		return 0;
 	}
 }
 
 void process_html_event(chtml_event_t event, const char* str, size_t size, const chtml_context_t* ctx) {
 	lua_State* L = (lua_State*)ctx->user_data;
-	/* TODO: Copying strings for every callback seems inefficient, esp. if the
-	 * fields aren't even read. Investigate using a (single) full user data
-	 * that is actually a pointer to the struct on the stack (and that is
-	 * cleared afterward). */
+	chtml_info_t info = { event, str, size, ctx };
 
-	 /* Push handler and event table */
-	 lua_getfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT_HANDLER);
-	 lua_getfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT);
+	lua_getfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT_HANDLER);
 
-	 /* Set up event table */
-	 switch (event) {
-		case CHTML_EVENT_OTHER: lua_pushstring(L, "other"); break;
-		case CHTML_EVENT_TAG_ENTER: lua_pushstring(L, "enter"); break;
-		case CHTML_EVENT_TAG_EXIT: lua_pushstring(L, "exit"); break;
-		case CHTML_EVENT_ATTRIBUTE: lua_pushstring(L, "attribute"); break;
-		default: lua_pushnil(L); break;
-	 }
+	/* Set up event object */
+	lua_getfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT);
+	*((chtml_info_t**)lua_touserdata(L, -1)) = &info;
 
-	 lua_setfield(L, -2, "type");
-
-	 lua_pushlstring(L, str, size);
-	 lua_setfield(L, -2, "html");
-	 lua_push_string_or_nil(L, ctx->tag, ctx->tag_size);
-	 lua_setfield(L, -2, "tag");
-	 lua_push_string_or_nil(L, ctx->attribute, ctx->attribute_size);
-	 lua_setfield(L, -2, "attribute");
-	 lua_push_string_or_nil(L, ctx->value, ctx->value_size);
-	 lua_setfield(L, -2, "value");
-
-	 /* Call handler */
-	 lua_call(L, 1, 0);
+	/* Call handler */
+	lua_call(L, 1, 0);
 }
 
 /* parseHtml(html, handler) */
@@ -184,17 +214,29 @@ int l_parse_html(lua_State* L) {
 
 	parse_html(html, process_html_event, L);
 
+	/* Clear event object */
+	lua_getfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT);
+	*((chtml_info_t**)lua_touserdata(L, -1)) = NULL;
+	lua_pop(L, 1);
+
 	lua_pushnil(L);
 	lua_setfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT_HANDLER);
 	lua_pop(L, 1);
+
 	return 0;
 }
 
-/* Initialization for chtml (namely, creating metatable for chtml event objects) */
+/* Initialization for chtml (namely, creating metatable for chtml event object) */
 void lua_chtml_init(lua_State* L) {
+	lua_newuserdata(L, sizeof(chtml_info_t*));
 	lua_newtable(L);
+	lua_pushcfunction(L, &l_chtml_info_index);
+	lua_setfield(L, -2, "__index");
+	lua_setmetatable(L, -2);
 	lua_setfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT);
 }
+
+/* Lua helpers */
 
 int lua_run(lua_State* L, const char* name, const char* script, int message_handler_index) {
 	int result;
