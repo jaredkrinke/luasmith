@@ -12,9 +12,7 @@ CFLAGS=$(MYCFLAGS) -I lua -I md4c/src -I chtml $(LUA_CFLAGS)
 all: luasmith
 
 clean:
-	rm -f lua/*.o
-	rm -f md4c/src/*.o
-	rm -f *.o
+	rm -f $(OBJS)
 	rm -f *.lua.h
 	rm -f luasmith
 
