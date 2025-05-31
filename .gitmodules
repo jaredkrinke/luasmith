@@ -7,3 +7,6 @@
 [submodule "etlua"]
 	path = etlua
 	url = https://github.com/leafo/etlua.git
+[submodule "chtml"]
+	path = chtml
+	url = https://github.com/jaredkrinke/chtml.git

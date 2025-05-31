@@ -34,6 +34,7 @@ return {
 		{ "^index.html$", fs.readThemeFile("blog.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
+	checkLinks(),
 	writeToDestination(destination),
 }
 

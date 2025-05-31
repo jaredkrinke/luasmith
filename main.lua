@@ -19,6 +19,11 @@ function format(v)
 end
 
 -- Helpers
+log = {}
+function log.warn(message)
+	print("WARNING:\t" .. message)
+end
+
 function table.append(t, i)
 	t[#t + 1] = i
 end
@@ -197,12 +202,37 @@ end
 fs = {}
 
 function fs.join(a, b)
-	return a .. "/" .. b
+	if a == "" then
+		return b
+	elseif b == "" then
+		return a
+	else
+		return a .. "/" .. b
+	end
 end
 
 function fs.directory(path)
 	local dir = string.match(path, "(.*)/")
 	return dir or ""
+end
+
+-- Normalize path by resolving ".." and "."
+function fs.normalize(path)
+	local results = {}
+	for part in string.split(path, "/") do
+		if part == "." then
+			-- Drop any "." components
+		elseif part == ".." then
+			results[#results] = nil
+		else
+			table.append(results, part)
+		end
+	end
+	return table.concat(results, "/")
+end
+
+function fs.resolveRelative(base, relative)
+	return fs.normalize(fs.join(fs.directory(base), relative))
 end
 
 function fs.createDirectory(dir)
@@ -590,6 +620,74 @@ createIndexes = function (createIndexPath, property, pattern)
 			return results
 		end,
 		pattern)
+end
+
+checkLinks = function ()
+	return createAggregateNode(function (items)
+			-- Enumerate anchors and relative links
+			local pathToAnchors = {}
+			local pathToLinks = {}
+			for _, item in ipairs(items) do
+				-- Obviously, only parse HTML files
+				if string.sub(item.path, -5) == ".html" then
+					local anchors = {}
+					local links = {}
+
+					_parseHtml(item.content, function (event)
+						if event.attribute and event.value then
+							if ((event.tag == "a" and event.attribute == "href") -- Check for links
+								or (event.tag == "link" and event.attribute == "href")
+								or (event.tag == "script" and event.attribute == "src")
+								or (event.tag == "img" and event.attribute == "src"))
+								and not string.find(event.value, ":") -- Local/relative links only
+							then
+								local target = event.value
+								if string.sub(event.value, 1, 1) ~= "#" then
+									target = fs.resolveRelative(item.path, event.value)
+								end
+								table.append(links, target)
+							elseif event.attribute == "id" or event.attribute == "name" then
+								anchors[event.value] = true
+							end
+						end
+					end)
+
+					pathToAnchors[item.path] = anchors
+					pathToLinks[item.path] = links
+				else
+					pathToAnchors[item.path] = true
+				end
+			end
+
+			-- Check all links (including hash/anchor)
+			for source, links in pairs(pathToLinks) do
+				for _, target in ipairs(links) do
+					-- Check for #fragment
+					local destination = target
+					local anchor = nil
+					local hash = string.find(target, "#", 1, true)
+					if hash then
+						if hash == 1 then
+							destination = source
+						else
+							destination = string.sub(target, 1, hash - 1)
+						end
+						anchor = string.sub(target, hash + 1)
+					end
+
+					local anchors = pathToAnchors[destination]
+					if anchors then
+						if anchor and not anchors[anchor] then
+							log.warn("Broken link from \"" .. source .. "\" to \"" .. destination .. "\" (no such fragment: \"#" .. anchor .. "\")")
+						end
+					else
+						log.warn("Broken link from \"" .. source .. "\" to \"" .. target .. "\"")
+					end
+				end
+			end
+
+			return {}
+		end)
 end
 
 -- Top-level logic

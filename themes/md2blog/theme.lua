@@ -81,6 +81,7 @@ return {
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
 	normalize, -- TODO: Remove!
+	checkLinks(),
 	writeToDestination("out"),
 }
 
