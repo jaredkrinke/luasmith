@@ -245,6 +245,9 @@ void lua_chtml_init(lua_State* L) {
 	lua_setfield(L, LUA_REGISTRYINDEX, LUA_CHTML_EVENT);
 }
 
+/* LPeg interface */
+extern int luaopen_lpeg(lua_State* L);
+
 /* Lua helpers */
 
 int lua_run(lua_State* L, const char* name, const char* script, int message_handler_index) {
@@ -287,6 +290,8 @@ int main(int argc, const char** argv) {
 
 	/* Load libraries */
 	lua_load_library(L, "etlua", STRINGIFIED_ETLUA, message_handler_index);
+	luaopen_lpeg(L);
+	lua_setglobal(L, "lpeg");
 
 	/* Expose command line arguments */
 	lua_createtable(L, argc, 0);
