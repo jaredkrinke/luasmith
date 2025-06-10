@@ -542,8 +542,28 @@ processMarkdown = function ()
 	"%.md$")
 end
 
--- TODO: Cache lexers?
 local lexer = require("lexer")
+local grammars = {}
+
+local function tryLoadGrammar(language)
+	-- Cache result of trying to load grammar
+	local cached = grammars[language]
+	if cached == nil then
+		local success, grammar = pcall(function ()
+			return lexer.load(language)
+		end)
+
+		if success then
+			grammars[language] = grammar
+			return grammar
+		else
+			grammars[language] = false
+			return nil
+		end
+	else
+		return cached or nil
+	end
+end
 
 local function unescapeHtml(html)
 	html = string.gsub(html, "&apos;", "'")
@@ -564,10 +584,9 @@ local function escapeHtml(raw)
 end
 
 local function highlightSyntaxInternal(language, escaped)
-	-- TODO: How to detect if a lexer is available? Ideally not hard-coded!
-	if language == "typescript" then
+	local parser = tryLoadGrammar(language)
+	if parser then
 		local parts = {}
-		local parser = lexer.load(language)
 		local code = unescapeHtml(escaped)
 		tokens = parser:lex(code)
 		local prev = 1
@@ -581,7 +600,7 @@ local function highlightSyntaxInternal(language, escaped)
 				table.append(parts, verbatim)
 			else
 				-- TODO: Don't concatenate?
-				table.append(parts, "<span class=\"hljs-" .. tag .. "\">" .. verbatim .. "</span>")
+				table.append(parts, "<span class=\"hl-" .. tag .. "\">" .. verbatim .. "</span>")
 			end
 
 			prev = tokens[i+1]
