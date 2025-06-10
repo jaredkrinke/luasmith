@@ -542,6 +542,126 @@ processMarkdown = function ()
 	"%.md$")
 end
 
+-- TODO: Cache lexers?
+local lexer = require("lexer")
+
+local function unescapeHtml(html)
+	html = string.gsub(html, "&apos;", "'")
+	html = string.gsub(html, "&quot;", "\"")
+	html = string.gsub(html, "&lt;", "<")
+	html = string.gsub(html, "&gt;", ">")
+	html = string.gsub(html, "&amp;", "&")
+	return html
+end
+
+local function escapeHtml(raw)
+	raw = string.gsub(raw, "&", "&amp;")
+	raw = string.gsub(raw, ">", "&gt;")
+	raw = string.gsub(raw, "<", "&lt;")
+	raw = string.gsub(raw, "\"", "&quot;")
+	raw = string.gsub(raw, "'", "&apos;")
+	return raw
+end
+
+local function highlightSyntaxInternal(language, escaped)
+	-- TODO: How to detect if a lexer is available? Ideally not hard-coded!
+	if language == "typescript" then
+		local parts = {}
+		local parser = lexer.load(language)
+		local code = unescapeHtml(escaped)
+		tokens = parser:lex(code)
+		local prev = 1
+		for i = 1, #tokens, 2 do
+			local tag = string.gsub(tokens[i], "%.", "_")
+			local raw = string.sub(code, prev, tokens[i+1] - 1)
+			local verbatim = escapeHtml(raw)
+
+			-- Don't bother tagging whitespace
+			if string.find(tag, "whitespace") then
+				table.append(parts, verbatim)
+			else
+				-- TODO: Don't concatenate?
+				table.append(parts, "<span class=\"hljs-" .. tag .. "\">" .. verbatim .. "</span>")
+			end
+
+			prev = tokens[i+1]
+		end
+
+		return table.concat(parts)
+	end
+
+	return escaped
+end
+
+highlightSyntax = function ()
+	-- TODO: Consider integrating with md4c-html directly, instead of post-procsesing
+	-- TODO: Unescape HTML?
+	-- TODO: Skip if no code blocks?
+	return createTransformNode(function (item)
+		local inPre = false
+		local inCode = false
+		local language = nil
+		local codeParts = nil
+		local htmlParts = {}
+
+		-- State machine using inPre, inCode, and language
+		local handleTag = {
+			["pre"] = function () inPre = true end,
+			["/pre"] = function () inPre = false end,
+			["code"] = function (event)
+				if not language then
+					if event.attribute == "class" then
+						language = string.match(event.value, "^language%-(.*)$")
+						if language then
+							-- Start accumulating code chunks
+							codeParts = {}
+						end
+					end
+				end
+			end,
+			["/code"] = function () inCode = false end,
+		}
+
+		_parseHtml(item.content, function (event)
+			local html = nil
+
+			if language then
+				-- In a code block; accumulate text nodes or output at end
+				local kind = event.event
+				if kind == "other" then
+					-- Accumulate code
+					table.append(codeParts, event.html)
+					html = ""
+				elseif kind ~= "exit" then
+					-- Highlight and output code
+					local code = table.concat(codeParts)
+					if code ~= "" then
+						html = highlightSyntaxInternal(language, code) .. event.html
+					end
+
+					-- Reset
+					language = nil
+					codeParts = nil
+				end
+			else
+				-- State machine transitions
+				local handler = handleTag[event.tag]
+				if handler then
+					handler(event)
+				else
+					language = nil
+				end
+			end
+
+			html = html or event.html
+			table.append(htmlParts, html)
+		end)
+
+		item.content = table.concat(htmlParts)
+	end,
+	"%.html$")
+end
+
 injectMetadata = function (properties, pattern)
 	return createTransformNode(function (item)
 			table.merge(properties, item)

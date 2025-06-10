@@ -61,6 +61,7 @@ return {
 		["css/style.css"] = fs.readThemeFile("style.css"),
 	}),
 	processMarkdown(),
+	highlightSyntax(),
 	normalize, -- TODO: Remove! This is only for testing!
 	omitWhen(function (item) return item.draft end),
 	deriveMetadata({ tags = deriveTags }, "^posts/.+%.html$"),
