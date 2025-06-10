@@ -21,7 +21,11 @@ end
 -- Helpers
 log = {}
 function log.warn(message)
-	print("WARNING:\t" .. message)
+	print("WARN:\t" .. message)
+end
+
+function log.info(message)
+	print("INFO:\t" .. message)
 end
 
 function table.append(t, i)
@@ -557,6 +561,7 @@ local function tryLoadGrammar(language)
 			grammars[language] = grammar
 			return grammar
 		else
+			log.info("Syntax highlighting not available for: " .. language)
 			grammars[language] = false
 			return nil
 		end
