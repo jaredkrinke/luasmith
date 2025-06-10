@@ -599,8 +599,11 @@ local function highlightSyntaxInternal(language, escaped)
 			if string.find(tag, "whitespace") then
 				table.append(parts, verbatim)
 			else
-				-- TODO: Don't concatenate?
-				table.append(parts, "<span class=\"hl-" .. tag .. "\">" .. verbatim .. "</span>")
+				table.append(parts, "<span class=\"hl-")
+				table.append(parts, tag)
+				table.append(parts, "\">")
+				table.append(parts, verbatim)
+				table.append(parts, "</span>")
 			end
 
 			prev = tokens[i+1]
@@ -614,8 +617,6 @@ end
 
 highlightSyntax = function ()
 	-- TODO: Consider integrating with md4c-html directly, instead of post-procsesing
-	-- TODO: Unescape HTML?
-	-- TODO: Skip if no code blocks?
 	return createTransformNode(function (item)
 		local inPre = false
 		local inCode = false
