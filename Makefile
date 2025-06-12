@@ -21,11 +21,12 @@ main.lua.h: main.lua
 	echo "#define STRINGIFIED_MAIN \\" > $@
 	cat main.lua |sed -f stringify.sed >> $@
 
-etlua.lua.h: etlua/etlua.lua
-	echo "#define STRINGIFIED_ETLUA \\" > $@
-	cat etlua/etlua.lua |sed -f stringify.sed >> $@
+scripts.lua.h: etlua/etlua.lua
+	echo "char* _embedded_scripts[] = {" > $@
+	cat etlua/etlua.lua |sed -f stringify.sed -e '$$a,' -e '1i"etlua",' >> $@
+	echo "NULL };" >> $@
 
-main.o: main.c main.lua.h etlua.lua.h
+main.o: main.c main.lua.h scripts.lua.h
 	$(CC) $(CFLAGS) -c main.c
 
 luasmith: $(OBJS)

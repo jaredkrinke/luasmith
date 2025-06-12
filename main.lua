@@ -1,3 +1,12 @@
+-- Support embedded scripts
+local function loadEmbeddedScript(name)
+	return _loadEmbeddedScript(name)
+end
+
+for _, name in ipairs(_embeddedScripts) do
+	package.preload[name] = loadEmbeddedScript
+end
+
 -- TODO: Ignore non-file/directory
 
 -- TODO: Needed?
@@ -704,6 +713,8 @@ deriveMetadata = function (derivations, pattern)
 end
 
 -- TODO: Should templates be able to include frontmatter?
+etlua = require("etlua")
+
 applyTemplates = function(templates)
 	local compiled = {}
 	for _, pair in ipairs(templates) do

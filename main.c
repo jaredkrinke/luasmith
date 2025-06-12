@@ -10,12 +10,15 @@
 #include <md4c-html.h>
 #include <chtml.h>
 
-/* Compile in Lua scripts */
+/* Embedded Lua scripts */
 #include "main.lua.h"
-#include "etlua.lua.h"
+#include "scripts.lua.h"
 
 #define TRUE 1
 #define FALSE 0
+
+#define LUA_REG_ERROR_HANDLER "errorHandler"
+#define LUA_REG_SCRIPTS "embeddedScripts"
 
 #define STRCMP_STATIC(stat, dyn) strncmp(stat, (dyn), sizeof(stat))
 
@@ -250,8 +253,12 @@ extern int luaopen_lpeg(lua_State* L);
 
 /* Lua helpers */
 
-int lua_run(lua_State* L, const char* name, const char* script, int message_handler_index) {
+int lua_run(lua_State* L, const char* name, const char* script) {
+	int message_handler_index;
 	int result;
+
+	lua_getfield(L, LUA_REGISTRYINDEX, LUA_REG_ERROR_HANDLER);
+	message_handler_index = lua_gettop(L);
 
 	luaL_loadbuffer(L, script, strlen(script), name);
 	result = lua_pcall(L, 0, LUA_MULTRET, message_handler_index);
@@ -259,17 +266,59 @@ int lua_run(lua_State* L, const char* name, const char* script, int message_hand
 		printf("*** ERROR ***\n%s\n", lua_tostring(L, -1));
 	}
 
+	lua_remove(L, message_handler_index);
+
 	return result;
 }
 
-void lua_load_library(lua_State* L, const char* name, const char* script, int message_handler_index) {
-	if (lua_run(L, name, script, message_handler_index) == LUA_OK) {
-		lua_setglobal(L, name);
+/* Embedded scripts interface */
+void lua_embedded_init(lua_State* L) {
+	char** str;
+	int i;
+	int array_index;
+	int map_index;
+
+	/* lua_scripts contains an array of the format ["filename", "content",
+	 * ..., NULL]. Rather than parsing or even loading these strings into
+	 * Lua, just create a globally accessible table listing the names for
+	 * use in main.lua, then use package.preload[] with a special function
+	 * for actually interning+loading the script contents. */
+
+	lua_newtable(L); /* Array of filenames */
+	array_index = lua_gettop(L);
+	lua_newtable(L); /* Filename -> string pointer (stored in registry) */
+	map_index = lua_gettop(L);
+
+	for (i = 1, str = &_embedded_scripts[0]; *str != NULL; str += 2) {
+		lua_pushinteger(L, i++);
+		lua_pushstring(L, str[0]);
+		lua_settable(L, array_index);
+
+		lua_pushlightuserdata(L, str[1]);
+		lua_setfield(L, map_index, str[0]);
 	}
+
+	lua_setfield(L, LUA_REGISTRYINDEX, LUA_REG_SCRIPTS);
+	lua_setglobal(L, "_embeddedScripts");
+}
+
+int l_load_embedded_script(lua_State* L) {
+	lua_pushvalue(L, 1);
+
+	lua_getfield(L, LUA_REGISTRYINDEX, LUA_REG_SCRIPTS);
+	lua_insert(L, -2);
+	lua_gettable(L, -2);
+
+	if (lua_islightuserdata(L, -1)) {
+		if (lua_run(L, lua_tostring(L, 1), (const char*)lua_topointer(L, -1)) == LUA_OK) {
+			return 1;
+		}
+	}
+
+	return 0;
 }
 
 int main(int argc, const char** argv) {
-	int message_handler_index;
 	int i;
 	lua_State* L = luaL_newstate();
 	luaL_openlibs(L);
@@ -277,11 +326,11 @@ int main(int argc, const char** argv) {
 
 	/* Load debug.traceback for stack tracing */
 	lua_getglobal(L, "debug");
-	lua_pushstring(L, "traceback");
-	lua_gettable(L, 1);
-	message_handler_index = lua_gettop(L);
+	lua_getfield(L, 1, "traceback");
+	lua_setfield(L, LUA_REGISTRYINDEX, LUA_REG_ERROR_HANDLER);
 
 	/* Register helper functions */
+	lua_register(L, "_loadEmbeddedScript", &l_load_embedded_script);
 	lua_register(L, "_markdownToHtml", &l_markdown_to_html);
 	lua_register(L, "_isDirectory", &l_is_directory);
 	lua_register(L, "_listDirectory", &l_list_directory);
@@ -289,9 +338,11 @@ int main(int argc, const char** argv) {
 	lua_register(L, "_parseHtml", &l_parse_html);
 
 	/* Load libraries */
-	lua_load_library(L, "etlua", STRINGIFIED_ETLUA, message_handler_index);
 	luaopen_lpeg(L);
 	lua_setglobal(L, "lpeg");
+
+	/* Expose embedded Lua libraries */
+	lua_embedded_init(L);
 
 	/* Expose command line arguments */
 	lua_createtable(L, argc, 0);
@@ -305,7 +356,7 @@ int main(int argc, const char** argv) {
 	lua_setglobal(L, "args");
 
 	/* Run main.lua */
-	lua_run(L, "main.lua", STRINGIFIED_MAIN, message_handler_index);
+	lua_run(L, "main.lua", STRINGIFIED_MAIN);
 
 	lua_close(L);
 	return 0;
