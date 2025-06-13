@@ -1,26 +1,28 @@
 -- Support embedded scripts
-local function runEmbeddedScript(name)
-	return _runEmbeddedScript(name)
-end
-
+local embeddedScripts = {}
 for _, name in ipairs(_embeddedScripts) do
-	package.preload[name] = runEmbeddedScript
+	embeddedScripts[name] = true
 end
 
--- Note that lexer.lua's searchpath modifies the search path for some reason...
-package.path = "./?.lua;" .. package.path
+-- Need to hook loadfile since lexer.lua uses it directly...
+package.path = package.path .. ";__builtin/?.lua"
 
 local originalLoadFile = loadfile
 loadfile = function(filename)
 	-- Need to hook loadfile since lexer.lua uses it to load scripts instead of using "require"
-	local name = string.match(filename, "^%./(.*)%.lua$")
-	if name then
-		if package.preload[name] == runEmbeddedScript then
-			return _loadEmbeddedScript(name)
-		end
+	local name = string.match(filename, "^%__builtin/(.*)%.lua$")
+	if name and embeddedScripts[name] then
+		return _loadEmbeddedScript(name)
 	end
 	return originalLoadFile(filename)
 end
+
+-- Add a searcher to support "require" (note: built-ins are lowest priority, so they can be overridden locally)
+table.insert(package.searchers, function (name)
+	if embeddedScripts[name] then
+		return _loadEmbeddedScript(name)
+	end
+end)
 
 -- TODO: Ignore non-file/directory
 
