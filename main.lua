@@ -1,10 +1,25 @@
 -- Support embedded scripts
-local function loadEmbeddedScript(name)
-	return _loadEmbeddedScript(name)
+local function runEmbeddedScript(name)
+	return _runEmbeddedScript(name)
 end
 
 for _, name in ipairs(_embeddedScripts) do
-	package.preload[name] = loadEmbeddedScript
+	package.preload[name] = runEmbeddedScript
+end
+
+-- Note that lexer.lua's searchpath modifies the search path for some reason...
+package.path = "./?.lua;" .. package.path
+
+local originalLoadFile = loadfile
+loadfile = function(filename)
+	-- Need to hook loadfile since lexer.lua uses it to load scripts instead of using "require"
+	local name = string.match(filename, "^%./(.*)%.lua$")
+	if name then
+		if package.preload[name] == runEmbeddedScript then
+			return _loadEmbeddedScript(name)
+		end
+	end
+	return originalLoadFile(filename)
 end
 
 -- TODO: Ignore non-file/directory
@@ -555,8 +570,8 @@ processMarkdown = function ()
 	"%.md$")
 end
 
-local lexer = require("lexer")
 local grammars = {}
+lexer = require("lexer")
 
 local function tryLoadGrammar(language)
 	-- Cache result of trying to load grammar

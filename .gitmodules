@@ -13,3 +13,6 @@
 [submodule "lpeg"]
 	path = lpeg
 	url = https://github.com/jaredkrinke/lpeg.git
+[submodule "scintillua"]
+	path = scintillua
+	url = https://github.com/orbitalquark/scintillua.git

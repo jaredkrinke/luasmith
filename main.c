@@ -303,6 +303,24 @@ void lua_embedded_init(lua_State* L) {
 }
 
 int l_load_embedded_script(lua_State* L) {
+	const char* str;
+
+	lua_pushvalue(L, 1);
+
+	lua_getfield(L, LUA_REGISTRYINDEX, LUA_REG_SCRIPTS);
+	lua_insert(L, -2);
+	lua_gettable(L, -2);
+
+	if (lua_islightuserdata(L, -1)) {
+		str = (const char*)lua_topointer(L, -1);
+		luaL_loadbuffer(L, str, strlen(str), lua_tostring(L, 1));
+		return 1;
+	}
+
+	return 0;
+}
+
+int l_run_embedded_script(lua_State* L) {
 	lua_pushvalue(L, 1);
 
 	lua_getfield(L, LUA_REGISTRYINDEX, LUA_REG_SCRIPTS);
@@ -331,6 +349,7 @@ int main(int argc, const char** argv) {
 
 	/* Register helper functions */
 	lua_register(L, "_loadEmbeddedScript", &l_load_embedded_script);
+	lua_register(L, "_runEmbeddedScript", &l_run_embedded_script);
 	lua_register(L, "_markdownToHtml", &l_markdown_to_html);
 	lua_register(L, "_isDirectory", &l_is_directory);
 	lua_register(L, "_listDirectory", &l_list_directory);

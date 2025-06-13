@@ -21,14 +21,135 @@ main.lua.h: main.lua
 	echo "#define STRINGIFIED_MAIN \\" > $@
 	cat main.lua |sed -f stringify.sed >> $@
 
-scripts.lua.h: etlua/etlua.lua
-	echo "char* _embedded_scripts[] = {" > $@
-	cat etlua/etlua.lua |sed -f stringify.sed -e '$$a,' -e '1i"etlua",' >> $@
-	echo "NULL };" >> $@
-
 main.o: main.c main.lua.h scripts.lua.h
 	$(CC) $(CFLAGS) -c main.c
 
 luasmith: $(OBJS)
 	$(CC) -o luasmith $(OBJS) -lm
+
+# Embedded Lua scripts (mostly related to syntax highlighting)
+VPATH = scintillua/lexers
+
+GRAMMARS = \
+	lexer.lua \
+	asm.lua \
+	asp.lua \
+	awk.lua \
+	bash.lua \
+	batch.lua \
+	clojure.lua \
+	c.lua \
+	cmake.lua \
+	coffeescript.lua \
+	cpp.lua \
+	crystal.lua \
+	csharp.lua \
+	css.lua \
+	cuda.lua \
+	dart.lua \
+	desktop.lua \
+	diff.lua \
+	django.lua \
+	d.lua \
+	dockerfile.lua \
+	dot.lua \
+	elixir.lua \
+	elm.lua \
+	erlang.lua \
+	factor.lua \
+	fennel.lua \
+	forth.lua \
+	fortran.lua \
+	fsharp.lua \
+	fstab.lua \
+	gleam.lua \
+	glsl.lua \
+	go.lua \
+	hare.lua \
+	haskell.lua \
+	html.lua \
+	idl.lua \
+	ini.lua \
+	java.lua \
+	javascript.lua \
+	jq.lua \
+	json.lua \
+	jsp.lua \
+	julia.lua \
+	latex.lua \
+	ledger.lua \
+	less.lua \
+	lisp.lua \
+	lua.lua \
+	makefile.lua \
+	markdown.lua \
+	matlab.lua \
+	mediawiki.lua \
+	meson.lua \
+	moonscript.lua \
+	networkd.lua \
+	nim.lua \
+	nix.lua \
+	nsis.lua \
+	null.lua \
+	objective_c.lua \
+	org.lua \
+	output.lua \
+	pascal.lua \
+	perl.lua \
+	php.lua \
+	pico8.lua \
+	pkgbuild.lua \
+	pony.lua \
+	powershell.lua \
+	prolog.lua \
+	props.lua \
+	protobuf.lua \
+	ps.lua \
+	pure.lua \
+	python.lua \
+	rails.lua \
+	rc.lua \
+	reason.lua \
+	rebol.lua \
+	rest.lua \
+	rexx.lua \
+	rhtml.lua \
+	r.lua \
+	rpmspec.lua \
+	ruby.lua \
+	rust.lua \
+	sass.lua \
+	scala.lua \
+	scheme.lua \
+	smalltalk.lua \
+	sml.lua \
+	snobol4.lua \
+	spin.lua \
+	sql.lua \
+	strace.lua \
+	systemd.lua \
+	taskpaper.lua \
+	tcl.lua \
+	texinfo.lua \
+	tex.lua \
+	text.lua \
+	toml.lua \
+	troff.lua \
+	typescript.lua \
+	vala.lua \
+	vb.lua \
+	vcard.lua \
+	verilog.lua \
+	vhdl.lua \
+	xml.lua \
+	xs.lua \
+	yaml.lua \
+	zig.lua \
+
+scripts.lua.h: etlua/etlua.lua $(GRAMMARS)
+	echo "char* _embedded_scripts[] = {" > $@
+	cat etlua/etlua.lua |sed -f stringify.sed -e '$$a,' -e '1i"etlua",' >> $@
+	for grammar in $(GRAMMARS:.lua=); do cat "scintillua/lexers/$$grammar.lua" |sed -f stringify.sed -e '$$a,' -e "1i\"$$grammar\","; done >> $@
+	echo "NULL };" >> $@
 
