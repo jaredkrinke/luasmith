@@ -1,7 +1,13 @@
 -- Support embedded scripts
-local embeddedScripts = {}
+local embeddedFiles = {}
+local builtInThemes = {}
 for _, name in ipairs(_embeddedScripts) do
-	embeddedScripts[name] = true
+	embeddedFiles[name] = true
+
+	local theme = string.match(name, "themes/(.-)%.lua")
+	if theme and theme ~= "shared" then
+		table.insert(builtInThemes, theme)
+	end
 end
 
 -- Need to hook loadfile since lexer.lua uses it directly...
@@ -10,8 +16,8 @@ package.path = package.path .. ";__builtin/?.lua"
 local originalLoadFile = loadfile
 loadfile = function(filename)
 	-- Need to hook loadfile since lexer.lua uses it to load scripts instead of using "require"
-	local name = string.match(filename, "^%__builtin/(.*)%.lua$")
-	if name and embeddedScripts[name] then
+	local name = string.match(filename, "^%__builtin/(.*%.lua)$")
+	if name and embeddedFiles[name] then
 		return _loadEmbeddedScript(name)
 	end
 	return originalLoadFile(filename)
@@ -19,8 +25,9 @@ end
 
 -- Add a searcher to support "require" (note: built-ins are lowest priority, so they can be overridden locally)
 table.insert(package.searchers, function (name)
-	if embeddedScripts[name] then
-		return _loadEmbeddedScript(name)
+	local filename = string.gsub(name, "%.", "/") .. ".lua"
+	if embeddedFiles[filename] then
+		return _loadEmbeddedScript(filename)
 	end
 end)
 
@@ -253,7 +260,12 @@ function fs.normalize(path)
 		if part == "." then
 			-- Drop any "." components
 		elseif part == ".." then
-			results[#results] = nil
+			if #results > 0 then
+				results[#results] = nil
+			else
+				-- Can't fully normalize; just return original path
+				return path
+			end
 		else
 			table.append(results, part)
 		end
@@ -318,7 +330,15 @@ function fs.tryReadFile(path)
 end
 
 function fs.readFile(path)
-	return fs.tryReadFile(path) or error("Could not open file: " .. path)
+	local result = fs.tryReadFile(path)
+	if result then
+		return result
+	end
+
+	-- Fallback to built-in file, if available
+	local normalized = fs.normalize(path)
+	return (embeddedFiles[normalized] and _readEmbeddedFile(normalized))
+		or error("Could not open file: " .. path)
 end
 
 function fs.tryLoadFile(path)
@@ -874,18 +894,26 @@ end
 -- Entry point
 if #args < 2 then
 	print("\nUsage: " .. args[1] .. " <THEME_NAME | THEME_PATH>\n")
-	print("The theme (which configures the build pipeline) can either be specified as the name of a theme (foo => themes/foo/theme.lua) or the path to a custom theme (Lua script file).")
+	print("The theme (which configures the build pipeline) can either be specified as the name of a built-in theme or the path to a custom theme (Lua script file).")
+	print("")
+	print("Built-in themes:")
+	print("")
+	for _, theme in ipairs(builtInThemes) do
+		print("", theme)
+	end
 	print("")
 	os.exit(-1)
 end
 
 local userScriptFile = args[2]
 if not string.find(userScriptFile, "%.lua$") then
-	-- Use built-in theme, relative to executable
-	userScriptFile = fs.join(fs.join(fs.join(fs.directory(args[1]), "themes"), userScriptFile), "theme.lua")
+	-- Use built-in theme
+	themeDirectory = fs.join("themes", userScriptFile)
+	userScriptFile = "themes." .. userScriptFile 
+else
+	themeDirectory = fs.directory(userScriptFile)
 end
 
-themeDirectory = fs.directory(userScriptFile)
-local pipeline = load(fs.readFile(userScriptFile), userScriptFile, "t")()
+local pipeline = require(userScriptFile)
 build(pipeline)
 

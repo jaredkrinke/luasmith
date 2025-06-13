@@ -302,7 +302,7 @@ void lua_embedded_init(lua_State* L) {
 	lua_setglobal(L, "_embeddedScripts");
 }
 
-const char* read_embedded_script(lua_State* L) {
+const char* read_embedded_file(lua_State* L) {
 	lua_pushvalue(L, 1);
 
 	lua_getfield(L, LUA_REGISTRYINDEX, LUA_REG_SCRIPTS);
@@ -316,24 +316,31 @@ const char* read_embedded_script(lua_State* L) {
 	return NULL;
 }
 
+int l_read_embedded_file(lua_State* L) {
+	const char* str = read_embedded_file(L);
+	if (str) {
+		lua_pushstring(L, str);
+		return 1;
+	}
+	return 0;
+}
+
 int l_load_embedded_script(lua_State* L) {
-	const char* str = read_embedded_script(L);
+	const char* str = read_embedded_file(L);
 	if (str) {
 		luaL_loadbuffer(L, str, strlen(str), lua_tostring(L, 1));
 		return 1;
 	}
-
 	return 0;
 }
 
 int l_run_embedded_script(lua_State* L) {
-	const char* str = read_embedded_script(L);
+	const char* str = read_embedded_file(L);
 	if (str) {
 		if (lua_run(L, lua_tostring(L, 1), (const char*)lua_topointer(L, -1)) == LUA_OK) {
 			return 1;
 		}
 	}
-
 	return 0;
 }
 
@@ -349,6 +356,7 @@ int main(int argc, const char** argv) {
 	lua_setfield(L, LUA_REGISTRYINDEX, LUA_REG_ERROR_HANDLER);
 
 	/* Register helper functions */
+	lua_register(L, "_readEmbeddedFile", &l_read_embedded_file);
 	lua_register(L, "_loadEmbeddedScript", &l_load_embedded_script);
 	lua_register(L, "_runEmbeddedScript", &l_run_embedded_script);
 	lua_register(L, "_markdownToHtml", &l_markdown_to_html);

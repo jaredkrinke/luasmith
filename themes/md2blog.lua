@@ -1,4 +1,4 @@
-shared = fs.loadThemeFile("../shared.lua")()
+shared = require("themes.shared")
 
 -- Helpers
 function escapeQuotes(str)

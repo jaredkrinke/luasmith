@@ -30,6 +30,22 @@ luasmith: $(OBJS)
 # Embedded Lua scripts (mostly related to syntax highlighting)
 VPATH = scintillua/lexers
 
+THEME_FILES = \
+	themes/shared.lua \
+	themes/shared/feed.etlua \
+	themes/md2blog.lua \
+	themes/md2blog/style.css \
+	themes/md2blog/archive.etlua \
+	themes/md2blog/index.etlua \
+	themes/md2blog/outer.etlua \
+	themes/md2blog/post.etlua \
+	themes/md2blog/root.etlua \
+	themes/blog.lua \
+	themes/blog/style.css \
+	themes/blog/outer.etlua \
+	themes/blog/post.etlua \
+	themes/blog/blog.etlua \
+
 GRAMMARS = \
 	lexer.lua \
 	asm.lua \
@@ -147,9 +163,10 @@ GRAMMARS = \
 	yaml.lua \
 	zig.lua \
 
-scripts.lua.h: etlua/etlua.lua $(GRAMMARS)
+scripts.lua.h: etlua/etlua.lua $(GRAMMARS) $(THEME_FILES)
 	echo "char* _embedded_scripts[] = {" > $@
-	cat etlua/etlua.lua |sed -f stringify.sed -e '$$a,' -e '1i"etlua",' >> $@
-	for grammar in $(GRAMMARS:.lua=); do cat "scintillua/lexers/$$grammar.lua" |sed -f stringify.sed -e '$$a,' -e "1i\"$$grammar\","; done >> $@
+	cat etlua/etlua.lua |sed -f stringify.sed -e '$$a,' -e '1i"etlua.lua",' >> $@
+	for grammar in $(GRAMMARS); do cat "scintillua/lexers/$$grammar" |sed -f stringify.sed -e '$$a,' -e "1i\"$$grammar\","; done >> $@
+	for themefile in $(THEME_FILES); do cat "$$themefile" |sed -f stringify.sed -e '$$a,' -e "1i\"$$themefile\","; done >> $@
 	echo "NULL };" >> $@
 
