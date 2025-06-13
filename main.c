@@ -281,8 +281,8 @@ void lua_embedded_init(lua_State* L) {
 	/* lua_scripts contains an array of the format ["filename", "content",
 	 * ..., NULL]. Rather than parsing or even loading these strings into
 	 * Lua, just create a globally accessible table listing the names for
-	 * use in main.lua, then use package.preload[] with a special function
-	 * for actually interning+loading the script contents. */
+	 * use in main.lua, along with a special function for actually loading the
+	 * strings from static memory. */
 
 	lua_newtable(L); /* Array of filenames */
 	array_index = lua_gettop(L);
@@ -302,9 +302,7 @@ void lua_embedded_init(lua_State* L) {
 	lua_setglobal(L, "_embeddedScripts");
 }
 
-int l_load_embedded_script(lua_State* L) {
-	const char* str;
-
+const char* read_embedded_script(lua_State* L) {
 	lua_pushvalue(L, 1);
 
 	lua_getfield(L, LUA_REGISTRYINDEX, LUA_REG_SCRIPTS);
@@ -312,7 +310,15 @@ int l_load_embedded_script(lua_State* L) {
 	lua_gettable(L, -2);
 
 	if (lua_islightuserdata(L, -1)) {
-		str = (const char*)lua_topointer(L, -1);
+		return (const char*)lua_topointer(L, -1);
+	}
+
+	return NULL;
+}
+
+int l_load_embedded_script(lua_State* L) {
+	const char* str = read_embedded_script(L);
+	if (str) {
 		luaL_loadbuffer(L, str, strlen(str), lua_tostring(L, 1));
 		return 1;
 	}
@@ -321,13 +327,8 @@ int l_load_embedded_script(lua_State* L) {
 }
 
 int l_run_embedded_script(lua_State* L) {
-	lua_pushvalue(L, 1);
-
-	lua_getfield(L, LUA_REGISTRYINDEX, LUA_REG_SCRIPTS);
-	lua_insert(L, -2);
-	lua_gettable(L, -2);
-
-	if (lua_islightuserdata(L, -1)) {
+	const char* str = read_embedded_script(L);
+	if (str) {
 		if (lua_run(L, lua_tostring(L, 1), (const char*)lua_topointer(L, -1)) == LUA_OK) {
 			return 1;
 		}
