@@ -39,7 +39,7 @@ local function atomRepathItemContent(item, prefix)
 			part = event.attribute .. "=\"" .. (prefix or "") .. fs.join(pathFromRoot, event.value) .. "\""
 		end
 
-		table.append(parts, part)
+		table.insert(parts, part)
 	end)
 	return table.concat(parts)
 end

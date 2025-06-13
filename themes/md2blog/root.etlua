@@ -6,7 +6,7 @@
    -- TODO: Could be cached or computed during index creation...
    local grouped = table.groupBy(items, "tags")
    local groups = {}
-   for k, v in pairs(grouped) do table.append(groups, { key = k, count = #v }) end
+   for k, v in pairs(grouped) do table.insert(groups, { key = k, count = #v }) end
    for i, g in ipairs(table.sortBy(groups, "count", true)) do
     if i > 4 then break end -%>
 <li><a href="posts/<%= g.key %>/index.html"><%= g.key %></a></li>

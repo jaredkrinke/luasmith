@@ -61,10 +61,6 @@ function log.info(message)
 	print("INFO:\t" .. message)
 end
 
-function table.append(t, i)
-	t[#t + 1] = i
-end
-
 function table.merge(source, dest)
 	for k, v in pairs(source) do
 		dest[k] = v
@@ -110,7 +106,7 @@ function table.groupBy(t, key)
 				if not groups[k] then
 					groups[k] = {}
 				end
-				table.append(groups[k], item)
+				table.insert(groups[k], item)
 			end
 		end
 	end
@@ -123,7 +119,7 @@ function table.concatenate(a, b)
 		r[k] = v
 	end
 	for _, v in ipairs(b) do
-		table.append(r, v)
+		table.insert(r, v)
 	end
 	return r
 end
@@ -141,7 +137,7 @@ end
 function iterator.collect(iterator)
 	local result = {}
 	for item in iterator do
-		table.append(result, item)
+		table.insert(result, item)
 	end
 	return result
 end
@@ -267,7 +263,7 @@ function fs.normalize(path)
 				return path
 			end
 		else
-			table.append(results, part)
+			table.insert(results, part)
 		end
 	end
 	return table.concat(results, "/")
@@ -306,7 +302,7 @@ local function enumerateFilesRecursive(prefixLength, dir, files)
 		if fs.isDirectory(path) then
 			enumerateFilesRecursive(prefixLength, path, files)
 		else
-			table.append(files, string.sub(path, prefixLength + 1))
+			table.insert(files, string.sub(path, prefixLength + 1))
 		end
 	end
 end
@@ -391,9 +387,9 @@ function createProcessingNode(process, pattern)
 			local excludedChanges = {}
 			for _, change in ipairs(changes) do
 				if string.match(change.item.path, pattern) then
-					table.append(includedChanges, change)
+					table.insert(includedChanges, change)
 				else
-					table.append(excludedChanges, change)
+					table.insert(excludedChanges, change)
 				end
 			end
 			return table.concatenate(excludedChanges, process(includedChanges) or {})
@@ -418,7 +414,7 @@ function createTransformNode(transform, pattern)
 					transform(newItem)
 					newChange = createChange(changeType, newItem)
 				end
-				table.append(newChanges, newChange)
+				table.insert(newChanges, newChange)
 			end
 			return newChanges
 		end,
@@ -432,7 +428,7 @@ function createAggregateNode(aggregate, pattern)
 			local items = {}
 			for _, change in ipairs(changes) do
 				if change.changeType ~= "delete" then
-					table.append(items, change.item)
+					table.insert(items, change.item)
 				end
 			end
 
@@ -450,7 +446,7 @@ injectFiles = function (files)
 		newChanges = {}
 		for path, content in pairs(files) do
 			-- TODO: Detect differences, probably via hash
-			table.append(newChanges, createChange("create", {
+			table.insert(newChanges, createChange("create", {
 				path = path,
 				content = content
 			}))
@@ -500,7 +496,7 @@ omitWhen = function (test, pattern)
 		for _, change in ipairs(changes) do
 			-- TODO: How does this work for caching?
 			if not (change.changeType == "create" and test(change.item)) then
-				table.append(newChanges, change)
+				table.insert(newChanges, change)
 			end
 		end
 		return newChanges
@@ -648,13 +644,13 @@ local function highlightSyntaxInternal(language, escaped)
 
 			-- Don't bother tagging whitespace
 			if string.find(tag, "whitespace") then
-				table.append(parts, verbatim)
+				table.insert(parts, verbatim)
 			else
-				table.append(parts, "<span class=\"hl-")
-				table.append(parts, tag)
-				table.append(parts, "\">")
-				table.append(parts, verbatim)
-				table.append(parts, "</span>")
+				table.insert(parts, "<span class=\"hl-")
+				table.insert(parts, tag)
+				table.insert(parts, "\">")
+				table.insert(parts, verbatim)
+				table.insert(parts, "</span>")
 			end
 
 			prev = tokens[i+1]
@@ -701,7 +697,7 @@ highlightSyntax = function ()
 				local kind = event.event
 				if kind == "other" then
 					-- Accumulate code
-					table.append(codeParts, event.html)
+					table.insert(codeParts, event.html)
 					html = ""
 				elseif kind ~= "exit" then
 					-- Highlight and output code
@@ -725,7 +721,7 @@ highlightSyntax = function ()
 			end
 
 			html = html or event.html
-			table.append(htmlParts, html)
+			table.insert(htmlParts, html)
 		end)
 
 		item.content = table.concat(htmlParts)
@@ -755,7 +751,7 @@ etlua = require("etlua")
 applyTemplates = function(templates)
 	local compiled = {}
 	for _, pair in ipairs(templates) do
-		table.append(compiled, { pair[1], etlua.compile(pair[2]) })
+		table.insert(compiled, { pair[1], etlua.compile(pair[2]) })
 	end
 
 	return createTransformNode(function (item)
@@ -792,7 +788,7 @@ createIndexes = function (createIndexPath, property, pattern)
 			local groups = table.groupBy(items, property)
 			local groupList = {}
 			for key, group in pairs(groups) do
-				table.append(groupList, {
+				table.insert(groupList, {
 					key = key,
 					count = #group,
 				})
@@ -803,7 +799,7 @@ createIndexes = function (createIndexPath, property, pattern)
 			-- Create index items
 			local results = {}
 			for key, group in pairs(groups) do
-				table.append(results, {
+				table.insert(results, {
 					path = createIndexPath(key),
 					key = key,
 					items = group,
@@ -838,7 +834,7 @@ checkLinks = function ()
 								if string.sub(event.value, 1, 1) ~= "#" then
 									target = fs.resolveRelative(item.path, event.value)
 								end
-								table.append(links, target)
+								table.insert(links, target)
 							elseif event.attribute == "id" or event.attribute == "name" then
 								anchors[event.value] = true
 							end

@@ -5,7 +5,7 @@
 <% -- Sort tags by frequency
    local grouped = table.groupBy(items, "tags")
    local groups = {}
-   for k, _ in pairs(grouped) do table.append(groups, k) end
+   for k, _ in pairs(grouped) do table.insert(groups, k) end
    table.sort(groups)
    for _, g in ipairs(groups) do -%>
 <li><a href="<%= pathToRoot %>posts/<%= g %>/index.html"><%= g %></a></li>

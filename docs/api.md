@@ -16,7 +16,6 @@ In particular, note that luasmith builds on top of [Lua's string matching patter
 For convenience, luasmith exposes some generic Lua helper functions, as documented here. See [main.lua](../main.lua) for the source code.
 
 ### `table` Helpers
-* `table.append(table, item)` appends an item to a table that is being used as an array
 * `table.merge(source, dest)` copies (shallowly) keys and values from table `source` to `dest`
 * `table.copy(table)` creates a shallow copy of `table`
 * `table.map(table, func)` creates a new (array) table that is the result of applying `func` to each value in `table`
