@@ -159,11 +159,15 @@ return {
 
 There you go! Now you've got a barebones blog.
 
-### Bonus: validate internal links
-Just add in the `checkLinks()` node to check that relative links are not broken:
+### Bonus: syntax highlighting and link checking
+* Add `highlightSytnax()` after `processMarkdown()` to apply CSS classes to code blocks
+* Add `checkLinks()` to check that relative links are not broken
 
 ```lua
 return {
+	...
+	processMarkdown(),
+	highlightSyntax(), -- Add ".hl-*" CSS classes to code blocks
 	...
 	checkLinks(), -- Check for broken links
 	writeToDestination("out"),

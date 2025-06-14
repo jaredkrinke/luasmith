@@ -1,6 +1,12 @@
 # luasmith
 **luasmith** is a small, simple, and flexible [static site generator](https://en.wikipedia.org/wiki/Static_site_generator) that is similar in design to [Metalsmith](https://metalsmith.io/), but much smaller because it's built on top of [Lua](https://www.lua.org/) and C instead of JavaScript and Node.js.
 
+## Features
+* Seamless relative links between Markdown files
+* Link checking
+* Syntax highlighting
+* Zero run-time dependencies (and < 500 KB!)
+
 ## Show me the code!
 See [the tutorial](docs/tutorial.md) for more, but here's an example that converts Markdown to HTML and adds the page's title to the resulting HTML:
 
@@ -18,6 +24,7 @@ local outer = [[
 return {
   readFromSource("content"),
   processMarkdown(),
+  highlightSyntax(),
   applyTemplates({ { "%.html$", outer } }),
   checkLinks(),
   writeToDestination("out"),
@@ -25,9 +32,9 @@ return {
 ```
 
 ## Summary
-Most of the heavy lifting in luasmith is done by [md4c](https://github.com/mity/md4c) ([patched](https://github.com/jaredkrinke/md4c/commit/fc4cac5277b060450d93b06a67397388defa358d) for relative links), [Lua](https://www.lua.org/), and [etlua](https://github.com/leafo/etlua).
+Most of the heavy lifting in luasmith is done by [md4c](https://github.com/mity/md4c) ([patched](https://github.com/jaredkrinke/md4c/commit/fc4cac5277b060450d93b06a67397388defa358d) for relative links), [Lua](https://www.lua.org/), [etlua](https://github.com/leafo/etlua), and [Scintillua](https://github.com/orbitalquark/scintillua).
 
-Note that luasmith is more of a proof-of-concept that, while functional, shouldn't be relied upon to take over the world.
+Note that luasmith is still an experimental project, subject to breaking changes.
 
 To get a feel for luasmith, either [read over the design](#design) or [go through the tutorial](docs/tutorial.md).
 
@@ -70,7 +77,7 @@ luasmith is designed around the concept of a "theme", which is basically a proce
 ./luasmith theme.lua
 ```
 
-For a built-in theme you only supply a name, and that is internally expanded to `<path to luasmith>/themes/<name of theme>/theme.lua`:
+For a built-in theme you only supply a name (the actual scripts themselves are embedded into the binary, but are present in the `themes` directory of this repository):
 
 ```
 ./luasmith blog
@@ -88,7 +95,7 @@ After pointing it to a theme, it's completely up to the theme what happens next,
 Note that the built-in templates assume Markdown files contain metadata in frontmatter that includes `title`, `description`, `date`, and optionally `keywords`. See the `example/content/` directory for examples (using both Lua and a subset of YAML).
 
 ### Customization
-If you want to customize the site's appearance or functionality, just copy an existing theme directory and start modifying the templates and/or `theme.lua` script.
+If you want to customize the site's appearance or functionality, just copy an existing theme directory from this repository and start modifying the templates and/or Lua script.
 
 ## Example / Tutorial
 See [docs/tutorial.md](docs/tutorial.md) for a tutorial that starts from scratch with a trivial pipeline and builds it up into a simple blog theme.
