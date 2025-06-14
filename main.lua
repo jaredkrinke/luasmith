@@ -901,15 +901,16 @@ if #args < 2 then
 	os.exit(-1)
 end
 
-local userScriptFile = args[2]
-if not string.find(userScriptFile, "%.lua$") then
-	-- Use built-in theme
-	themeDirectory = fs.join("themes", userScriptFile)
-	userScriptFile = "themes." .. userScriptFile 
+local themeModule = args[2]
+if string.find(themeModule, "%.lua$") then
+	themeModule = string.sub(themeModule, 1, #themeModule - 4)
+	themeDirectory = fs.directory(themeModule)
 else
-	themeDirectory = fs.directory(userScriptFile)
+	-- Use built-in theme
+	themeDirectory = fs.join("themes", themeModule)
+	themeModule = "themes." .. themeModule 
 end
 
-local pipeline = require(userScriptFile)
+local pipeline = require(themeModule)
 build(pipeline)
 
