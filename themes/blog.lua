@@ -25,6 +25,7 @@ return {
 	readFromSource(source),
 	injectFiles({ ["style.css"] = fs.readThemeFile("style.css"), }),
 	processMarkdown(),
+	highlightSyntax(),
 	aggregate("feed.xml", "%.html$"),
 	aggregate("index.html", "%.html$"),
 	injectMetadata({ site = site }),

@@ -2,10 +2,52 @@
 * { box-sizing: border-box; }
 body { max-width: 40em; margin: auto; padding: 0.5em 1em 1em 1em; font-family: sans-serif; line-height: 1.5; }
 td, h1, h2, h3, h4, h5 { line-height: 1.2; }
-pre code { line-height: 1.3; }
 pre { overflow: auto; }
 img { display: block; max-width: 100%; }
 ul, ol { padding-left: 1.5em; }
 li { margin-bottom: 0.5em; }
-header { border-bottom: thin solid black; }
+header { border-bottom: thin solid; }
+pre { border: thin solid; padding: 0.5em; line-height: 1.2; }
+
+/* Syntax highlighting */
+.hl-comment { font-style: italic; }
+
+.hl-preprocessor { font-weight: bold; font-style: italic; }
+
+.hl-tag,
+.hl-tag_single,
+.hl-function,
+.hl-function_builtin,
+.hl-heading,
+.hl-label,
+.hl-function_method { font-weight: bold; }
+
+.hl-reference,
+.hl-variable,
+.hl-variable_builtin,
+.hl-code,
+.hl-embedded,
+.hl-identifier { font-weight: normal; }
+
+.hl-operator { font-weight: lighter; }
+
+.hl-annotation,
+.hl-class,
+.hl-type,
+.hl-keyword { font-weight: bolder; }
+
+.hl-attribute,
+.hl-constant,
+.hl-constant_builtin { font-weight: normal; }
+
+.hl-bold,
+.hl-italic,
+.hl-number,
+.hl-underline,
+.hl-string { font-style: italic; }
+
+.hl-link,
+.hl-list,
+.hl-error,
+.hl-regex { font-style: italic; text-decoration: underline; }
 
