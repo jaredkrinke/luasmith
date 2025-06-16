@@ -45,14 +45,6 @@ headerStart = etlua.compile(
 
 headerEnd = "</header>"
 
--- TODO: For testing purposes only!
-local normalize = createTransformNode(function (item)
-	if item.content then
-		item.content = string.gsub(item.content, "&#039;", "&#39;")
-		item.content = string.gsub(item.content, "'", "&#39;")
-	end
-end, "%.html$")
-
 -- Build pipeline
 return {
 	readFromSource("content"),
@@ -61,9 +53,8 @@ return {
 		["css/style.css"] = fs.readThemeFile("style.css"),
 	}),
 	processMarkdown(),
+	omitWhen(function (item) return item.draft or item.path == "site.lua" end),
 	highlightSyntax(),
-	normalize, -- TODO: Remove! This is only for testing!
-	omitWhen(function (item) return item.draft end),
 	deriveMetadata({ tags = deriveTags }, "^posts/.+%.html$"),
 	-- TODO: Cache index?
 	aggregate("feed.xml", "^posts/.+%.html$"),
