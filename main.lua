@@ -638,7 +638,9 @@ local function highlightSyntaxInternal(language, escaped)
 		tokens = parser:lex(code)
 		local prev = 1
 		for i = 1, #tokens, 2 do
-			local tag = string.gsub(tokens[i], "%.", "_")
+			-- Convert e.g. "string.longstring" to just "string"
+			local tag = string.gsub(tokens[i], "%..*", "")
+
 			local raw = string.sub(code, prev, tokens[i+1] - 1)
 			local verbatim = escapeHtml(raw)
 

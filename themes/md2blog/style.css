@@ -103,16 +103,12 @@ a:visited { color: #4af0f0; }
 .hl-preprocessor { color: #ff80ff; }
 
 .hl-tag,
-.hl-tag_single,
 .hl-function,
-.hl-function_builtin,
 .hl-heading,
-.hl-label,
-.hl-function_method { color: #71f4f4; }
+.hl-label { color: #71f4f4; }
 
 .hl-reference,
 .hl-variable,
-.hl-variable_builtin,
 .hl-code,
 .hl-embedded,
 .hl-identifier { color: #f0f0f0; }
@@ -125,8 +121,7 @@ a:visited { color: #4af0f0; }
 .hl-keyword { color: #0fbdbd; }
 
 .hl-attribute,
-.hl-constant,
-.hl-constant_builtin { color: #55ffff; }
+.hl-constant { color: #55ffff; }
 
 .hl-bold,
 .hl-italic,
