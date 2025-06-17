@@ -61,7 +61,7 @@ return {
 	}),
 	injectMetadata({ pathToRoot = site.url }, "^404%.html$"),
 	processMarkdown(),
-	omitWhen(function (item) return item.draft or item.path == "site.lua" end),
+	omitWhen(function (item) return item.draft or item.path == "site.lua" or item.path == "site.json" end),
 	highlightSyntax(),
 	deriveMetadata({ tags = deriveTags }, "^posts/.+%.html$"),
 	-- TODO: Cache index?
