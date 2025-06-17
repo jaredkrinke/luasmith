@@ -45,19 +45,13 @@ headerStart = etlua.compile(
 
 headerEnd = "</header>"
 
--- 404 needs to use absolute URLs
-notFoundHtml = [[<h1>Not found</h1>
-<p>The requested page was not found.</p>
-<p><a href="]] .. site.url .. [[">Click here</a> to go to the home page.</p>
-]]
-
 -- Build pipeline
 return {
 	readFromSource("content"),
 	-- TODO: Allow shorthand for directly inserting unmodified theme files?
 	injectFiles({
 		["css/style.css"] = fs.readThemeFile("style.css"),
-		["404.html"] = notFoundHtml,
+		["404.html"] = "",
 	}),
 	injectMetadata({ pathToRoot = site.url }, "^404%.html$"),
 	processMarkdown(),
@@ -80,6 +74,7 @@ return {
 		{ "^posts/index.html$", fs.readThemeFile("archive.etlua") },
 		{ "^feed.xml$", fs.readThemeFile("../shared/feed.etlua") },
 		{ "^index.html$", fs.readThemeFile("root.etlua") },
+		{ "^404.html$", fs.readThemeFile("404.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
 	checkLinks(),

@@ -1,0 +1,8 @@
+<%- headerStart(self) %>
+<%- headerEnd %>
+<main>
+<h1>Not found</h1>
+<p>The requested page was not found.</p>
+<p><a href="<%= pathToRoot %>">Click here</a> to go to the home page.</p>
+</main>
+
