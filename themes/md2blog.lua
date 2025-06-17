@@ -45,13 +45,21 @@ headerStart = etlua.compile(
 
 headerEnd = "</header>"
 
+-- 404 needs to use absolute URLs
+notFoundHtml = [[<h1>Not found</h1>
+<p>The requested page was not found.</p>
+<p><a href="]] .. site.url .. [[">Click here</a> to go to the home page.</p>
+]]
+
 -- Build pipeline
 return {
 	readFromSource("content"),
 	-- TODO: Allow shorthand for directly inserting unmodified theme files?
 	injectFiles({
 		["css/style.css"] = fs.readThemeFile("style.css"),
+		["404.html"] = notFoundHtml,
 	}),
+	injectMetadata({ pathToRoot = site.url }, "^404%.html$"),
 	processMarkdown(),
 	omitWhen(function (item) return item.draft or item.path == "site.lua" end),
 	highlightSyntax(),
@@ -62,11 +70,12 @@ return {
 	injectMetadata({ description = site.subtitle }, "^index.html$"),
 	aggregate("posts/index.html", "^posts/.+%.html$"), -- TODO: allow optional metadata
 	injectMetadata({ title = site.title .. ": Archive of all posts since the beginning of time" }, "^posts/index.html$"),
+	injectMetadata({ pathToRoot = site.url }, "404%.html$"),
 	createIndexes(function (tag) return "posts/" .. tag .. "/index.html" end, "tags", "^posts/.+%.html$"),
 	deriveMetadata({ title = function (item) return site.title .. ": Posts tagged with: " .. item.key end }, "^posts/.-/index.html$"),
 	injectMetadata({ site = site }),
 	applyTemplates({
-		{ "%.html$", fs.readThemeFile("post.etlua") },
+		{ "^posts/.-%.html$", fs.readThemeFile("post.etlua") },
 		{ "^posts/.-/index.html$", fs.readThemeFile("index.etlua") },
 		{ "^posts/index.html$", fs.readThemeFile("archive.etlua") },
 		{ "^feed.xml$", fs.readThemeFile("../shared/feed.etlua") },
