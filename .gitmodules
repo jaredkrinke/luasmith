@@ -15,4 +15,4 @@
 	url = https://github.com/jaredkrinke/lpeg.git
 [submodule "scintillua"]
 	path = scintillua
-	url = https://github.com/orbitalquark/scintillua.git
+	url = https://github.com/jaredkrinke/scintillua.git

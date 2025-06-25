@@ -73,6 +73,7 @@ GRAMMARS = \
 	elixir.lua \
 	elm.lua \
 	erlang.lua \
+	etlua.lua \
 	factor.lua \
 	fennel.lua \
 	forth.lua \
@@ -87,6 +88,7 @@ GRAMMARS = \
 	html.lua \
 	idl.lua \
 	ini.lua \
+	janet.lua \
 	java.lua \
 	javascript.lua \
 	jq.lua \
@@ -166,7 +168,7 @@ GRAMMARS = \
 
 scripts.lua.h: etlua/etlua.lua $(GRAMMARS) $(THEME_FILES)
 	echo "char* _embedded_scripts[] = {" > $@
-	cat etlua/etlua.lua |sed -f stringify.sed -e '$$a,' -e '1i"etlua.lua",' >> $@
+	cat etlua/etlua.lua |sed -f stringify.sed -e '$$a,' -e '1i"_etlua.lua",' >> $@
 	for grammar in $(GRAMMARS); do cat "scintillua/lexers/$$grammar" |sed -f stringify.sed -e '$$a,' -e "1i\"$$grammar\","; done >> $@
 	for themefile in $(THEME_FILES); do cat "$$themefile" |sed -f stringify.sed -e '$$a,' -e "1i\"$$themefile\","; done >> $@
 	echo "NULL };" >> $@

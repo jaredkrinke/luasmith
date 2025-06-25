@@ -748,7 +748,8 @@ deriveMetadata = function (derivations, pattern)
 end
 
 -- TODO: Should templates be able to include frontmatter?
-etlua = require("etlua")
+-- Note: Needed to rename etlua's module to not collide with any etlua lexer...
+etlua = require("_etlua")
 
 applyTemplates = function(templates)
 	local compiled = {}
