@@ -172,10 +172,10 @@ function string.split(str, separator)
 		if i > #str then
 			return nil
 		else
-			local j = string.find(str, separator, i)
+			local j, j2 = string.find(str, separator, i)
 			if j then
 				local result = string.sub(str, i, j - 1)
-				i = j + 1
+				i = j2 + 1
 				return result
 			else
 				local result =  string.sub(str, i)
@@ -187,7 +187,7 @@ function string.split(str, separator)
 end
 
 function string.lines(str)
-	return string.split(str, "\n")
+	return string.split(str, "\r?\n")
 end
 
 function string.trim(str)
@@ -551,13 +551,13 @@ end
 
 local function parseFrontmatter(item)
 	-- Parse YAML frontmatter
-	local i, j, frontmatter = string.find(item.content, "^%-%-%-\n(.-)\n%-%-%-\n")
+	local i, j, frontmatter = string.find(item.content, "^%-%-%-\r?\n(.-)\r?\n%-%-%-\r?\n")
 	if i and j and frontmatter then
 		table.merge(parseYaml(frontmatter), item)
 		item.content = string.sub(item.content, j + 1)
 	else
 		-- Parse Lua frontmatter
-		i, j, frontmatter = string.find(item.content, "^%[%[\n(.-)\n%]%]\n")
+		i, j, frontmatter = string.find(item.content, "^%[%[\r?\n(.-)\r?\n%]%]\r?\n")
 		if i and j and frontmatter then
 			table.merge(parseLua(frontmatter), item)
 			item.content = string.sub(item.content, j + 1)
