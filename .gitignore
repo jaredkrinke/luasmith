@@ -2,6 +2,9 @@
 *.o
 *.lua.h
 *.tar.gz
+*.zip
+*.com*
+*.elf
 luasmith
 test/
 sample/out/
