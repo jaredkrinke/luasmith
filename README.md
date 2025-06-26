@@ -39,7 +39,10 @@ Note that luasmith is still an experimental project, subject to breaking changes
 To get a feel for luasmith, either [read over the design](#design) or [go through the tutorial](docs/tutorial.md).
 
 ### Supported platforms
-Currently, luasmith is only tested on **Linux** and **NetBSD**. It should work on generic **POSIX** platforms. It has not been tested on Windows yet.
+There are two builds of luasmith available from [the releases page](https://github.com/jaredkrinke/luasmith/releases):
+
+* Statically-linked, native **Linux** build: `luasmith-*-linux-x86_64.tar.gz`
+* "Actuall portable executable" build (using [Cosmopolitan](https://github.com/jart/cosmopolitan)) that should run on **Windows**, **macOS**, **Linux**, and most **BSDs**
 
 ## Quickstart
 To create a minimal blog:
