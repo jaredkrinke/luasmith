@@ -33,7 +33,7 @@ VPATH = scintillua/lexers
 THEME_FILES = \
 	themes/shared.lua \
 	themes/shared/feed.etlua \
-	themes/md2blog.lua \
+	themes/md2blog/theme.lua \
 	themes/md2blog/404.etlua \
 	themes/md2blog/style.css \
 	themes/md2blog/archive.etlua \
@@ -41,7 +41,7 @@ THEME_FILES = \
 	themes/md2blog/outer.etlua \
 	themes/md2blog/post.etlua \
 	themes/md2blog/root.etlua \
-	themes/blog.lua \
+	themes/blog/theme.lua \
 	themes/blog/style.css \
 	themes/blog/outer.etlua \
 	themes/blog/post.etlua \

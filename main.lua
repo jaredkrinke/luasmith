@@ -911,7 +911,7 @@ if string.find(themeModule, "%.lua$") then
 else
 	-- Use built-in theme
 	themeDirectory = fs.join("themes", themeModule)
-	themeModule = "themes." .. themeModule 
+	themeModule = "themes." .. themeModule  .. ".theme"
 end
 
 local pipeline = require(themeModule)
