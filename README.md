@@ -42,6 +42,7 @@ To get a feel for luasmith, either [read over the design](#design) or [go throug
 There are two builds of luasmith available from [the releases page](https://github.com/jaredkrinke/luasmith/releases):
 
 * Statically-linked, native **Linux** build: `luasmith-*-linux-x86_64.tar.gz`
+* **Windows** build: `luasmith-*-windows-x86_64.zip`
 * "Actuall portable executable" build (using [Cosmopolitan](https://github.com/jart/cosmopolitan)) that should run on **Windows**, **macOS**, **Linux**, and most **BSDs**: `luasmith-*-universal.zip`
 
 ## Quickstart
