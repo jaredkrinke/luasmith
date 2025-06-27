@@ -1,13 +1,13 @@
 # Configuration
 CC=cc
 MYCFLAGS=-Os -Wall
+LUA_CFLAGS=-DLUA_USE_POSIX
 
 LUA_OBJS=lua/lapi.o lua/lcode.o lua/lctype.o lua/ldebug.o lua/ldo.o lua/ldump.o lua/lfunc.o lua/lgc.o lua/llex.o lua/lmem.o lua/lobject.o lua/lopcodes.o lua/lparser.o lua/lstate.o lua/lstring.o lua/ltable.o lua/ltm.o lua/lundump.o lua/lvm.o lua/lzio.o lua/lauxlib.o lua/lbaselib.o lua/lbitlib.o lua/lcorolib.o lua/ldblib.o lua/liolib.o lua/lmathlib.o lua/loslib.o lua/lstrlib.o lua/ltablib.o lua/loadlib.o lua/linit.o
 LPEG_OBJS=lpeg/lpcap.o lpeg/lpcode.o lpeg/lpcset.o lpeg/lpprint.o lpeg/lptree.o lpeg/lpvm.o
 MD4C_OBJS=md4c/src/entity.o md4c/src/md4c.o md4c/src/md4c-html.o
 OBJS=main.o $(MD4C_OBJS) $(LUA_OBJS) $(LPEG_OBJS) chtml/chtml.o
 
-LUA_CFLAGS=-DLUA_COMPAT_ALL -DLUA_USE_POSIX
 CFLAGS=$(MYCFLAGS) -I lua -I md4c/src -I chtml $(LUA_CFLAGS)
 
 all: luasmith
@@ -22,7 +22,7 @@ main.lua.h: main.lua
 	cat main.lua |sed -f stringify.sed >> $@
 
 main.o: main.c main.lua.h scripts.lua.h
-	$(CC) $(CFLAGS) -c main.c
+	$(CC) $(CFLAGS) -c main.c -o $@
 
 luasmith: $(OBJS)
 	$(CC) -o luasmith $(OBJS) -lm
