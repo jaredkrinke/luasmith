@@ -15,7 +15,7 @@ all: luasmith
 clean:
 	rm -f $(OBJS)
 	rm -f *.lua.h
-	rm -f luasmith
+	rm -f luasmith luasmith.*
 
 main.lua.h: main.lua
 	echo "#define STRINGIFIED_MAIN \\" > $@

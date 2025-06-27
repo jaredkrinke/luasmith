@@ -81,9 +81,28 @@ int l_markdown_to_html(lua_State* L) {
 
 /* File system interface */
 
+#ifdef WIN32
+#include <windows.h>
+
+int l_is_directory(lua_State* L) {
+	int is_directory = !!(GetFileAttributes(lua_tostring(L, 1)) & FILE_ATTRIBUTE_DIRECTORY);
+	lua_pushboolean(L, is_directory);
+	return 1;
+}
+
+int l_mkdir(lua_State* L) {
+	if (mkdir(lua_tostring(L, 1)) == -1) {
+		/* Ignore "already exists" errors */
+		if (errno != EEXIST) {
+			luaL_error(L, "Failed to create directory!");
+		}
+	}
+	return 0;
+}
+#else
 int l_is_directory(lua_State* L) {
 	struct stat s;
-	int  result = lstat(lua_tostring(L, 1), &s);
+	int result = lstat(lua_tostring(L, 1), &s);
 
 	if (result == 0) {
 		lua_pushboolean(L, (s.st_mode & S_IFMT) == S_IFDIR);
@@ -103,6 +122,7 @@ int l_mkdir(lua_State* L) {
 	}
 	return 0;
 }
+#endif
 
 int l_list_directory(lua_State* L) {
 	DIR* d = opendir(lua_tostring(L, 1));
