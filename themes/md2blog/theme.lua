@@ -13,7 +13,7 @@ end
 -- Derive keywords from explicit keywords as well as directory
 local function deriveTags(item)
 	local category = string.match(item.path, "^posts/(.-)/.+%.html$")
-	local tags = { category }
+	local tags = { category or "misc" }
 	if item.keywords then
 		for _, keyword in ipairs(item.keywords) do
 			if keyword ~= category then
