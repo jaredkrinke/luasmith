@@ -2,7 +2,16 @@
 <h1><%= site.title %></h1>
 </header>
 <ul>
-<% for i, item in ipairs(table.sortBy(items, "date", true)) do -%>
+<% for _, item in ipairs(table.sortBy(items, "date", true)) do -%>
 <li><a href="<%= item.path %>"><%= item.title %></a> (<%- htmlifyDate(item.date) %>)</li>
 <% end -%>
 </ul>
+<footer>
+<%
+local grouped = table.groupBy(items, "keywords")
+local groups = {}
+for k, v in pairs(grouped) do table.insert(groups, { key = k }) end
+-%>
+<%- keywordList(pathToRoot, table.sorted(table.map(groups, function (g) return g.key end))) %>
+<p>&rarr; Subscribe to the <a href="feed.xml">Atom feed</a></p>
+</footer>

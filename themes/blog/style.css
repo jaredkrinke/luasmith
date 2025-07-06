@@ -7,6 +7,7 @@ img { display: block; max-width: 100%; }
 ul, ol { padding-left: 1.5em; }
 li { margin-bottom: 0.5em; }
 header { border-bottom: thin solid; }
+footer { border-top: thin solid; }
 pre { border: thin solid; padding: 0.5em; line-height: 1.2; }
 
 /* Syntax highlighting */

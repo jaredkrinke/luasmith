@@ -46,6 +46,7 @@ THEME_FILES = \
 	themes/blog/outer.etlua \
 	themes/blog/post.etlua \
 	themes/blog/blog.etlua \
+	themes/blog/index.etlua \
 
 GRAMMARS = \
 	lexer.lua \
