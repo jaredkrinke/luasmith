@@ -5,6 +5,10 @@ td, h1, h2, h3, h4, h5 { line-height: 1.2; }
 pre { overflow: auto; }
 img { display: block; max-width: 100%; }
 ul, ol { padding-left: 1.5em; }
+ul.posts { padding-left: 0em; list-style-type: none; display: table }
+ul.posts li { display: table-row; }
+ul.posts li time { padding-right: 1em; white-space: nowrap; }
+ul.posts li time, ul.posts li a { display: table-cell; padding-bottom: 0.5em; }
 li { margin-bottom: 0.5em; }
 header { border-bottom: thin solid; }
 footer { border-top: thin solid; }

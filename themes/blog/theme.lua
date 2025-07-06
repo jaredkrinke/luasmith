@@ -2,6 +2,12 @@ shared = require("themes.shared")
 
 -- Helpers
 local htmlDateTemplate = etlua.compile([[<time datetime="<%= short %>"><%= long %></time>]])
+local months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" }
+function htmlifyDateShort(date)
+	local year, month, day = string.match(date, "^(%d%d%d%d)-(%d%d)-(%d%d)")
+	return htmlDateTemplate({ short = date, long = months[string.toNumber(month)] .. " " .. day })
+end
+
 function htmlifyDate(date)
 	return htmlDateTemplate({ short = date, long = shared.formatDate(date) })
 end
@@ -11,6 +17,29 @@ for i, k in ipairs(keywords) do -%><% if i > 1 then %> | <% end %><a href="<%= p
 <% end -%>]])
 function keywordList(pathToRoot, keywords)
 	return keywordListTemplate({ pathToRoot = pathToRoot, keywords = keywords })
+end
+
+local postListTemplate = etlua.compile([[<% local lastYear = nil -%>
+<% for i, item in ipairs(table.sortBy(items, "date", true)) do
+   local year = string.match(item.date, "^(%d%d%d%d)")
+   if lastYear ~= year then
+     if lastYear ~= nil then -%>
+</ul>
+<% end -%>
+<h2><%= year %></h2>
+<ul class="posts">
+<%
+	 lastYear = year
+   end
+-%>
+<li><%- htmlifyDateShort(item.date) %> <a href="<%= pathToRoot %><%= item.path %>"><%= item.title %></a></li>
+<% end -%>
+<% if #items > 0 then -%>
+</ul>
+<% end -%>
+]])
+function postList(self)
+	return postListTemplate({ pathToRoot = self.pathToRoot, items = self.items })
 end
 
 -- Site metadata
