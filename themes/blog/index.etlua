@@ -1,5 +1,5 @@
 <header>
-<h1><%= site.title %></h1>
+<h1>#<%= key %></h1>
 </header>
 <ul>
 <% for i, item in ipairs(table.sortBy(items, "date", true)) do -%>
