@@ -636,7 +636,11 @@ local function escapeHtml(raw)
 	return raw
 end
 
-local function highlightSyntaxInternal(language, escaped)
+local function highlightSpanDefault(verbatim, tag)
+	return "<span class=\"hl-" .. tag .. "\">" .. verbatim .. "</span>"
+end
+
+local function highlightSyntaxInternal(language, escaped, highlightSpan)
 	local parser = tryLoadGrammar(language)
 	if parser then
 		local parts = {}
@@ -654,11 +658,7 @@ local function highlightSyntaxInternal(language, escaped)
 			if string.find(tag, "whitespace") then
 				table.insert(parts, verbatim)
 			else
-				table.insert(parts, "<span class=\"hl-")
-				table.insert(parts, tag)
-				table.insert(parts, "\">")
-				table.insert(parts, verbatim)
-				table.insert(parts, "</span>")
+				table.insert(parts, highlightSpan(verbatim, tag))
 			end
 
 			prev = tokens[i+1]
@@ -670,8 +670,9 @@ local function highlightSyntaxInternal(language, escaped)
 	return escaped
 end
 
-highlightSyntax = function ()
+highlightSyntax = function (highlightSpan)
 	-- TODO: Consider integrating with md4c-html directly, instead of post-procsesing
+	highlightSpan = highlightSpan or highlightSpanDefault
 	return createTransformNode(function (item)
 		local inPre = false
 		local inCode = false
@@ -711,7 +712,7 @@ highlightSyntax = function ()
 					-- Highlight and output code
 					local code = table.concat(codeParts)
 					if code ~= "" then
-						html = highlightSyntaxInternal(language, code) .. event.html
+						html = highlightSyntaxInternal(language, code, highlightSpan) .. event.html
 					end
 
 					-- Reset
