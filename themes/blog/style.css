@@ -20,16 +20,12 @@ pre { border: thin solid; padding: 0.5em; line-height: 1.2; }
 .hl-preprocessor { font-weight: bold; font-style: italic; }
 
 .hl-tag,
-.hl-tag_single,
 .hl-function,
-.hl-function_builtin,
 .hl-heading,
-.hl-label,
-.hl-function_method { font-weight: bold; }
+.hl-label { font-weight: bold; }
 
 .hl-reference,
 .hl-variable,
-.hl-variable_builtin,
 .hl-code,
 .hl-embedded,
 .hl-identifier { font-weight: normal; }
@@ -42,8 +38,7 @@ pre { border: thin solid; padding: 0.5em; line-height: 1.2; }
 .hl-keyword { font-weight: bolder; }
 
 .hl-attribute,
-.hl-constant,
-.hl-constant_builtin { font-weight: normal; }
+.hl-constant { font-weight: normal; }
 
 .hl-bold,
 .hl-italic,
