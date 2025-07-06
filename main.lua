@@ -81,6 +81,12 @@ function table.map(t, f)
 	return r
 end
 
+function table.sorted(t, compare)
+	local sorted = table.copy(t)
+	table.sort(sorted, compare)
+	return sorted
+end
+
 function table.sortBy(t, property, descending)
 	local sorted = table.copy(t)
 	if descending then
@@ -760,15 +766,22 @@ applyTemplates = function(templates)
 	return createTransformNode(function (item)
 		local path = item.path
 		local matchingTemplate = nil
+		local matchingPattern = nil
 		for _, pair in ipairs(compiled) do
 			-- Note: Last matching template wins
 			if string.find(path, pair[1]) then
+				matchingPattern = pair[1]
 				matchingTemplate = pair[2]
 			end
 		end
 
 		if matchingTemplate then
-			item.content = matchingTemplate(item)
+			local success, content = pcall(matchingTemplate, item)
+			if success then
+				item.content = content
+			else
+				error("Error filling in template \"" .. matchingPattern .. "\" on item \"" .. path .. "\":\n\n\t" .. content .. "\n")
+			end
 		end
 	end)
 end

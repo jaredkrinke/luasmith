@@ -20,6 +20,7 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 * `table.copy(table)` creates a shallow copy of `table`
 * `table.map(table, func)` creates a new (array) table that is the result of applying `func` to each value in `table`
 * `table.sortBy(table, prop, desc)` creates a new (array) table with items ordered by the value of key `prop`, optionally in descending order (if `desc` is not false)
+* `table.sorted(table, compare)` creates a new (array) table with items ordered by the result of calling `compare(a, b)` on two elements
 * `table.groupby(table, key)` groups items in array `table` under keys in a new table -- this is used for creating e.g. index pages based on keywords
 * `table.concatenate(table1, table2)` creates a new array table that contains values from `table1` followed by items from `table2`
 
