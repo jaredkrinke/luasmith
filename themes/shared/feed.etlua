@@ -8,7 +8,7 @@
 <author>
 <name><%= site.title %></name>
 </author>
-<updated><%= shared.yamlDateToIso(posts[1].date) %></updated>
+<updated><%= shared.yamlDateToIso((posts[1] or {date="1970-01-01"}).date) %></updated>
 
 <% for i, post in ipairs(posts) do -%>
 <% if i > 5 then break end -%>

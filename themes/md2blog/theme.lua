@@ -27,7 +27,7 @@ end
 -- Site metadata
 local site = {
 	title = "Untitled",
-	subtitle = "You should set title, subtitle, and url in site.lua",
+	subtitle = "You should set title, subtitle, and url in site.lua; posts go in \"posts/<topic>/\"",
 	url = "https://example.com/",
 }
 

@@ -15,7 +15,7 @@
   "@type": "BlogPosting",
   "headline": "<%- escapeQuotes(title) %>",
   "abstract": "<%- escapeQuotes(description) %>",
-  "keywords": "<%- escapeQuotes(table.concat(tags, ",")) %>",
+  <% if tags then %>"keywords": "<%- escapeQuotes(table.concat(tags, ",")) %>",<% end %>
   "datePublished": "<%= date %>"
 }
 </script>
