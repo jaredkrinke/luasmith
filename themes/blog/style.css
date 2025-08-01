@@ -1,4 +1,4 @@
-:root { color-scheme: light dark; }
+:root { color-scheme: light dark; --lighter: color-mix(in srgb, currentColor 70%, transparent); }
 * { box-sizing: border-box; }
 body { max-width: 40em; margin: auto; padding: 0.5em 1em 1em 1em; font-family: sans-serif; line-height: 1.5; }
 td, h1, h2, h3, h4, h5 { line-height: 1.2; }
@@ -16,7 +16,7 @@ pre { border: thin solid; border-radius: 0.5em; padding: 0.5em; line-height: 1.2
 pre, code:not(pre code) { background: color-mix(in srgb, currentColor 12%, transparent); border-radius: 0.5em; }
 
 /* Syntax highlighting */
-.hl-comment { font-style: italic; }
+.hl-comment { font-style: italic; color: var(--lighter); }
 
 .hl-preprocessor { font-weight: bold; font-style: italic; }
 
@@ -31,7 +31,7 @@ pre, code:not(pre code) { background: color-mix(in srgb, currentColor 12%, trans
 .hl-embedded,
 .hl-identifier { font-weight: normal; }
 
-.hl-operator { font-weight: lighter; }
+.hl-operator { font-weight: lighter; color: var(--lighter); }
 
 .hl-annotation,
 .hl-class,
