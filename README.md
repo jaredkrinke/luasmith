@@ -1,5 +1,5 @@
 # luasmith
-**luasmith** is a small, simple, and flexible [static site generator](https://en.wikipedia.org/wiki/Static_site_generator) that is similar in design to [Metalsmith](https://metalsmith.io/), but much smaller because it's built on top of [Lua](https://www.lua.org/) and C instead of JavaScript and Node.js.
+**luasmith** is a small, simple, and flexible [static site generator](https://en.wikipedia.org/wiki/Static_site_generator) that is similar in design to [Metalsmith](https://metalsmith.io/), but much smaller because it's built on top of [Lua](https://www.lua.org/) and C instead of JavaScript and Node.js. Example sites are: [here](https://log.schemescape.com/) and [here](https://jaredkrinke.github.io/til/).
 
 ## Features
 * Seamless relative links between Markdown files
@@ -34,16 +34,17 @@ return {
 ## Summary
 Most of the heavy lifting in luasmith is done by [md4c](https://github.com/mity/md4c) ([patched](https://github.com/jaredkrinke/md4c/commit/fc4cac5277b060450d93b06a67397388defa358d) for relative links), [Lua](https://www.lua.org/), [etlua](https://github.com/leafo/etlua), and [Scintillua](https://github.com/orbitalquark/scintillua).
 
-Note that luasmith is still an experimental project, subject to breaking changes.
-
 To get a feel for luasmith, either [read over the design](#design) or [go through the tutorial](docs/tutorial.md).
 
+Note that luasmith is still an experimental project, subject to breaking changes. If you like *the idea* of luasmith, let me know and I can put some work into stabilizing and polishing it--for now, I'm assuming I'm probably the only person writing plugins.
+
 ### Supported platforms
-There are two builds of luasmith available from [the releases page](https://github.com/jaredkrinke/luasmith/releases):
+There are multiple builds of luasmith available from [the releases page](https://github.com/jaredkrinke/luasmith/releases):
 
 * Statically-linked, native **Linux** build: `luasmith-*-linux-x86_64.tar.gz`
 * **Windows** build: `luasmith-*-windows-x86_64.zip`
-* "Actuall portable executable" build (using [Cosmopolitan](https://github.com/jart/cosmopolitan)) that should run on **Windows**, **macOS**, **Linux**, and most **BSDs**: `luasmith-*-universal.zip`
+* "Actually Portable Executable" build (using [Cosmopolitan](https://github.com/jart/cosmopolitan)) that should run on **Windows**, **macOS**, **Linux**, and most **BSDs**: `luasmith-*-universal.zip`
+* There's also a source archive that actually includes submodule code (unlike GitHub's automatic source archives)
 
 ## Quickstart
 To create a minimal blog:
@@ -71,8 +72,8 @@ Content goes here. Note you can [link to other posts](foobar.md).
 ## Themes
 Built in themes:
 
-* `blog`: a minimal blog theme
-* `md2blog`: an opinionated (and slightly less minimal) blog theme (following the structure of [md2blog](https://jaredkrinke.github.io/md2blog/))
+* `blog`: a minimal blog theme ([example site](https://jaredkrinke.github.io/til/))
+* `md2blog`: an opinionated (and slightly less minimal) blog theme, following the structure of [md2blog](https://jaredkrinke.github.io/md2blog/) ([example site](https://log.schemescape.com/))
 
 ## Architecture
 luasmith is designed around the concept of a "theme", which is basically a processing pipeline, probably including some templates (and perhaps static assets). You run the tool by providing either the path to a Lua script or the name of a built-in theme:
