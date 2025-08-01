@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# Source code
+make clean
+git ls-files --recurse-submodules |xargs tar czf luasmith-$1-src.tar.gz --transform "s,^,luasmith-$1/,"
+
 # Statically-linked Linux build, using zig cc
 make clean
 make CC="zig cc --target=x86_64-linux-musl"
