@@ -73,6 +73,8 @@ return {
 }
 ```
 
+What does `%.html$` mean? Lua does not POSIX regular expressions (regexp) for reasons outlined [here](https://www.lua.org/pil/20.1.html). In this case, `%.` means the literal `.` character; in other words, `%` is the escape character. The `$` (**only** at the end of a pattern) anchors the match to the end of the string in question. The manual outlines this in greater detail [here](https://www.lua.org/manual/5.4/manual.html#6.4.1). A tutorial [here](http://lua-users.org/wiki/PatternsTutorial) explains some of the limitations of Lua's pattern matching.
+
 ### Adding CSS
 Injecting a CSS file is trivial, but remember to reference it using the correct relative path (see `pathToRoot` in the contained HTML template):
 
