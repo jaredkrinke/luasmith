@@ -918,16 +918,17 @@ if #args < 2 then
 	os.exit(-1)
 end
 
-local themeModule = args[2]
-if string.find(themeModule, "%.lua$") then
-	themeModule = string.sub(themeModule, 1, #themeModule - 4)
-	themeDirectory = fs.directory(themeModule)
+local pipeline = nil
+local theme = args[2]
+if string.find(theme, "%.lua$") then
+	-- Use the provided file as the theme
+	themeDirectory = fs.directory(theme)
+	pipeline = dofile(theme)
 else
 	-- Use built-in theme
-	themeDirectory = fs.join("themes", themeModule)
-	themeModule = "themes." .. themeModule  .. ".theme"
+	themeDirectory = fs.join("themes", theme)
+	pipeline = require("themes." .. theme  .. ".theme")
 end
 
-local pipeline = require(themeModule)
 build(pipeline)
 
