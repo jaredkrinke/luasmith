@@ -362,6 +362,10 @@ function fs.loadThemeFile(path)
 	return load(fs.readFile(p), p, "t")
 end
 
+function fs.doThemeFile(path)
+	return fs.loadThemeFile(path)()
+end
+
 function fs.writeFile(path, content)
 	local f = io.open(path, "wb")
 	f:write(content)

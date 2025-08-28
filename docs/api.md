@@ -39,7 +39,9 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 * `fs.createDirectory(dir)` creates directory at path `dir`, including any necessary parent directories
 * `fs.readFile(path)` reads the file at `path` and returns its contents as a string
 * `fs.readThemeFile(path)` reads the file at `path`, relative to the current `theme.lua` file
-* `fs.writeFile(path, content)` writes file with `content` to `path`
+* `fs.loadThemeFile(path)` loads the Lua script at `path` (relative to the current `theme.lua` file) into a Lua chunk (but *does not* execute it), returning a function to execute the code
+* `fs.doThemeFile(path)` loads and executes the Lua script at `path` (relative to the current `theme.lua` file), returning any value that is returned from the script (this is useful for splitting theme code into multiple files and loading them relative to the main script)
+* `fs.writeFile(path, content)` writes file with `content` to `path` (relative to the working directory, i.e. where `luasmith` was invoked)
 
 ## Item Schema
 Items in luasmith are represented as Lua tables, with a few known keys:
