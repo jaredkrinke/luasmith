@@ -63,6 +63,7 @@ For step 3, this Lua snippet can be used to for a `site.lua` file:
 return {
   title = "a website"
   url = "https://a.site/"
+}
 ```
 
 For step 4, use this Markdown file as a template (it uses YAML frontmatter):
