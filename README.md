@@ -57,7 +57,7 @@ To create a minimal blog:
 6. Open `out/index.html` to view the site
 7. Optionally, upload it somewhere!
 
-For step 3, this Lua snippet can be used to for a `site.lua` file:
+For step 3, this Lua snippet can be used for a `site.lua` file:
 
 ```lua
 return {
