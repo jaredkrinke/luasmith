@@ -31,7 +31,7 @@ local site = {
 	url = "https://example.com/",
 }
 
-local siteOverrides = fs.tryLoadFile("content/site.lua")
+local siteOverrides = fs.tryLoadFile("site.lua")
 if siteOverrides then
 	table.merge(siteOverrides(), site)
 end
