@@ -11,7 +11,7 @@ body {
     flex-direction: column;
     align-items: center;
     font-family: sans-serif;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 body > header, main { width: 40em; }
