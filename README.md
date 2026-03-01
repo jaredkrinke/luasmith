@@ -51,7 +51,7 @@ To create a minimal blog:
 
 1. Download binary package or clone and compile with `make`
 2. Create an input directory named `content/`
-3. Add `content/site.lua` returning a table containing `title` (site title) and `url` (root URL for the site--used for RSS)
+3. Add `site.lua` returning a table containing `title` (site title) and `url` (root URL for the site--used for RSS)
 4. Add Markdown files (with `title`, `description`,  and `date` in frontmatter)
 5. Run `./luasmith blog` (this will read from `content/` and output to `out/`)
 6. Open `out/index.html` to view the site
@@ -61,8 +61,8 @@ For step 3, this Lua snippet can be used for a `site.lua` file:
 
 ```lua
 return {
-  title = "a website"
-  url = "https://a.site/"
+  title = "a website",
+  url = "https://a.site/",
 }
 ```
 
