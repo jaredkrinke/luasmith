@@ -76,7 +76,7 @@ date: 2025-04-22
 ---
 Content goes here. Note you can [link to other posts](foobar.md).
 
-## Sub-heading
+## Subheading
 More content goes here.
 ```
 

@@ -4,7 +4,6 @@ description = "This is the first post on a blog."
 date = "2025-04-21"
 ]]
 
-# First post!
 This is just an example post.
 
 ## Relative links
