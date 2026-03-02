@@ -1,6 +1,8 @@
 <header>
 <h1><%= title %></h1>
+<% if date then -%>
 <p><%- htmlifyDate(date) %></p>
+<% end -%>
 </header>
 <%- content %>
 <footer>

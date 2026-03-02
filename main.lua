@@ -130,6 +130,16 @@ function table.concatenate(a, b)
 	return r
 end
 
+function table.include(t, f)
+	local r = {}
+	for k, v in ipairs(t) do
+		if f(v) then
+			r[k] = v
+		end
+	end
+	return r
+end
+
 iterator = {}
 
 function iterator.count(iterator)

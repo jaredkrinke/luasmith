@@ -39,7 +39,7 @@ local postListTemplate = etlua.compile([[<% local lastYear = nil -%>
 <% end -%>
 ]])
 function postList(self)
-	return postListTemplate({ pathToRoot = self.pathToRoot, items = self.items })
+	return postListTemplate({ pathToRoot = self.pathToRoot, items = table.include(self.items, shared.hasDate) })
 end
 
 -- Hard-code syntax highlighting as normal HTML markup to support non-CSS browsers (e.g. terminal browsers)

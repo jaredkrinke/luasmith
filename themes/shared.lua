@@ -21,6 +21,10 @@ local function yamlDateToIso(str)
 	return year .. "-" .. month .. "-" .. day .. "T" .. (hour or "00") .. ":" .. (minute or "00") .. ":00.000Z"
 end
 
+local function hasDate(item)
+	return item.date
+end
+
 -- Atom feed helpers
 local function atomRepathItemContent(item, prefix)
 	local parts = {}
@@ -51,6 +55,7 @@ end
 return {
 	atomifyItemContent = atomifyItemContent,
 	formatDate = formatDate,
+	hasDate = hasDate,
 	yamlDateToIso = yamlDateToIso,
 }
 
