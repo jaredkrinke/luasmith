@@ -34,7 +34,7 @@ return {
 ## Summary
 Most of the heavy lifting in luasmith is done by [md4c](https://github.com/mity/md4c) ([patched](https://github.com/jaredkrinke/md4c/commit/fc4cac5277b060450d93b06a67397388defa358d) for relative links), [Lua](https://www.lua.org/), [etlua](https://github.com/leafo/etlua), and [Scintillua](https://github.com/orbitalquark/scintillua).
 
-To get a feel for luasmith, either [read over the design](#design) or [go through the tutorial](docs/tutorial.md).
+To get a feel for luasmith, either [read over the design](#architecture) or [go through the tutorial](docs/tutorial.md).
 
 Note that luasmith is still an experimental project, subject to breaking changes. If you like *the idea* of luasmith, let me know and I can put some work into stabilizing and polishing it--for now, I'm assuming I'm probably the only person writing plugins.
 
