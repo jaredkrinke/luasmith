@@ -86,6 +86,10 @@ Built in themes:
 * `blog`: a minimal blog theme ([example site](https://jaredkrinke.github.io/til/))
 * `md2blog`: an opinionated (and slightly less minimal) blog theme, following the structure of [md2blog](https://jaredkrinke.github.io/md2blog/) ([example site](https://log.schemescape.com/))
 
+Community themes:
+
+* [`catala`](https://github.com/alunya-cat/luasmith-catala): A theme designed to prioritize readability and content. 
+
 ## Architecture
 luasmith is designed around the concept of a "theme", which is basically a processing pipeline, probably including some templates (and perhaps static assets). You run the tool by providing either the path to a Lua script or the name of a built-in theme:
 
