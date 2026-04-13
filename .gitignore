@@ -9,3 +9,5 @@ luasmith
 test/
 sample/out/
 tags
+*.pdb
+*.exe
