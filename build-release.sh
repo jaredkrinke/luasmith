@@ -12,7 +12,7 @@ tar czf luasmith-$1-linux-x86_64.tar.gz luasmith
 
 # Windows build, cross-compiled using zig cc
 make clean
-make CC="zig cc --target=x86_64-windows-gnu" LUA_CFLAGS=""
+make CC="zig cc --target=x86_64-windows-gnu" LUA_CFLAGS="" MYRC=luasmith.exe.manifest
 mv luasmith luasmith.exe
 zip luasmith-$1-windows-x86_64.zip luasmith.exe
 

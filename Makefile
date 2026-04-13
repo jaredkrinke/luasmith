@@ -1,6 +1,7 @@
 # Configuration
 CC=cc
 MYCFLAGS=-Os -Wall
+MYRC=
 LUA_CFLAGS=-DLUA_USE_POSIX
 
 LUA_OBJS=lua/lapi.o lua/lcode.o lua/lctype.o lua/ldebug.o lua/ldo.o lua/ldump.o lua/lfunc.o lua/lgc.o lua/llex.o lua/lmem.o lua/lobject.o lua/lopcodes.o lua/lparser.o lua/lstate.o lua/lstring.o lua/ltable.o lua/ltm.o lua/lundump.o lua/lvm.o lua/lzio.o lua/lauxlib.o lua/lbaselib.o lua/lbitlib.o lua/lcorolib.o lua/ldblib.o lua/liolib.o lua/lmathlib.o lua/loslib.o lua/lstrlib.o lua/ltablib.o lua/loadlib.o lua/linit.o
@@ -15,7 +16,7 @@ all: luasmith
 clean:
 	rm -f $(OBJS)
 	rm -f *.lua.h
-	rm -f luasmith luasmith.*
+	rm -f luasmith luasmith.exe luasmith.com
 
 main.lua.h: main.lua
 	echo "#define STRINGIFIED_MAIN \\" > $@
@@ -25,7 +26,7 @@ main.o: main.c main.lua.h scripts.lua.h
 	$(CC) $(CFLAGS) -c main.c -o $@
 
 luasmith: $(OBJS)
-	$(CC) -o luasmith $(OBJS) -lm
+	$(CC) -o luasmith $(OBJS) $(MYRC) -lm
 
 # Embedded Lua scripts (mostly related to syntax highlighting)
 VPATH = scintillua/lexers
