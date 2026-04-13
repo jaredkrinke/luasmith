@@ -265,9 +265,10 @@ function fs.directory(path)
 	return dir or ""
 end
 
--- Normalize path by resolving ".." and "."
+-- Normalize path by 1) converting "\" to "/" and 2) resolving ".." and "."
 function fs.normalize(path)
 	local results = {}
+	path = string.gsub(path, "\\", "/")
 	for part in string.split(path, "/") do
 		if part == "." then
 			-- Drop any "." components
@@ -933,7 +934,7 @@ if #args < 2 then
 end
 
 local pipeline = nil
-local theme = args[2]
+local theme = fs.normalize(args[2])
 if string.find(theme, "%.lua$") then
 	-- Use the provided file as the theme
 	themeDirectory = fs.directory(theme)
