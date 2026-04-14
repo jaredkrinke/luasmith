@@ -132,9 +132,9 @@ end
 
 function table.include(t, f)
 	local r = {}
-	for k, v in ipairs(t) do
+	for _, v in ipairs(t) do
 		if f(v) then
-			r[k] = v
+			table.insert(r, v)
 		end
 	end
 	return r
