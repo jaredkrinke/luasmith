@@ -76,6 +76,7 @@ return {
 	deriveMetadata({ title = function (item) return site.title .. ": Posts tagged with: " .. item.key end }, "^posts/.-/index.html$"),
 	injectMetadata({ site = site }),
 	applyTemplates({
+		{ "%.html$", fs.readThemeFile("misc.etlua") },
 		{ "^posts/.-%.html$", fs.readThemeFile("post.etlua") },
 		{ "^posts/.-/index.html$", fs.readThemeFile("index.etlua") },
 		{ "^posts/index.html$", fs.readThemeFile("archive.etlua") },

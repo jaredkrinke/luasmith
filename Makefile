@@ -36,6 +36,7 @@ THEME_FILES = \
 	themes/shared/feed.etlua \
 	themes/md2blog/theme.lua \
 	themes/md2blog/404.etlua \
+	themes/md2blog/misc.etlua \
 	themes/md2blog/style.css \
 	themes/md2blog/archive.etlua \
 	themes/md2blog/index.etlua \

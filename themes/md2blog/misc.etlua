@@ -1,0 +1,9 @@
+<% if title then -%>
+<%- headerStart(self) %>
+<%- headerEnd %>
+<main>
+<%- content %>
+</main>
+<% else -%>
+<%- content %>
+<% end -%>
