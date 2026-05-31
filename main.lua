@@ -920,7 +920,7 @@ function build(nodes)
 end
 
 -- Entry point
-if #args < 2 then
+if #args < 2 or args[2] == "--help" then
 	print("\nUsage: " .. args[1] .. " <THEME_NAME | THEME_PATH>\n")
 	print("The theme (which configures the build pipeline) can either be specified as the name of a built-in theme or the path to a custom theme (Lua script file).")
 	print("")
