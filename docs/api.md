@@ -12,36 +12,17 @@ luasmith exposes Lua 5.2's standard library. See the [Lua 5.2 manual](https://ww
 
 In particular, note that luasmith builds on top of [Lua's string matching patterns](https://www.lua.org/manual/5.2/manual.html#6.4.1) (which are similar to Regular Expressions).
 
-## Lua Helpers
-For convenience, luasmith exposes some generic Lua helper functions, as documented here. See [main.lua](../main.lua) for the source code.
+## Site Schema
+The built-in themes each support site-level metadata, as returned by a script in the input directory named `site.lua`.
 
-### `table` Helpers
-* `table.merge(source, dest)` copies (shallowly) keys and values from table `source` to `dest`
-* `table.copy(table)` creates a shallow copy of `table`
-* `table.map(table, func)` creates a new (array) table that is the result of applying `func` to each value in `table`
-* `table.sortBy(table, prop, desc)` creates a new (array) table with items ordered by the value of key `prop`, optionally in descending order (if `desc` is not false)
-* `table.sorted(table, compare)` creates a new (array) table with items ordered by the result of calling `compare(a, b)` on two elements
-* `table.groupby(table, key)` groups items in array `table` under keys in a new table -- this is used for creating e.g. index pages based on keywords
-* `table.concatenate(table1, table2)` creates a new array table that contains values from `table1` followed by items from `table2`
+### `blog` Theme
+* `title`: Title for the site
+* `url`: Root URL for the site (e.g. `https://example.com/`) -- this is used to provide absolute links in the Atom feed
 
-### `iterator` Helpers
-* `iterator.count(iterator)` counts the number of items in a Lua iterator
-* `iterator.collect(iterator)` collects items from a Lua iterator into an array table
-
-### `string` Helpers
-* `string.toNumber(str)` converts a decimal integer string into a number
-* `string.charAt(str, index)` returns a single-byte string that represents the byte at position `index` in `str`
-* `string.split(str, separator)` returns a Lua iterator that returns substrings of `str` that are separated by the single character string `separator`
-* `string.lines(str)` returns a Lua iterator that returns lines ("\n"-separated) of `str`
-* `string.trim(str)` returns `str`, with spaces from the beginning and end removed
-
-### `fs` Helpers
-* `fs.createDirectory(dir)` creates directory at path `dir`, including any necessary parent directories
-* `fs.readFile(path)` reads the file at `path` and returns its contents as a string
-* `fs.readThemeFile(path)` reads the file at `path`, relative to the current `theme.lua` file
-* `fs.loadThemeFile(path)` loads the Lua script at `path` (relative to the current `theme.lua` file) into a Lua chunk (but *does not* execute it), returning a function to execute the code
-* `fs.doThemeFile(path)` loads and executes the Lua script at `path` (relative to the current `theme.lua` file), returning any value that is returned from the script (this is useful for splitting theme code into multiple files and loading them relative to the main script)
-* `fs.writeFile(path, content)` writes file with `content` to `path` (relative to the working directory, i.e. where `luasmith` was invoked)
+### `md2blog` Theme
+* `title`: Title for the site
+* `subtitle`: Sub-title for the site
+* `url`: Root URL for the site (e.g. `https://example.com/`) -- this is used to provide absolute links in the Atom feed
 
 ## Item Schema
 Items in luasmith are represented as Lua tables, with a few known keys:
@@ -81,3 +62,47 @@ There are a few different kinds of processing nodes in luasmith (number of input
 * `checkLinks()` verifies that relative link targets in HTML files exist, including hash/fragments/anchors (i.e. "checks for broken links")
 
 Note: `aggregate()` can be easily used to create a blog index/home page with a list of posts. `createIndexes()` can be used to create e.g. "keyword index" pages.
+
+## Lua Helpers
+For convenience, luasmith exposes some generic Lua helper functions, as documented here. See [main.lua](../main.lua) for the source code.
+
+### `log` Helpers
+* `log.warn(message)` logs a warning
+* `log.info(message)` logs a message
+
+### `table` Helpers
+* `table.merge(source, dest)` copies (shallowly) keys and values from table `source` to `dest`
+* `table.copy(table)` creates a shallow copy of `table`
+* `table.map(table, func)` creates a new (array) table that is the result of applying `func` to each value in `table`
+* `table.sortBy(table, prop, desc)` creates a new (array) table with items ordered by the value of key `prop`, optionally in descending order (if `desc` is not false)
+* `table.sorted(table, compare)` creates a new (array) table with items ordered by the result of calling `compare(a, b)` on two elements
+* `table.groupBy(table, key)` groups items in array `table` under keys in a new table -- this is used for creating e.g. index pages based on keywords
+* `table.concatenate(table1, table2)` creates a new array table that contains values from `table1` followed by items from `table2`
+* `table.include(table, incl)` creates a new table that contains values from `table` for which the function `incl` returns a truthy value
+
+### `iterator` Helpers
+* `iterator.count(iterator)` counts the number of items in a Lua iterator
+* `iterator.collect(iterator)` collects items from a Lua iterator into an array table
+
+### `string` Helpers
+* `string.toNumber(str)` converts a decimal integer string into a number
+* `string.charAt(str, index)` returns a single-byte string that represents the byte at position `index` in `str`
+* `string.split(str, separator)` returns a Lua iterator that returns substrings of `str` that are separated by the single character string `separator`
+* `string.lines(str)` returns a Lua iterator that returns lines ("\n"-separated) of `str`
+* `string.trim(str)` returns `str`, with spaces from the beginning and end removed
+
+### `fs` Helpers
+* `fs.join(part1, part2)` joins `part1` and `part2` with a `/` (note: if one value is an empty string, this just returns the other value)
+* `fs.dir(path)` returns the directory part of `path` (without any trailing slash)
+* `fs.normalize(path)` normalizes `path` by converting `\` to `/` and resolving `..` and `.`
+* `fs.resolveRelative(base, relative)` resolves path `relative`, relative to `base`
+* `fs.createDirectory(dir)` creates directory at path `dir`, including any necessary parent directories
+* `fs.enumerateFiles(dir)` returns a list of files under `dir`
+* `fs.tryReadFile(path)` tries to read the file at `path` and return its contents as a string, returning `nil` if the file doesn't exist or can't be opened
+* `fs.tryLoadFile(path)` tries to load a Lua script at `path`, returning `nil` on error
+* `fs.readFile(path)` reads the file at `path` and returns its contents as a string
+* `fs.readThemeFile(path)` reads the file at `path`, relative to the current `theme.lua` file
+* `fs.loadThemeFile(path)` loads the Lua script at `path` (relative to the current `theme.lua` file) into a Lua chunk (but *does not* execute it), returning a function to execute the code
+* `fs.doThemeFile(path)` loads and executes the Lua script at `path` (relative to the current `theme.lua` file), returning any value that is returned from the script (this is useful for splitting theme code into multiple files and loading them relative to the main script)
+* `fs.writeFile(path, content)` writes file with `content` to `path` (relative to the working directory, i.e. where `luasmith` was invoked)
+
