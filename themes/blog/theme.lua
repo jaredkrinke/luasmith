@@ -62,6 +62,7 @@ end
 -- Site metadata
 local site = {
 	title = "Untitled",
+	subtitle = nil,
 	url = "https://example.com/",
 }
 

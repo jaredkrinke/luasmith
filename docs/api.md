@@ -17,11 +17,12 @@ The built-in themes each support site-level metadata, as returned by a script in
 
 ### `blog` Theme
 * `title`: Title for the site
+* `subtitle`: Subtitle for the site (optional)
 * `url`: Root URL for the site (e.g. `https://example.com/`) -- this is used to provide absolute links in the Atom feed
 
 ### `md2blog` Theme
 * `title`: Title for the site
-* `subtitle`: Sub-title for the site
+* `subtitle`: Subtitle for the site
 * `url`: Root URL for the site (e.g. `https://example.com/`) -- this is used to provide absolute links in the Atom feed
 * `links`: List of links to include at the top of each page, example: `links = { { "About", "about.html" }, { "Contact", "mailto:contact@example.com" } }`
 

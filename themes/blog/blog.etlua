@@ -1,5 +1,8 @@
 <header>
 <h1><%= site.title %></h1>
+<% if site.subtitle then -%>
+<p><%= site.subtitle %></p>
+<% end -%>
 </header>
 <%- postList(self) %>
 <footer>
