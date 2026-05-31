@@ -2,7 +2,7 @@
 <nav>
 <strong>Topics:&nbsp;</strong>
 <ul>
-<% -- Sort tags by frequency
+<% -- Sort tags
    local grouped = table.groupBy(items, "tags")
    local groups = {}
    for k, _ in pairs(grouped) do table.insert(groups, k) end
