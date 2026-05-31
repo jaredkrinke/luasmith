@@ -41,6 +41,13 @@ headerStart = etlua.compile(
 [[<header>
 <h1><a href="<%= pathToRoot %>index.html"><%= site.title %></a></h1>
 <p><%= site.subtitle %></p>
+<% if site.links then -%>
+<nav class="site"><ul>
+<% for _, link in ipairs(site.links) do -%>
+<li><a href="<%= url.isRelative(link[2]) and (pathToRoot .. link[2]) or link[2] %>"><%= link[1] %></a></li>
+<% end -%>
+</ul></nav>
+<% end -%>
 ]])
 
 headerEnd = "</header>"

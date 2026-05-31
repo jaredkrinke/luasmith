@@ -387,6 +387,13 @@ local function computePathToRoot(path)
 	return string.rep("../", iterator.count(string.gmatch(path, "/")))
 end
 
+-- URL helpers
+url = {}
+
+function url.isRelative(url)
+	return not string.find(url, ":")
+end
+
 -- Processing node helpers
 function createChange(changeType, item)
 	if not item.pathToRoot then
@@ -860,7 +867,7 @@ checkLinks = function ()
 								or (event.tag == "link" and event.attribute == "href")
 								or (event.tag == "script" and event.attribute == "src")
 								or (event.tag == "img" and event.attribute == "src"))
-								and not string.find(event.value, ":") -- Local/relative links only
+								and url.isRelative(event.value) -- Local/relative links only
 							then
 								local target = event.value
 								if string.sub(event.value, 1, 1) ~= "#" then
