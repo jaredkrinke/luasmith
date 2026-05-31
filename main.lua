@@ -4,7 +4,7 @@ local builtInThemes = {}
 for _, name in ipairs(_embeddedScripts) do
 	embeddedFiles[name] = true
 
-	local theme = string.match(name, "themes/(.-)%.lua")
+	local theme = string.match(name, "themes/(.-)/theme%.lua")
 	if theme and theme ~= "shared" then
 		table.insert(builtInThemes, theme)
 	end
