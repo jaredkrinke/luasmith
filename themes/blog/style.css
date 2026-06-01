@@ -4,6 +4,7 @@ body { max-width: 40em; margin: auto; padding: 0.5em 1em 1em 1em; font-family: s
 td, h1, h2, h3, h4, h5 { line-height: 1.2; }
 pre { overflow: auto; }
 img { display: block; max-width: 100%; }
+img + em { font-size: 85%; }
 ul, ol { padding-left: 1.5em; }
 ul.posts { padding-left: 0em; list-style-type: none; display: table }
 ul.posts li { display: table-row; }
