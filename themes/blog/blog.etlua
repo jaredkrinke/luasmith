@@ -22,9 +22,32 @@
 </ul>
 <footer>
 <%
-local grouped = table.groupBy(items, "keywords")
-local groups = {}
-for k, v in pairs(grouped) do table.insert(groups, { key = k }) end
+-- Show the most recent keywords
+local limit = 10
+local count = 0
+local keywordSet = {}
+local truncated = false
+for _, item in ipairs(items) do
+	if truncated then break end
+	for _, keyword in ipairs(item.keywords or {}) do
+		if not keywordSet[keyword] then
+			count = count + 1
+			if count > limit then
+				truncated = true
+				break
+			end
+			keywordSet[keyword] = true
+		end
+	end
+end
+
+local keywords = {}
+for keyword in pairs(keywordSet) do
+	table.insert(keywords, keyword)
+end
 -%>
-<%- keywordList(pathToRoot, table.sorted(table.map(groups, function (g) return g.key end))) %>
+<%- keywordList(pathToRoot, table.sorted(keywords)) -%>
+<% if truncated then -%>
+ |&nbsp;<a href="<%= pathToRoot %>topics/index.html">&hellip;</a>
+<% end -%>
 </footer>
