@@ -4,12 +4,19 @@
 <p><%= site.subtitle %></p>
 <% end -%>
 </header>
+<% -- This is a bit of a hack, to support inserting index.md content into the generated index.html page -%>
+<% local extra = table.include(items, function (item) return item.path == "index.html" end)[1] -%>
+<% if extra then -%>
+<%   -%>
+<%-  extra.content -%>
+<% end -%>
+<h2>Recent articles</h2>
 <% local limit = 8 -%>
-<%- postList(self, limit) %>
+<%- postList(self, 3, limit) %>
 <h2>More</h2>
 <ul>
 <% if #items > limit then -%>
-<li>See <a href="topics/index.html">all <%= #items %> articles</a></li>
+<li>See <a href="topics/index.html">all articles</a></li>
 <% end -%>
 <li>Subscribe to the <a href="feed.xml">Atom feed</a></li>
 </ul>

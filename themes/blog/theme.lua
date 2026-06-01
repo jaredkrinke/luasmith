@@ -20,14 +20,15 @@ function keywordList(pathToRoot, keywords)
 end
 
 local postListTemplate = etlua.compile([[<% local lastYear = nil -%>
-<% for i, item in ipairs(table.sortBy(items, "date", true)) do
+<% local level = level or 2
+   for i, item in ipairs(table.sortBy(items, "date", true)) do
    if limit and i > limit then break end
    local year = string.match(item.date, "^(%d%d%d%d)")
    if lastYear ~= year then
      if lastYear ~= nil then -%>
 </ul>
 <% end -%>
-<h2><%= year %></h2>
+<h<%= level%>><%= year %></h<%= level%>>
 <ul class="posts">
 <%
 	 lastYear = year
@@ -39,8 +40,13 @@ local postListTemplate = etlua.compile([[<% local lastYear = nil -%>
 </ul>
 <% end -%>
 ]])
-function postList(self, limit)
-	return postListTemplate({ pathToRoot = self.pathToRoot, items = table.include(self.items, shared.hasDate), limit = limit })
+function postList(self, level, limit)
+	return postListTemplate({
+		pathToRoot = self.pathToRoot,
+		items = table.include(self.items, shared.hasDate),
+		level = level,
+		limit = limit,
+	})
 end
 
 -- Hard-code syntax highlighting as normal HTML markup to support non-CSS browsers (e.g. terminal browsers)
@@ -89,6 +95,9 @@ return {
 	aggregate("feed.xml", "%.html$"),
 	aggregate("index.html", "%.html$"),
 	aggregate("topics/index.html", "%.html$"),
+
+	-- Ugly hack to remove any duplicate index.html, e.g. if index.md was present in the input
+	omitWhen(function (item) return item.path == "index.html" and not item.items end),
 
 	-- Keyword indexes
 	createIndexes(function (keyword) return "topics/" .. keyword .. ".html" end, "keywords", "%.html$"),
