@@ -1,5 +1,14 @@
 shared = require("themes.shared")
 
+-- Site metadata
+local site = {
+	title = "Untitled",
+	subtitle = nil,
+	url = "https://example.com/",
+	footer = nil,
+	keywordDirectoryPattern = "^posts/(.-)/.+%.html$",
+}
+
 -- Helpers
 local htmlDateTemplate = etlua.compile([[<time datetime="<%= short %>"><%= long %></time>]])
 local months = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" }
@@ -66,14 +75,16 @@ local function highlightSpan(verbatim, tag)
 	return "<" .. element .. " class=\"hl-" .. tag .. "\">" .. verbatim .. "</" .. element .. ">"
 end
 
--- Site metadata
-local site = {
-	title = "Untitled",
-	subtitle = nil,
-	url = "https://example.com/",
-	footer = nil,
-}
+local function deriveKeywords(item)
+	local category = string.match(item.path, site.keywordDirectoryPattern)
+	local keywords = item.keywords or {}
+	if category then
+		return table.concatenate({ category }, keywords)
+	end
+	return keywords
+end
 
+-- Load site metadata
 local siteOverrides = fs.tryLoadFile("site.lua")
 if siteOverrides then
 	table.merge(siteOverrides(), site)
@@ -95,6 +106,7 @@ return {
 	processMarkdown(),
 	omitWhen(function (item) return item.draft or item.path == "site.lua" end),
 	highlightSyntax(highlightSpan),
+	deriveMetadata({ keywords = deriveKeywords }, site.keywordDirectoryPattern),
 
 	-- RSS and root page
 	aggregate("feed.xml", "%.html$"),

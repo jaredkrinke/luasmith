@@ -16,10 +16,16 @@ In particular, note that luasmith builds on top of [Lua's string matching patter
 The built-in themes each support site-level metadata, as returned by a script in the input directory named `site.lua`.
 
 ### `blog` Theme
+Required/recommended:
+
 * `title`: Title for the site
-* `subtitle`: Subtitle for the site (optional)
 * `url`: Root URL for the site (e.g. `https://example.com/`) -- this is used to provide absolute links in the Atom feed
-* `footer`: Footer (raw HTML) to append to the end of every page
+
+Optional:
+
+* `subtitle`: Subtitle for the site (default: `nil`/none)
+* `footer`: Footer (raw HTML) to append to the end of every page (default: `nil`/none)
+* `keywordDirectoryPattern`: Lua pattern for deriving keywords from the first capture group of item paths (default: `"^posts/(.-)/.+%.html$"`, meaning the (first) subdirectory of `posts/` is the name of a keyword)
 
 ### `md2blog` Theme
 * `title`: Title for the site
