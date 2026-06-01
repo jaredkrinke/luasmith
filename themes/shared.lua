@@ -1,4 +1,8 @@
 -- Helpers
+local function escapeQuotes(str)
+	return string.gsub(str, "\"", [[\"]])
+end
+
 local months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" }
 
 local function parseYamlDate(str)
@@ -54,6 +58,7 @@ end
 
 return {
 	atomifyItemContent = atomifyItemContent,
+	escapeQuotes = escapeQuotes,
 	formatDate = formatDate,
 	hasDate = hasDate,
 	yamlDateToIso = yamlDateToIso,

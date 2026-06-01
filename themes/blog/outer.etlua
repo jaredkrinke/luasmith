@@ -9,6 +9,18 @@
 <link rel="stylesheet" href="<%= pathToRoot %>style.css" />
 <link rel="icon" href="data:," />
 <% if path == "index.html" then %><link rel="alternate" type="application/rss+xml" href="feed.xml" /><% end %>
+<% if title and date then -%>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "<%- shared.escapeQuotes(title) %>",
+  <% if description then %>"abstract": "<%- shared.escapeQuotes(description) %>",<% end%>
+  <% if keywords then %>"keywords": "<%- shared.escapeQuotes(table.concat(keywords, ",")) %>",<% end %>
+  "datePublished": "<%= date %>"
+}
+</script>
+<% end -%>
 </head>
 <body>
 <main>
