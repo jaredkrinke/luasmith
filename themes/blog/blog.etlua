@@ -4,7 +4,15 @@
 <p><%= site.subtitle %></p>
 <% end -%>
 </header>
-<%- postList(self) %>
+<% local limit = 8 -%>
+<%- postList(self, limit) %>
+<h2>More</h2>
+<ul>
+<% if #items > limit then -%>
+<li>See <a href="topics/index.html">all <%= #items %> articles</a></li>
+<% end -%>
+<li>Subscribe to the <a href="feed.xml">Atom feed</a></li>
+</ul>
 <footer>
 <%
 local grouped = table.groupBy(items, "keywords")
@@ -12,5 +20,4 @@ local groups = {}
 for k, v in pairs(grouped) do table.insert(groups, { key = k }) end
 -%>
 <%- keywordList(pathToRoot, table.sorted(table.map(groups, function (g) return g.key end))) %>
-<p>&rarr; Subscribe to the <a href="feed.xml">Atom feed</a></p>
 </footer>

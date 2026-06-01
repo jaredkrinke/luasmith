@@ -21,6 +21,7 @@ end
 
 local postListTemplate = etlua.compile([[<% local lastYear = nil -%>
 <% for i, item in ipairs(table.sortBy(items, "date", true)) do
+   if limit and i > limit then break end
    local year = string.match(item.date, "^(%d%d%d%d)")
    if lastYear ~= year then
      if lastYear ~= nil then -%>
@@ -38,8 +39,8 @@ local postListTemplate = etlua.compile([[<% local lastYear = nil -%>
 </ul>
 <% end -%>
 ]])
-function postList(self)
-	return postListTemplate({ pathToRoot = self.pathToRoot, items = table.include(self.items, shared.hasDate) })
+function postList(self, limit)
+	return postListTemplate({ pathToRoot = self.pathToRoot, items = table.include(self.items, shared.hasDate), limit = limit })
 end
 
 -- Hard-code syntax highlighting as normal HTML markup to support non-CSS browsers (e.g. terminal browsers)
@@ -87,6 +88,7 @@ return {
 	-- RSS and root page
 	aggregate("feed.xml", "%.html$"),
 	aggregate("index.html", "%.html$"),
+	aggregate("topics/index.html", "%.html$"),
 
 	-- Keyword indexes
 	createIndexes(function (keyword) return "topics/" .. keyword .. ".html" end, "keywords", "%.html$"),
