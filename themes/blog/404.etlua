@@ -1,0 +1,6 @@
+<header>
+<h1><%= title %></h1>
+</header>
+<p>The requested page was not found.</p>
+<p><a href="<%= pathToRoot %>">Click here</a> to go to the home page.</p>
+

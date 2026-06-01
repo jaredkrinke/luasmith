@@ -85,7 +85,11 @@ local destination = args[4] or "out"
 -- Build pipeline
 return {
 	readFromSource(source),
-	injectFiles({ ["style.css"] = fs.readThemeFile("style.css"), }),
+	injectFiles({
+		["style.css"] = fs.readThemeFile("style.css"),
+		["404.html"] = "",
+	}),
+	injectMetadata({ title = "Not found", pathToRoot = site.url or "/" }, "^404%.html$"),
 
 	-- Markdown, drafts, syntax highlighting
 	processMarkdown(),
@@ -111,6 +115,7 @@ return {
 		{ "^topics/.-%.html$", fs.readThemeFile("index.etlua") },
 		{ "^feed.xml$", fs.readThemeFile("../shared/feed.etlua") },
 		{ "^index.html$", fs.readThemeFile("blog.etlua") },
+		{ "^404.html$", fs.readThemeFile("404.etlua") },
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
 
