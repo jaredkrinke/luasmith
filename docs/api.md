@@ -19,6 +19,7 @@ The built-in themes each support site-level metadata, as returned by a script in
 * `title`: Title for the site
 * `subtitle`: Subtitle for the site (optional)
 * `url`: Root URL for the site (e.g. `https://example.com/`) -- this is used to provide absolute links in the Atom feed
+* `footer`: Footer (raw HTML) to append to the end of every page
 
 ### `md2blog` Theme
 * `title`: Title for the site

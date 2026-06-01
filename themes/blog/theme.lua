@@ -71,6 +71,7 @@ local site = {
 	title = "Untitled",
 	subtitle = nil,
 	url = "https://example.com/",
+	footer = nil,
 }
 
 local siteOverrides = fs.tryLoadFile("site.lua")

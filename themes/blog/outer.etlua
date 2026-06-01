@@ -14,5 +14,8 @@
 <main>
 <%- content %>
 </main>
+<% if site.footer then -%>
+<%- site.footer %>
+<% end -%>
 </body>
 </html>
