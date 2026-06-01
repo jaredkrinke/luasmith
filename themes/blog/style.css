@@ -1,4 +1,4 @@
-:root { color-scheme: light dark; --lighter: color-mix(in srgb, currentColor 70%, transparent); }
+:root { color-scheme: light dark; --lighter: color-mix(in srgb, currentColor 70%, transparent); --bg: color-mix(in srgb, currentColor 12%, transparent); }
 * { box-sizing: border-box; }
 body { max-width: 40em; margin: auto; padding: 0.5em 1em 1em 1em; font-family: sans-serif; line-height: 1.5; }
 td, h1, h2, h3, h4, h5 { line-height: 1.2; }
@@ -13,7 +13,12 @@ li { margin-bottom: 0.5em; }
 header { border-bottom: thin solid; }
 footer { border-top: thin solid; }
 pre { border: thin solid; border-radius: 0.5em; padding: 0.5em; line-height: 1.2; }
-pre, code:not(pre code) { background: color-mix(in srgb, currentColor 12%, transparent); border-radius: 0.5em; }
+pre, code:not(pre code) { background: var(--bg); border-radius: 0.5em; }
+
+table, th, tr, td { border-collapse: collapse; border: solid 1px; }
+th, td { padding: 0.25em; }
+th { background: var(--bg); }
+tr:nth-child(even) { background: color-mix(in srgb, currentColor 8%, transparent); }
 
 /* Syntax highlighting */
 .hl-comment { font-style: italic; color: var(--lighter); }
