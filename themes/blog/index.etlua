@@ -1,5 +1,5 @@
 <header>
-<h1>#<%= key %></h1>
+<h1><%= title %></h1>
 </header>
 <%- postList(self) %>
 <footer>

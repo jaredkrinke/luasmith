@@ -118,7 +118,7 @@ return {
 
 	-- Keyword indexes
 	createIndexes(function (keyword) return "topics/" .. keyword .. ".html" end, "keywords", "%.html$"),
-	deriveMetadata({ title = function (item) return item.key end }, "^topics/.-%.html$"),
+	deriveMetadata({ title = function (item) return item.key and ("#" .. item.key) or "All articles" end }, "^topics/.-%.html$"),
 
 	-- Global metadata and templates
 	injectMetadata({ site = site }),
