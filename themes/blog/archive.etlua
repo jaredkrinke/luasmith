@@ -1,0 +1,16 @@
+<header>
+<h1>All articles</h1>
+</header>
+<h2>Tags</h2>
+<%
+local grouped = table.groupBy(items, "keywords")
+local groups = {}
+for k, v in pairs(grouped) do table.insert(groups, { key = k }) end
+-%>
+<%- keywordList(pathToRoot, table.sorted(table.map(groups, function (g) return g.key end))) %>
+<h2>Articles</h2>
+<%- postList(self, 3) %>
+<footer>
+<p>&crarr; <a href="<%= pathToRoot %>index.html">Back</a>
+</footer>
+

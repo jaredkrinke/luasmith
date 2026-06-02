@@ -125,6 +125,7 @@ return {
 	applyTemplates({
 		{ "%.html$", fs.readThemeFile("post.etlua") },
 		{ "^topics/.-%.html$", fs.readThemeFile("index.etlua") },
+		{ "^topics/index%.html$", fs.readThemeFile("archive.etlua") },
 		{ "^feed.xml$", fs.readThemeFile("../shared/feed.etlua") },
 		{ "^index.html$", fs.readThemeFile("blog.etlua") },
 		{ "^404.html$", fs.readThemeFile("404.etlua") },

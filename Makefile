@@ -44,6 +44,7 @@ THEME_FILES = \
 	themes/md2blog/post.etlua \
 	themes/md2blog/root.etlua \
 	themes/blog/404.etlua \
+	themes/blog/archive.etlua \
 	themes/blog/theme.lua \
 	themes/blog/style.css \
 	themes/blog/outer.etlua \

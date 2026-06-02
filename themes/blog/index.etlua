@@ -1,20 +1,8 @@
 <header>
-<% if key then -%>
 <h1>#<%= key %></h1>
-<% else -%>
-<h1>All articles</h1>
-<% end -%>
 </header>
 <%- postList(self) %>
 <footer>
-<%
-local groups = groups
-if not groups then
-	local grouped = table.groupBy(items, "keywords")
-	groups = {}
-	for k, v in pairs(grouped) do table.insert(groups, { key = k }) end
-end
--%>
 <%- keywordList(pathToRoot, table.sorted(table.map(groups, function (g) return g.key end))) %>
 <p>&crarr; <a href="<%= pathToRoot %>index.html">Back</a>
 </footer>
