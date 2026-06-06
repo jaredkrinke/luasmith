@@ -239,7 +239,7 @@ end
 local function parseYaml(yaml)
 	local o = {}
 	for line in string.lines(yaml) do
-		local k, v = string.match(line, "^(.-):(.+)")
+		local k, v = string.match(line, "^(.-)%s-%=%s-(.+)")
 		if k and v then
 			o[k] = parseYamlValue(v)
 		end
@@ -579,7 +579,7 @@ end
 
 local function parseFrontmatter(item)
 	-- Parse YAML frontmatter
-	local i, j, frontmatter = string.find(item.content, "^%-%-%-\r?\n(.-)\r?\n%-%-%-\r?\n")
+	local i, j, frontmatter = string.find(item.content, "^%+%+%+\r?\n(.-)\r?\n%+%+%+\r?\n")
 	if i and j and frontmatter then
 		table.merge(parseYaml(frontmatter), item)
 		item.content = string.sub(item.content, j + 1)
