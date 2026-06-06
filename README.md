@@ -1,5 +1,5 @@
 # luasmith
-**luasmith** is a small, simple, and flexible [static site generator](https://en.wikipedia.org/wiki/Static_site_generator) that is similar in design to [Metalsmith](https://metalsmith.io/), but much smaller because it's built on top of [Lua](https://www.lua.org/) and C instead of JavaScript and Node.js. Example sites are: [here](https://log.schemescape.com/) and [here](https://jaredkrinke.github.io/til/).
+**luasmith** is a small, simple, and flexible [static site generator](https://en.wikipedia.org/wiki/Static_site_generator) that is similar in design to [Metalsmith](https://metalsmith.io/), but much smaller because it's built on top of [Lua](https://www.lua.org/) and C instead of JavaScript and Node.js. Example sites are: [here](https://log.schemescape.com/) and [here](https://til.schemescape.com).
 
 ## Features
 * Seamless relative links between Markdown files
@@ -83,7 +83,7 @@ More content goes here.
 ## Themes
 Built in themes:
 
-* `blog`: a minimal blog theme ([example site](https://jaredkrinke.github.io/til/))
+* `blog`: a minimal blog theme ([example site](https://til.schemescape.com))
 * `md2blog`: an opinionated (and slightly less minimal) blog theme, following the structure of [md2blog](https://jaredkrinke.github.io/md2blog/) ([example site](https://log.schemescape.com/))
 
 Community themes:
@@ -112,7 +112,7 @@ After pointing it to a theme, it's completely up to the theme what happens next,
 4. Apply templates (using [etlua](https://github.com/leafo/etlua))
 5. Write everything to the output directory (named `out/` by default)
 
-Note that the built-in templates assume Markdown files contain metadata in frontmatter that includes `title`, `description`, `date`, and optionally `keywords`. See the `example/content/` directory for examples (using both Lua and a subset of YAML).
+Note that the built-in templates assume Markdown files contain metadata in frontmatter that includes `title`, `description`, `date`, and optionally `keywords`. See the `sample/content/` directory for examples (using both Lua and a subset of YAML).
 
 ### Customization
 If you want to customize the site's appearance or functionality, just copy an existing theme directory from this repository and start modifying the templates and/or Lua script.
