@@ -239,7 +239,18 @@ end
 local function parseYaml(yaml)
 	local o = {}
 	for line in string.lines(yaml) do
-		local k, v = string.match(line, "^(.-)%s-%=%s-(.+)")
+		local k, v = string.match(line, "^(.-):(.+)")
+		if k and v then
+			o[k] = parseYamlValue(v)
+		end
+	end
+	return o
+end
+
+local function parseToml(toml)
+	local o = {}
+	for line in string.lines(toml) do
+		local k, v = string.match(line, "^(.-)%s-=(.+)")
 		if k and v then
 			o[k] = parseYamlValue(v)
 		end
@@ -578,18 +589,30 @@ local function postProcessMarkdown(content)
 end
 
 local function parseFrontmatter(item)
+	local i, j, frontmatter
+
 	-- Parse YAML frontmatter
-	local i, j, frontmatter = string.find(item.content, "^%+%+%+\r?\n(.-)\r?\n%+%+%+\r?\n")
+	i, j, frontmatter = string.find(item.content, "^%-%-%-\r?\n(.-)\r?\n%-%-%-\r?\n")
 	if i and j and frontmatter then
 		table.merge(parseYaml(frontmatter), item)
 		item.content = string.sub(item.content, j + 1)
-	else
-		-- Parse Lua frontmatter
-		i, j, frontmatter = string.find(item.content, "^%[%[\r?\n(.-)\r?\n%]%]\r?\n")
-		if i and j and frontmatter then
-			table.merge(parseLua(frontmatter), item)
-			item.content = string.sub(item.content, j + 1)
-		end
+		return
+	end
+
+	-- Parse Lua frontmatter
+	i, j, frontmatter = string.find(item.content, "^%[%[\r?\n(.-)\r?\n%]%]\r?\n")
+	if i and j and frontmatter then
+		table.merge(parseLua(frontmatter), item)
+		item.content = string.sub(item.content, j + 1)
+		return
+	end
+
+	-- Parse TOML frontmatter
+	i, j, frontmatter = string.find(item.content, "^%+%+%+\r?\n(.-)\r?\n%+%+%+\r?\n")
+	if i and j and frontmatter then
+		table.merge(parseToml(frontmatter), item)
+		item.content = string.sub(item.content, j + 1)
+		return
 	end
 end
 
