@@ -3,20 +3,30 @@
 <head>
 <meta charset="utf-8" />
 <title><%= title or site.title %></title>
-<% if description then %><meta name="description" content="<%= description %>" /><% end %>
-<% if keywords then %><meta name="keywords" content="<%= table.concat(keywords, ",") %>" /><% end %>
+<% if description then -%>
+<meta name="description" content="<%= description %>" />
+<% end -%>
+<% if keywords then -%>
+<meta name="keywords" content="<%= table.concat(keywords, ",") %>" />
+<% end -%>
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 <link rel="stylesheet" href="<%= pathToRoot %>style.css" />
 <link rel="icon" href="data:," />
-<% if path == "index.html" then %><link rel="alternate" type="application/rss+xml" href="feed.xml" /><% end %>
+<% if path == "index.html" then -%>
+<link rel="alternate" type="application/rss+xml" href="feed.xml" />
+<% end -%>
 <% if title and date then -%>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "<%- shared.escapeQuotes(title) %>",
-  <% if description then %>"abstract": "<%- shared.escapeQuotes(description) %>",<% end%>
-  <% if keywords then %>"keywords": "<%- shared.escapeQuotes(table.concat(keywords, ",")) %>",<% end %>
+<% if description then -%>
+  "abstract": "<%- shared.escapeQuotes(description) %>",
+<% end -%>
+<% if keywords then -%>
+  "keywords": "<%- shared.escapeQuotes(table.concat(keywords, ",")) %>",
+<% end -%>
   "datePublished": "<%= date %>"
 }
 </script>
@@ -24,6 +34,7 @@
 </head>
 <body>
 <main>
+
 <%- content %>
 </main>
 <% if site.footer then -%>
