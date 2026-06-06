@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+cd test
+rm -rf actual
+mkdir actual
+for i in fm-lua fm-yaml fm-toml; do
+	echo "Running test $i..."
+	../luasmith fm.lua "$i" "actual/$i"
+	if ! diff -qr baseline/fm "actual/$i" ; then
+		echo "*** TEST FAILED ***"
+	fi
+done
+

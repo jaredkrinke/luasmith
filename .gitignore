@@ -6,7 +6,8 @@
 *.com*
 *.elf
 luasmith
-test/
+t/
+test/actual/
 sample/out/
 tags
 *.pdb
