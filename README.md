@@ -112,7 +112,7 @@ After pointing it to a theme, it's completely up to the theme what happens next,
 4. Apply templates (using [etlua](https://github.com/leafo/etlua))
 5. Write everything to the output directory (named `out/` by default)
 
-Note that the built-in templates assume Markdown files contain metadata in frontmatter that includes `title`, `description`, `date`, and optionally `keywords`. See the `sample/content/` directory for examples (using both Lua and a subset of YAML).
+Note that the built-in templates assume Markdown files contain metadata in frontmatter that includes `title`, `description`, `date`, and optionally `keywords`. See the `sample/content/` directory for examples (using Lua, a subset of YAML, and TOML).
 
 ### Customization
 If you want to customize the site's appearance or functionality, just copy an existing theme directory from this repository and start modifying the templates and/or Lua script.
