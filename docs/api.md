@@ -59,7 +59,7 @@ There are a few different kinds of processing nodes in luasmith (number of input
 * `omitWhen(test, pattern)` calls function `test` on each item matching path `pattern` and removes items that return non-false
 
 ### Transform Nodes
-* `processMarkdown()` converts `*.md` files from Markdown to HTML (`.html`), extracting either Lua, (limited) YAML, or TOML frontmatter metadata in the process
+* `processMarkdown()` converts `*.md` files from Markdown to HTML (`.html`), extracting either Lua, (limited) YAML, or (limited) TOML frontmatter metadata in the process
 * `highlightSyntax()` adds HTML spans with `.hl-*` CSS classes to fenced code blocks
 * `injectMetadata(properties, pattern)` merges `properties` into items that match path `pattern`
 * `deriveMetadata(derivations, pattern)` similar to `injectMetadata` but instead of adding fixed metadata, it runs functions on the item; the format of `derivations` is `{ [property] = f, ... }` where `f` takes in the item and returns the new value

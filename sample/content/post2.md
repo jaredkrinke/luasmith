@@ -1,6 +1,6 @@
 ---
 title: Second post
-description: This post uses a subset of YAML for frontsmatter, instead of Lua.
+description: This post uses a subset of YAML for frontmatter, instead of Lua.
 date: 2025-04-22
 ---
 
@@ -14,6 +14,6 @@ This post's YAML frontmatter:
 
 ```yaml
 title: Second post
-description: This post uses a subset of YAML for front matter, instead of Lua.
+description: This post uses a subset of YAML for frontmatter, instead of Lua.
 date: 2025-04-22
 ```
