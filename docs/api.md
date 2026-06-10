@@ -1,5 +1,5 @@
 # API
-This documentation is split into a few sections
+This documentation is split into a few sections:
 
 * [Lua standard library information](#lua)
 * [General helper functions](#lua-helpers)
