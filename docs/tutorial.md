@@ -162,7 +162,7 @@ return {
 There you go! Now you've got a barebones blog.
 
 ### Bonus: syntax highlighting and link checking
-* Add `highlightSytnax()` after `processMarkdown()` to apply CSS classes to code blocks
+* Add `highlightSyntax()` after `processMarkdown()` to apply CSS classes to code blocks
 * Add `checkLinks()` to check that relative links are not broken
 
 ```lua
