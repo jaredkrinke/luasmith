@@ -27,7 +27,8 @@ local limit = 10
 local count = 0
 local keywordSet = {}
 local truncated = false
-for _, item in ipairs(items) do
+local itemsByDate = table.sortBy(table.include(items, shared.hasDate), "date", true)
+for _, item in ipairs(itemsByDate) do
 	if truncated then break end
 	for _, keyword in ipairs(item.keywords or {}) do
 		if not keywordSet[keyword] then
