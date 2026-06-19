@@ -123,3 +123,20 @@ See [docs/tutorial.md](docs/tutorial.md) for a tutorial that starts from scratch
 ## API Documentation
 See [docs/api.md](docs/api.md) for detailed information on helper functions, processing nodes, etc.
 
+## Notes
+### Supported Markdown extensions
+For Markdown, luasmith uses [md4c](https://github.com/mity/md4c), with the following extensions enabled:
+
+* Tables
+* Footnotes
+* Auto-linking of URLs and email addresses
+* Strikethrough
+* Relative links between Markdown files (not part of md4c)
+* Syntax highlighting (optional, not part of md4c)
+
+Frontmatter is supported in the following formats (not part of md4c):
+
+* YAML (limited support): ` ``` ... ``` `
+* TOML (limited support): ` +++ ... +++ `
+* Lua: ` [[ ... ]] `
+

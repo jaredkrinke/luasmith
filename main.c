@@ -60,6 +60,7 @@ int l_markdown_to_html(lua_State* L) {
 		&push_internal,
 		&state,
 		(	0
+			| MD_FLAG_FOOTNOTES
 			| MD_FLAG_PERMISSIVEURLAUTOLINKS
 			| MD_FLAG_PERMISSIVEEMAILAUTOLINKS
 			| MD_FLAG_TABLES

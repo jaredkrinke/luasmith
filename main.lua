@@ -665,6 +665,7 @@ end
 
 local function unescapeHtml(html)
 	html = string.gsub(html, "&apos;", "'")
+	html = string.gsub(html, "&#x27;", "'")
 	html = string.gsub(html, "&quot;", "\"")
 	html = string.gsub(html, "&lt;", "<")
 	html = string.gsub(html, "&gt;", ">")
