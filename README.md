@@ -130,9 +130,9 @@ For Markdown, luasmith uses [md4c](https://github.com/mity/md4c), with the follo
 
 Frontmatter is supported in the following formats (not part of md4c):
 
-* YAML (limited support): ` ``` ... ``` `
-* TOML (limited support): ` +++ ... +++ `
-* Lua: ` [[ ... ]] `
+* YAML (limited support): `--- ... ---`
+* TOML (limited support): `+++ ... +++`
+* Lua: `[[ ... ]]`
 
 ## Example / Tutorial
 See [docs/tutorial.md](docs/tutorial.md) for a tutorial that starts from scratch with a trivial pipeline and builds it up into a simple blog theme.
