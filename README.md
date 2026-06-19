@@ -117,12 +117,6 @@ Note that the built-in templates assume Markdown files contain metadata in front
 ### Customization
 If you want to customize the site's appearance or functionality, just copy an existing theme directory from this repository and start modifying the templates and/or Lua script.
 
-## Example / Tutorial
-See [docs/tutorial.md](docs/tutorial.md) for a tutorial that starts from scratch with a trivial pipeline and builds it up into a simple blog theme.
-
-## API Documentation
-See [docs/api.md](docs/api.md) for detailed information on helper functions, processing nodes, etc.
-
 ## Notes
 ### Supported Markdown extensions
 For Markdown, luasmith uses [md4c](https://github.com/mity/md4c), with the following extensions enabled:
@@ -139,4 +133,10 @@ Frontmatter is supported in the following formats (not part of md4c):
 * YAML (limited support): ` ``` ... ``` `
 * TOML (limited support): ` +++ ... +++ `
 * Lua: ` [[ ... ]] `
+
+## Example / Tutorial
+See [docs/tutorial.md](docs/tutorial.md) for a tutorial that starts from scratch with a trivial pipeline and builds it up into a simple blog theme.
+
+## API Documentation
+See [docs/api.md](docs/api.md) for detailed information on helper functions, processing nodes, etc.
 
