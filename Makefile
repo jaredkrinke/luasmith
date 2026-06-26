@@ -174,8 +174,8 @@ GRAMMARS = \
 
 scripts.lua.h: etlua/etlua.lua $(GRAMMARS) $(THEME_FILES)
 	echo "char* _embedded_scripts[] = {" > $@
-	cat etlua/etlua.lua |$(SED) -f stringify.sed -e '$$a,' -e '1i"_etlua.lua",' >> $@
-	for grammar in $(GRAMMARS); do cat "scintillua/lexers/$$grammar" |$(SED) -f stringify.sed -e '$$a,' -e "1i\"$$grammar\","; done >> $@
-	for themefile in $(THEME_FILES); do cat "$$themefile" |$(SED) -f stringify.sed -e '$$a,' -e "1i\"$$themefile\","; done >> $@
+	cat etlua/etlua.lua |$(SED) -f stringify.sed -e '$$s/\(.*\)/\1,/' -e '1s/\(.*\)/"_etlua.lua",\1/' >> $@
+	for grammar in $(GRAMMARS); do cat "scintillua/lexers/$$grammar" |$(SED) -f stringify.sed -e '$$s/\(.*\)/\1,/' -e "1s/\\(.*\\)/\"$$grammar\",\\1/"; done >> $@
+	for themefile in $(THEME_FILES); do cat "$$themefile" |$(SED) -f stringify.sed -e '$$s/\(.*\)/\1,/' -e "1s/\\(.*\\)/\"$$(echo $$themefile |$(SED) -e s/\\//\\\\\\//g)\",\\1/"; done >> $@
 	echo "NULL };" >> $@
 
