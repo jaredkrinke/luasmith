@@ -1,5 +1,6 @@
 # Configuration
 CC=cc
+SED=sed
 MYCFLAGS=-Os -Wall
 MYRC=
 LUA_CFLAGS=-DLUA_USE_POSIX
@@ -20,7 +21,7 @@ clean:
 
 main.lua.h: main.lua
 	echo "#define STRINGIFIED_MAIN \\" > $@
-	cat main.lua |sed -f stringify.sed >> $@
+	cat main.lua |$(SED) -f stringify.sed >> $@
 
 main.o: main.c main.lua.h scripts.lua.h
 	$(CC) $(CFLAGS) -c main.c -o $@
@@ -173,8 +174,8 @@ GRAMMARS = \
 
 scripts.lua.h: etlua/etlua.lua $(GRAMMARS) $(THEME_FILES)
 	echo "char* _embedded_scripts[] = {" > $@
-	cat etlua/etlua.lua |sed -f stringify.sed -e '$$a,' -e '1i"_etlua.lua",' >> $@
-	for grammar in $(GRAMMARS); do cat "scintillua/lexers/$$grammar" |sed -f stringify.sed -e '$$a,' -e "1i\"$$grammar\","; done >> $@
-	for themefile in $(THEME_FILES); do cat "$$themefile" |sed -f stringify.sed -e '$$a,' -e "1i\"$$themefile\","; done >> $@
+	cat etlua/etlua.lua |$(SED) -f stringify.sed -e '$$a,' -e '1i"_etlua.lua",' >> $@
+	for grammar in $(GRAMMARS); do cat "scintillua/lexers/$$grammar" |$(SED) -f stringify.sed -e '$$a,' -e "1i\"$$grammar\","; done >> $@
+	for themefile in $(THEME_FILES); do cat "$$themefile" |$(SED) -f stringify.sed -e '$$a,' -e "1i\"$$themefile\","; done >> $@
 	echo "NULL };" >> $@
 
