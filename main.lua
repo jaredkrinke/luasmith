@@ -784,6 +784,13 @@ highlightSyntax = function (highlightSpan)
 	"%.html$")
 end
 
+processEtlua = function (pattern)
+	return createTransformNode(function (item)
+		item.content = etlua.render(item.content, item)
+	end,
+	pattern or "%.md$")
+end
+
 injectMetadata = function (properties, pattern)
 	return createTransformNode(function (item)
 			table.merge(properties, item)

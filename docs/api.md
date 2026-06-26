@@ -63,6 +63,7 @@ There are a few different kinds of processing nodes in luasmith (number of input
 ### Transform Nodes
 * `processMarkdown()` converts `*.md` files from Markdown to HTML (`.html`), extracting either Lua, (limited) YAML, or (limited) TOML frontmatter metadata in the process
 * `highlightSyntax()` adds HTML spans with `.hl-*` CSS classes to fenced code blocks
+* `processEtlua(pattern?)` evaluates any [etlua](https://github.com/leafo/etlua) blocks in item content, similar to Hugo shortcodes, but using Lua (note: due to Markdown processing escaping angle brackets, be sure to use this node *prior* to `processMarkdown()`); `pattern` defaults to `%.md$` ("*.md")
 * `injectMetadata(properties, pattern)` merges `properties` into items that match path `pattern`
 * `deriveMetadata(derivations, pattern)` similar to `injectMetadata` but instead of adding fixed metadata, it runs functions on the item; the format of `derivations` is `{ [property] = f, ... }` where `f` takes in the item and returns the new value
 * `applyTemplates(templates)` applies a single template to each matched item; note that `templates` is an array of the format `{ [pattern] = template }` and the last match wins (e.g. so you can match "all HTML files" but then override that logic for specific items using more specific patterns)
