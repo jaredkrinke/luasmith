@@ -16,6 +16,8 @@ In particular, note that luasmith builds on top of [Lua's string matching patter
 The built-in themes each support site-level metadata, as returned by a script in the input directory named `site.lua`.
 
 ### `blog` Theme
+An optional `index.md` file in the root of the input directory will have its rendered contents added to the top of (only) the site's landing page. This is useful for adding an introduction, contact info, links to other sites, etc.
+
 Required/recommended:
 
 * `title`: Title for the site
