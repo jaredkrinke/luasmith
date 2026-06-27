@@ -90,6 +90,18 @@ There are a few different kinds of processing nodes in luasmith (number of input
 
 Note: `aggregate()` can be easily used to create a blog index/home page with a list of posts. `createIndexes()` can be used to create e.g. "keyword index" pages.
 
+## Theme helpers
+The built-in themes rely on some shared and reusable (though not necessarily guaranteed to be stable across release!) functionality.
+
+### Atom feeds
+To add an Atom feed to a from-scratch theme, you'll need to
+
+1. Load the shared helpers: `shared = require("themes.shared")`
+2. Define site metadata: `local site = { title = ..., url = ... }`
+3. Aggregate articles into a new item named e.g. `feed.xml`, in the build pipeline: `aggregate("feed.xml", "%.html$"),`
+4. Inject site metadata into items, as part of the build pipeline: `injectMetadata({ site = site }),`
+5. Ensure a row in the `applyTemplates()` tranform node applies the built-in feed template (using `readFile` instead of the usual `readThemeFile`): `{ "^feed.xml$", fs.readFile("themes/shared/feed.etlua") },`
+
 ## Lua Helpers
 For convenience, luasmith exposes some generic Lua helper functions, as documented here. See [main.lua](../main.lua) for the source code.
 
