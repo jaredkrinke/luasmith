@@ -36,7 +36,22 @@ Optional:
 * `links`: List of links to include at the top of each page, example: `links = { { "About", "about.html" }, { "Contact", "mailto:contact@example.com" } }`
 
 ## Item Schema
-Items in luasmith are represented as Lua tables, with a few known keys:
+### Frontmatter
+Both `blog` and `md2blog` items make use of the following frontmatter properties:
+
+* `title`: Name of the article
+* `date`: Creation date of the article, in the form `YYYY-MM-DD` or `YYYY-MM-DD HH:mm`
+* `description`: Description or summary of the article (optional in the `blog` theme)
+* `keywords`: Optional array of keywords, e.g. `keywords: [foo,bar]`
+
+Optional:
+
+* `draft`: Optionally set to `true` to exclude an item
+
+Additional properties can be added, for use in custom templates.
+
+### Templates
+Items in luasmith are represented as Lua tables, with a few known keys that can be used in templates (in addition to any frontmatter properties):
 
 * `path` the path (relative to the input/output root) of the item
 * `pathToRoot` the path *from* the item *to* the root (useful for relative references)
