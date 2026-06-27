@@ -136,3 +136,6 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 ### `url` Helpers
 * `url.isRelative(url)` returns true if `url` is a relative URL (instead of absolute)
 
+### Item/HTML helpers
+* `lib.item.repathRelativeLinks(item, prefix)` rewrites relative HTML links so that they start with the given prefix (this can be used to rewrite relative links as absolute links, e.g. as used when built-in themes produce Atom feeds)
+

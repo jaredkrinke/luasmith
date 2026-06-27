@@ -415,6 +415,32 @@ function url.isRelative(url)
 	return not string.find(url, ":")
 end
 
+-- Misc. helpers
+lib = {}
+lib.item = {}
+
+function lib.item.repathRelativeLinks(item, prefix)
+	local parts = {}
+	local pathFromRoot = fs.directory(item.path)
+	_parseHtml(item.content, function (event)
+		local part = event.html
+
+		-- Repath relative links, if needed
+		if pathFromRoot ~= "" and event.attribute and event.value
+			and((event.tag == "a" and event.attribute == "href") -- Check for links
+			or (event.tag == "link" and event.attribute == "href")
+			or (event.tag == "script" and event.attribute == "src")
+			or (event.tag == "img" and event.attribute == "src"))
+			and not string.find(event.value, ":") -- Local/relative links only
+		then
+			part = event.attribute .. "=\"" .. (prefix or "") .. fs.join(pathFromRoot, event.value) .. "\""
+		end
+
+		table.insert(parts, part)
+	end)
+	return table.concat(parts)
+end
+
 -- Processing node helpers
 function createChange(changeType, item)
 	if not item.pathToRoot then
