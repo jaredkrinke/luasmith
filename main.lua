@@ -52,6 +52,11 @@ function format(v)
 end
 
 -- Helpers
+local function loadOrError(ld, source, mode, env)
+	local result, err = load(ld, source, mode, env)
+	return result or error(err)
+end
+
 log = {}
 function log.warn(message)
 	print("WARN:\t" .. message)
@@ -211,9 +216,9 @@ function string.trim(str)
 end
 
 -- Frontmatter parsing
-local function parseLua(lua)
+local function parseLua(lua, file)
 	local o = {}
-	load(lua, "frontmatter", "t", o)()
+	loadOrError(lua, file or "frontmatter", "t", o)()
 	return o
 end
 
@@ -368,7 +373,12 @@ end
 function fs.tryLoadFile(path)
 	local content = fs.tryReadFile(path)
 	if content then
-		return load(content, path, "t")
+		local result, err = loadOrError(content, path, "t")
+		if result then
+			return result
+		else
+			error(err)
+		end
 	else
 		return nil
 	end
@@ -381,7 +391,7 @@ end
 
 function fs.loadThemeFile(path)
 	local p = fs.join(themeDirectory, path)
-	return load(fs.readFile(p), p, "t")
+	return loadOrError(fs.readFile(p), p, "t")
 end
 
 function fs.doThemeFile(path)
@@ -602,7 +612,7 @@ local function parseFrontmatter(item)
 	-- Parse Lua frontmatter
 	i, j, frontmatter = string.find(item.content, "^%[%[\r?\n(.-)\r?\n%]%]\r?\n")
 	if i and j and frontmatter then
-		table.merge(parseLua(frontmatter), item)
+		table.merge(parseLua(frontmatter, item.path), item)
 		item.content = string.sub(item.content, j + 1)
 		return
 	end
@@ -624,12 +634,9 @@ end
 
 processMarkdown = function ()
 	return createTransformNode(function (item)
-		-- .md -> .html
-		item.path = string.gsub(item.path, "%.md$", ".html")
-
-		-- Parse frontmatter
 		parseFrontmatter(item)
 
+		item.path = string.gsub(item.path, "%.md$", ".html")
 		item.content = markdown.toHtml(item.content)
 
 		-- TODO: This is a quick hack to add ids to headers. Ideally, this
