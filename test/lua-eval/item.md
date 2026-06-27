@@ -11,3 +11,5 @@ And <%- table.concat({ "<em>", "inline", "</em>" }) %>, too!
 <% end -%>
 </ul>
 
+<%= path %>
+
