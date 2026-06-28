@@ -31,26 +31,6 @@ table.insert(package.searchers, function (name)
 	end
 end)
 
--- TODO: Ignore non-file/directory
-
--- TODO: Needed?
-function format(v)
-	local t = type(v)
-	if t == "table" then
-		local s = "{"
-		for k, v in pairs(v) do
-			s = s .. " " .. tostring(k) .. " = " .. format(v) .. ","
-		end
-		s = s .. " }"
-		return s
-	elseif t == "string" then
-		-- TODO: Escape quotes
-		return "\"" .. tostring(v) .. "\""
-	else
-		return tostring(v)
-	end
-end
-
 -- Helpers
 local function loadOrError(ld, source, mode, env)
 	local result, err = load(ld, source, mode, env)
@@ -161,21 +141,6 @@ function iterator.collect(iterator)
 		table.insert(result, item)
 	end
 	return result
-end
-
--- TODO: Needed?
-function chainEnvironment(parent)
-	local e = {}
-	setmetatable(e, {
-		__index = function (table, key)
-			local r = rawget(table, key)
-			if r then
-				return r
-			end
-			return parent[key]
-		end,
-	})
-	return e
 end
 
 -- String helpers
@@ -916,7 +881,6 @@ deriveMetadata = function (derivations, pattern)
 		pattern)
 end
 
--- TODO: Should templates be able to include frontmatter?
 -- Note: Needed to rename etlua's module to not collide with any etlua lexer...
 etlua = require("_etlua")
 
