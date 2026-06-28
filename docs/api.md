@@ -78,11 +78,20 @@ There are a few different kinds of processing nodes in luasmith (number of input
 
 ### Transform Nodes
 * `processMarkdown()` converts `*.md` files from Markdown to HTML (`.html`), extracting either Lua, (limited) YAML, or (limited) TOML frontmatter metadata in the process
-* `highlightSyntax(options?)` adds HTML spans with `.hl-*` CSS classes to fenced code blocks, use the optional `options` argument for syntax highlighting aliases, e.g. to have a code block tagged `sh` be highlighted using the Bash highlighter: `highlightSyntax({ sh = "bash" })`
+* `highlightSyntax(options?)` adds HTML spans with `.hl-*` CSS classes to fenced code blocks (see notes [below](#syntax-highlighting) for more detail)
 * `processEtlua(pattern?)` evaluates any [etlua](https://github.com/leafo/etlua) blocks in item content, similar to Hugo shortcodes, but using Lua (note: due to Markdown processing escaping angle brackets, be sure to use this node *prior* to `processMarkdown()`); `pattern` defaults to `%.md$` ("*.md")
 * `injectMetadata(properties, pattern)` merges `properties` into items that match path `pattern`
 * `deriveMetadata(derivations, pattern)` similar to `injectMetadata` but instead of adding fixed metadata, it runs functions on the item; the format of `derivations` is `{ [property] = f, ... }` where `f` takes in the item and returns the new value
 * `applyTemplates(templates)` applies a single template to each matched item; note that `templates` is an array of the format `{ [pattern] = template }` and the last match wins (e.g. so you can match "all HTML files" but then override that logic for specific items using more specific patterns)
+
+#### Syntax highlighting
+Syntax highlighting uses [Scintillua](https://github.com/orbitalquark/scintillua) internally. `highlightSyntax()` accepts an optional table, with the following keys:
+
+* `aliases`: Table of syntax aliases, where keys are code block tags and values are the corresponding  highlighters ("lexers"), for example `highlightSyntax({ sh = "bash" })` would highlight code blocks tagged `sh` with the embedded Bash lexer (`bash.lua`)
+
+luasmith's embedded copy of Scintillua may be slightly out of date, but, for reference, [here is a list of Scintillua lexers](https://github.com/orbitalquark/scintillua/tree/default/lexers).
+
+Note: if you need to tweak or add a lexer, you can simply add a lexer on Lua's search path (usually the current working directory) and it will take precedence over any embedded lexer.
 
 ### Aggregate Nodes
 * `aggregate(path, pattern)` creates a new item at `path` with empty `content`, but with an `items` property that is an array of all items matched by `pattern`
