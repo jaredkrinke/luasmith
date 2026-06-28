@@ -7,6 +7,7 @@ local site = {
 	url = "https://example.com/",
 	footer = nil,
 	keywordDirectoryPattern = "^posts/(.-)/.+%.html$",
+	syntaxAliases = nil,
 }
 
 -- Helpers
@@ -105,7 +106,10 @@ return {
 	-- Markdown, drafts, syntax highlighting
 	processMarkdown(),
 	omitWhen(function (item) return item.draft or item.path == "site.lua" end),
-	highlightSyntax(highlightSpan),
+	highlightSyntax({
+		aliases = site.syntaxAliases,
+		highlightSpan = highlightSpan,
+	}),
 	deriveMetadata({ keywords = deriveKeywords }, site.keywordDirectoryPattern),
 
 	-- RSS and root page

@@ -28,6 +28,7 @@ Optional:
 * `subtitle`: Subtitle for the site (default: `nil`/none)
 * `footer`: Footer (raw HTML) to append to the end of every page (default: `nil`/none)
 * `keywordDirectoryPattern`: Lua pattern for deriving keywords from the first capture group of item paths (default: `"^posts/(.-)/.+%.html$"`, meaning the (first) subdirectory of `posts/` is the name of a keyword)
+* `syntaxAliases`: Aliases for syntax highlighting, e.g. to have a code block tagged as `sh` use the Scintillua highlighter ("lexer") for Bash, you could set `syntaxAliases = { sh = "bash" }`
 
 ### `md2blog` Theme
 * `title`: Title for the site
@@ -77,7 +78,7 @@ There are a few different kinds of processing nodes in luasmith (number of input
 
 ### Transform Nodes
 * `processMarkdown()` converts `*.md` files from Markdown to HTML (`.html`), extracting either Lua, (limited) YAML, or (limited) TOML frontmatter metadata in the process
-* `highlightSyntax()` adds HTML spans with `.hl-*` CSS classes to fenced code blocks
+* `highlightSyntax(options?)` adds HTML spans with `.hl-*` CSS classes to fenced code blocks, use the optional `options` argument for syntax highlighting aliases, e.g. to have a code block tagged `sh` be highlighted using the Bash highlighter: `highlightSyntax({ sh = "bash" })`
 * `processEtlua(pattern?)` evaluates any [etlua](https://github.com/leafo/etlua) blocks in item content, similar to Hugo shortcodes, but using Lua (note: due to Markdown processing escaping angle brackets, be sure to use this node *prior* to `processMarkdown()`); `pattern` defaults to `%.md$` ("*.md")
 * `injectMetadata(properties, pattern)` merges `properties` into items that match path `pattern`
 * `deriveMetadata(derivations, pattern)` similar to `injectMetadata` but instead of adding fixed metadata, it runs functions on the item; the format of `derivations` is `{ [property] = f, ... }` where `f` takes in the item and returns the new value

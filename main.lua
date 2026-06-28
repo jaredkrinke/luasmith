@@ -675,7 +675,7 @@ end
 local grammars = {}
 lexer = require("lexer")
 
-local function tryLoadGrammar(language)
+local function tryLoadGrammar(language, aliases)
 	-- Cache result of trying to load grammar
 	local cached = grammars[language]
 	if cached == nil then
@@ -686,11 +686,20 @@ local function tryLoadGrammar(language)
 		if success then
 			grammars[language] = grammar
 			return grammar
-		else
-			log.info("Syntax highlighting not available for: " .. language)
-			grammars[language] = false
-			return nil
 		end
+
+		local alias = aliases[language]
+		if alias then
+			grammar = tryLoadGrammar(alias, aliases)
+			if grammar then
+				grammars[language] = grammar
+				return grammar
+			end
+		end
+
+		log.info("Syntax highlighting not available for: " .. language)
+		grammars[language] = false
+		return nil
 	else
 		return cached or nil
 	end
@@ -719,8 +728,8 @@ local function highlightSpanDefault(verbatim, tag)
 	return "<span class=\"hl-" .. tag .. "\">" .. verbatim .. "</span>"
 end
 
-local function highlightSyntaxInternal(language, escaped, highlightSpan)
-	local parser = tryLoadGrammar(language)
+local function highlightSyntaxInternal(language, escaped, aliases, highlightSpan)
+	local parser = tryLoadGrammar(language, aliases)
 	if parser then
 		local parts = {}
 		local code = unescapeHtml(escaped)
@@ -749,9 +758,20 @@ local function highlightSyntaxInternal(language, escaped, highlightSpan)
 	return escaped
 end
 
-highlightSyntax = function (highlightSpan)
-	-- TODO: Consider integrating with md4c-html directly, instead of post-procsesing
+highlightSyntax = function (optionsOrHighlightSpan)
+	-- Need to handle highlightSpan instead of options for backcompat
+	local highlightSpan
+	local aliases
+	if type(optionsOrHighlightSpan) == "function" then
+		highlightSpan = optionsOrHighlightSpan
+	elseif type(optionsOrHighlightSpan) == "table" then
+		local options = optionsOrHighlightSpan
+		highlightSpan = options.highlightSpan
+		aliases = options.aliases
+	end
+
 	highlightSpan = highlightSpan or highlightSpanDefault
+	aliases = aliases or {}
 	return createTransformNode(function (item)
 		local inPre = false
 		local inCode = false
@@ -791,7 +811,7 @@ highlightSyntax = function (highlightSpan)
 					-- Highlight and output code
 					local code = table.concat(codeParts)
 					if code ~= "" then
-						html = highlightSyntaxInternal(language, code, highlightSpan) .. event.html
+						html = highlightSyntaxInternal(language, code, aliases, highlightSpan) .. event.html
 					end
 
 					-- Reset
