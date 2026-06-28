@@ -162,4 +162,17 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 
 ### Item/HTML helpers
 * `lib.item.repathRelativeLinks(item, prefix)` rewrites relative HTML links so that they start with the given prefix (this can be used to rewrite relative links as absolute links, e.g. as used when built-in themes produce Atom feeds)
+* `lib.item.createTableOfContents(item)` generates a table of contents for the given HTML item (see example below)
+
+#### Inserting a table of contents
+Example of inserting a table of contents into an etlua template (note the call to `lib.item.createTableOfContents`:
+
+```etlua
+<header>
+<h1><%= title %></h1>
+<details><summary>Table of contents</summary>
+<%- lib.item.createTableOfContents(self) %>
+</details>
+</header>
+```
 

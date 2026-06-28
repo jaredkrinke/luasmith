@@ -441,6 +441,58 @@ function lib.item.repathRelativeLinks(item, prefix)
 	return table.concat(parts)
 end
 
+function lib.item.createTableOfContents(item)
+	local level = nil
+	local min = nil
+	local toc = { }
+	local position = 1
+	local count = 0
+	while true do
+		local i, j, l, id, title = string.find(item.content, "<h([1-6]) -id=\"(.-)\" ->(.-)</h[1-6]>", position)
+		if i then
+			l = l + 0
+			if level then
+				if l < min then
+					log.warn("Invalid document structure in " .. item.path .. " for \"" .. id .. "\": encountered h" .. l .. " under h" .. min .. "!")
+					while l < min do
+						table.insert(toc, 1, "<ol>\n")
+						min = min - 1
+					end
+				end
+
+				while l > level do
+					table.insert(toc, "<ol>\n")
+					level = level + 1
+				end
+				while l < level do
+					table.insert(toc, "</ol>\n")
+					level = level - 1
+				end
+			else
+				level = l
+				min = level
+				table.insert(toc, "<ol>\n")
+			end
+
+			table.insert(toc, "<li><a href=\"#" .. id .. "\">" .. title .. "</a></li>\n")
+			count = count + 1
+			position = j + 1
+		else
+			break
+		end
+	end
+
+	if count > 1 then
+		while level >= min do
+			table.insert(toc, "</ol>\n")
+			level = level - 1
+		end
+		return table.concat(toc)
+	end
+	return ""
+end
+
+
 -- Processing node helpers
 function createChange(changeType, item)
 	if not item.pathToRoot then
