@@ -607,21 +607,25 @@ local function sluggify(slugs, html)
 end
 
 local function postProcessMarkdown(content)
-	local result = ""
+	local parts = {}
 	local position = 1
 	local slugs = {}
 	while true do
 		local i, j, inner = string.find(content, "<h[1-6]>(.-)</h[1-6]>", position)
 		if i then
 			local id = sluggify(slugs, inner)
-			result = result .. string.sub(content, position, i + 2) .. " id=\"" .. id .. "\">" .. string.sub(content, i + 4, j)
+			table.insert(parts, string.sub(content, position, i + 2))
+			table.insert(parts, " id=\"")
+			table.insert(parts, id)
+			table.insert(parts, "\">")
+			table.insert(parts, string.sub(content, i + 4, j))
 			position = j + 1
 		else
-			result = result .. string.sub(content, position)
-			return result
+			table.insert(parts, string.sub(content, position))
+			break
 		end
 	end
-	return result
+	return table.concat(parts)
 end
 
 local function parseFrontmatter(item)
