@@ -33,6 +33,7 @@ luasmith: $(OBJS)
 VPATH = scintillua/lexers
 
 THEME_FILES = \
+	themes/check-links/theme.lua \
 	themes/shared.lua \
 	themes/shared/feed.etlua \
 	themes/md2blog/theme.lua \
