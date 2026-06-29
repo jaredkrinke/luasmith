@@ -100,6 +100,27 @@ Note: if you need to tweak or add a lexer, you can simply add a lexer on Lua's s
 
 Note: `aggregate()` can be easily used to create a blog index/home page with a list of posts. `createIndexes()` can be used to create e.g. "keyword index" pages.
 
+There is also an "escape hatch" for arbitrarily modifying the entire site at once, for example if you want to add previous/next links between posts:
+
+* `processItems(process)`: Calls `process` (a function) with a representation of all items, in the form of a key-value table with paths as keys and items as values; you can add and remove entries to/from the map (luasmith will internally added `path` and `pathToRoot` properties to new items)
+
+Here's an example for adding `previousItem`/`nextItem` links to all items that have a `date` property:
+
+```lua
+processItems(function (items)
+	local itemsWithDates = table.include(table.values(items), function (item) return item.date end)
+	local sorted = table.sortBy(itemsWithDates, "date")
+	local previousItem = nil
+	for _, item in ipairs(sorted) do
+		if previousItem then
+			previousItem.nextItem = item
+			item.previousItem = previousItem
+		end
+		previousItem = item
+	end
+end),
+```
+
 ## Theme helpers
 The built-in themes rely on some shared and reusable (though not necessarily guaranteed to be stable across release!) functionality.
 
@@ -110,7 +131,7 @@ To add an Atom feed to a from-scratch theme, you'll need to
 2. Define site metadata: `local site = { title = ..., url = ... }`
 3. Aggregate articles into a new item named e.g. `feed.xml`, in the build pipeline: `aggregate("feed.xml", "%.html$"),`
 4. Inject site metadata into items, as part of the build pipeline: `injectMetadata({ site = site }),`
-5. Ensure a row in the `applyTemplates()` tranform node applies the built-in feed template: `{ "^feed.xml$", fs.readFile("themes/shared/feed.etlua") },`
+5. Ensure that `applyTemplates()` to generate the feed using the built-in feed template is run, *in a separate step*, *before* generic/outer HTML templates (to avoid having those included in the generated feed): `applyTemplates({ { "^feed.xml$", fs.readFile("themes/shared/feed.etlua") } })`
 
 Note: the last bit of code uses `readFile` instead of the usual `readThemeFile` because it's using the built-in `feed.etlua` file instead of a file from this particular theme's directory.
 
@@ -129,7 +150,8 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 * `table.sorted(table, compare)` creates a new (array) table with items ordered by the result of calling `compare(a, b)` on two elements
 * `table.groupBy(table, key)` groups items in array `table` under keys in a new table -- this is used for creating e.g. index pages based on keywords
 * `table.concatenate(table1, table2)` creates a new array table that contains values from `table1` followed by items from `table2`
-* `table.include(table, incl)` creates a new table that contains values from `table` for which the function `incl` returns a truthy value
+* `table.include(table, incl)` creates a new array table that contains values from array table `table` for which the function `incl` returns a truthy value
+* `table.values(table)` creates a new array table that contains the values from `table` (in unspecified order); think of this as converting a map to an array (discarding the keys in the process)
 
 ### `iterator` Helpers
 * `iterator.count(iterator)` counts the number of items in a Lua iterator

@@ -125,6 +125,14 @@ function table.include(t, f)
 	return r
 end
 
+function table.values(map)
+	local array = {}
+	for _, item in pairs(map) do
+		table.insert(array, item)
+	end
+	return array
+end
+
 iterator = {}
 
 function iterator.count(iterator)
@@ -457,143 +465,120 @@ function lib.item.createTableOfContents(item)
 	return ""
 end
 
-
--- Processing node helpers
-function createChange(changeType, item)
+local function enrichItem(path, item)
+	if not item.path then
+		item.path = path
+	end
 	if not item.pathToRoot then
 		item.pathToRoot = computePathToRoot(item.path)
 	end
-
-	return {
-		changeType = changeType,
-		item = item,
-	}
 end
 
-function createProcessingNode(process, pattern)
-	local p = process
+local function enrichItems(items)
+	for path, item in pairs(items) do
+		item.path = path
+		item.pathToRoot = computePathToRoot(path)
+	end
+end
+
+local function shouldInclude(path, pattern)
 	if pattern then
-		-- Input pattern was supplied; only process selected changes
-		p = function (changes)
-			local includedChanges = {}
-			local excludedChanges = {}
-			for _, change in ipairs(changes) do
-				if string.match(change.item.path, pattern) then
-					table.insert(includedChanges, change)
-				else
-					table.insert(excludedChanges, change)
+		return string.match(path, pattern)
+	end
+	return true
+end
+
+function createTransformNode(transform, pattern)
+	return function (items)
+		local changes = {}
+		for path, item in pairs(items) do
+			if shouldInclude(path, pattern) then
+				local originalPath = path
+				item.self = item
+				transform(item)
+				if originalPath ~= item.path then
+					table.insert(changes, { originalPath, item.path })
+					item.pathToRoot = nil
 				end
+				enrichItem(item.path, item)
 			end
-			return table.concatenate(excludedChanges, process(includedChanges) or {})
+		end
+
+		for _, change in ipairs(changes) do
+			items[change[2]] = items[change[1]]
+			items[change[1]] = nil
 		end
 	end
-
-	return {
-		process = p,
-	}
-end
-
--- TODO: Consider supporting multiple outputs
-function createTransformNode(transform, pattern)
-	return createProcessingNode(function (changes)
-			local newChanges = {}
-			for _, change in ipairs(changes) do
-				local changeType = change.changeType
-				local newChange = change
-				if changeType ~= "delete" then
-					local newItem = table.copy(change.item)
-					newItem.self = newItem
-					transform(newItem)
-					newChange = createChange(changeType, newItem)
-				end
-				table.insert(newChanges, newChange)
-			end
-			return newChanges
-		end,
-		pattern)
 end
 
 function createAggregateNode(aggregate, pattern)
-	-- TODO: Cache inputs from previous runs
-	return createProcessingNode(function (changes)
-			-- Find items
-			local items = {}
-			for _, change in ipairs(changes) do
-				if change.changeType ~= "delete" then
-					table.insert(items, change.item)
-				end
+	return function (items)
+		-- Find items
+		local included = {}
+		for path, item in pairs(items) do
+			if shouldInclude(path, pattern) then
+				table.insert(included, item)
 			end
+		end
 
-			-- Run aggregation
-			local outputItems = aggregate(items)
-			local newChanges = table.map(outputItems, function (item) return createChange("create", item) end)
-			return table.concatenate(changes, newChanges)
-		end,
-		pattern)
+		-- Run aggregation
+		local outputItems = aggregate(included)
+		for _, item in ipairs(outputItems) do
+			enrichItem(item.path, item)
+			items[item.path] = item
+		end
+	end
 end
 
 -- Source/sink nodes
 injectFiles = function (files)
-	return createProcessingNode(function (changes)
-		newChanges = {}
+	return function (items)
 		for path, content in pairs(files) do
-			-- TODO: Detect differences, probably via hash
-			table.insert(newChanges, createChange("create", {
-				path = path,
-				content = content
-			}))
+			local item = { content = content }
+			enrichItem(path, item)
+			items[path] = item
 		end
-		return table.concatenate(changes, newChanges)
-	end)
+	end
 end
 
 readFromSource = function (dir)
-	return createProcessingNode(function (changes)
-			-- TODO: Check for differences from last run
-			newChanges = table.map(fs.enumerateFiles(dir), function (path)
-				return createChange("create", {
-					path = path,
-					content = fs.readFile(fs.join(dir, path)),
-				})
-			end)
-
-			return table.concatenate(changes, newChanges)
-		end)
+	return function (items)
+		for _, path in ipairs(fs.enumerateFiles(dir)) do
+			local item = { content = fs.readFile(fs.join(dir, path)), }
+			enrichItem(path, item)
+			items[path] = item
+		end
+	end
 end
 
-writeToDestination = function (dir, pattern)
-	return createProcessingNode(function (changes)
-			local dirsMade = {}
-			for _, change in ipairs(changes) do
-				-- TODO: Handle deletes
-				local ct = change.changeType
-				if ct == "create" then
-					local item = change.item
-					local localPath = fs.join(dir, item.path)
-					local localDir = fs.directory(localPath)
-					if not dirsMade[localDir] then
-						fs.createDirectory(localDir)
-						dirsMade[localDir] = true
-					end
-					fs.writeFile(localPath, item.content)
-				end
+writeToDestination = function (dir)
+	return function (items)
+		local dirsMade = {}
+		for path, item in pairs(items) do
+			local localPath = fs.join(dir, path)
+			local localDir = fs.directory(localPath)
+			if not dirsMade[localDir] then
+				fs.createDirectory(localDir)
+				dirsMade[localDir] = true
 			end
-		end,
-		pattern)
+			fs.writeFile(localPath, item.content)
+		end
+	end
 end
 
 omitWhen = function (test, pattern)
-	return createProcessingNode(function (changes)
-		local newChanges = {}
-		for _, change in ipairs(changes) do
-			-- TODO: How does this work for caching?
-			if not (change.changeType == "create" and test(change.item)) then
-				table.insert(newChanges, change)
+	return function (items)
+		local deletes = {}
+		for path, item in pairs(items) do
+			if shouldInclude(path, pattern) and test(item) then
+				table.insert(deletes, path)
 			end
 		end
-		return newChanges
-	end,
-	pattern)
+
+		for _, path in ipairs(deletes) do
+			items[path] = nil
+		end
+	end
 end
 
 -- Transform nodes
@@ -1022,11 +1007,18 @@ checkLinks = function ()
 		end)
 end
 
+processItems = function (process)
+	return function (items)
+		process(items)
+		enrichItems(items)
+	end
+end
+
 -- Top-level logic
 function build(nodes)
-	changes = {}
-	for _, node in ipairs(nodes) do
-		changes = node.process(changes)
+	local items = {}
+	for _, process in ipairs(nodes) do
+		process(items)
 	end
 end
 

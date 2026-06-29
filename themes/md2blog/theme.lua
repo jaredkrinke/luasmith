@@ -75,12 +75,12 @@ return {
 	createIndexes(function (tag) return "posts/" .. tag .. "/index.html" end, "tags", "^posts/.+%.html$"),
 	deriveMetadata({ title = function (item) return site.title .. ": Posts tagged with: " .. item.key end }, "^posts/.-/index.html$"),
 	injectMetadata({ site = site }),
+	applyTemplates({ { "^feed.xml$", fs.readThemeFile("../shared/feed.etlua") } }),
 	applyTemplates({
 		{ "%.html$", fs.readThemeFile("misc.etlua") },
 		{ "^posts/.-%.html$", fs.readThemeFile("post.etlua") },
 		{ "^posts/.-/index.html$", fs.readThemeFile("index.etlua") },
 		{ "^posts/index.html$", fs.readThemeFile("archive.etlua") },
-		{ "^feed.xml$", fs.readThemeFile("../shared/feed.etlua") },
 		{ "^index.html$", fs.readThemeFile("root.etlua") },
 		{ "^404.html$", fs.readThemeFile("404.etlua") },
 	}),

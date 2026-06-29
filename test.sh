@@ -20,7 +20,7 @@ for i in footnotes; do
 	fi
 done
 
-for i in lua-eval; do
+for i in lua-eval prev-next; do
 	echo "Running test $i..."
 	../luasmith "$i.lua" "$i" "actual/$i"
 	if ! diff -qr "baseline/$i" "actual/$i" ; then
