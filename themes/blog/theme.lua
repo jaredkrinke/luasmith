@@ -117,9 +117,6 @@ return {
 	aggregate("index.html", "%.html$"),
 	aggregate("topics/index.html", "%.html$"),
 
-	-- Ugly hack to remove any duplicate index.html, e.g. if index.md was present in the input
-	omitWhen(function (item) return item.path == "index.html" and not item.items end),
-
 	-- Keyword indexes
 	createIndexes(function (keyword) return "topics/" .. keyword .. ".html" end, "keywords", "%.html$"),
 	deriveMetadata({ title = function (item) return item.key and ("#" .. item.key) or "All articles" end }, "^topics/.-%.html$"),
