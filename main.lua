@@ -32,8 +32,16 @@ table.insert(package.searchers, function (name)
 end)
 
 -- Helpers
-local function loadOrError(ld, source, mode, env)
-	local result, err = load(ld, source, mode, env)
+local function loadOrError(ld, source, mode)
+	local result, err = load(ld, source, mode)
+	return result or error(err)
+end
+
+local function loadOrErrorInEnvironment(ld, source, mode, env)
+	-- Note: load()'s env argument distinguishes nil from "no argument", so
+	-- this needs to be a separate helper from loadOrError() above!
+	local result, err = load(ld,
+	source, mode, env)
 	return result or error(err)
 end
 
@@ -191,7 +199,7 @@ end
 -- Frontmatter parsing
 local function parseLua(lua, file)
 	local o = {}
-	loadOrError(lua, file or "frontmatter", "t", o)()
+	loadOrErrorInEnvironment(lua, file or "frontmatter", "t", o)()
 	return o
 end
 
@@ -346,12 +354,7 @@ end
 function fs.tryLoadFile(path)
 	local content = fs.tryReadFile(path)
 	if content then
-		local result, err = loadOrError(content, path, "t")
-		if result then
-			return result
-		else
-			error(err)
-		end
+		return loadOrError(content, path, "t")
 	else
 		return nil
 	end
