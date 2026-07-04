@@ -554,17 +554,19 @@ readFromSource = function (dir)
 	end
 end
 
-writeToDestination = function (dir)
+writeToDestination = function (dir, pattern)
 	return function (items)
 		local dirsMade = {}
 		for path, item in pairs(items) do
-			local localPath = fs.join(dir, path)
-			local localDir = fs.directory(localPath)
-			if not dirsMade[localDir] then
-				fs.createDirectory(localDir)
-				dirsMade[localDir] = true
+			if shouldInclude(path, pattern) then
+				local localPath = fs.join(dir, path)
+				local localDir = fs.directory(localPath)
+				if not dirsMade[localDir] then
+					fs.createDirectory(localDir)
+					dirsMade[localDir] = true
+				end
+				fs.writeFile(localPath, item.content)
 			end
-			fs.writeFile(localPath, item.content)
 		end
 	end
 end
