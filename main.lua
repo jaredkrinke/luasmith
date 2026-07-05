@@ -596,18 +596,32 @@ end
 
 writeToDestination = function (dir, pattern)
 	return function (items)
-		local dirsMade = {}
+		-- Check for unspecified content first
+		local dirsToCreate = {}
+		local filesToWrite = {}
 		for path, item in pairs(items) do
 			processingContext = path
 			if shouldInclude(path, pattern) then
-				local localPath = fs.join(dir, path)
-				local localDir = fs.directory(localPath)
-				if not dirsMade[localDir] then
-					fs.createDirectory(localDir)
-					dirsMade[localDir] = true
+				if not item.content then
+					error("Item " .. path .. " does not have any content specified (content property is nil)! Did you forget to apply a template? (To generate an empty file, set the content property to an empty string.)")
 				end
-				fs.writeFile(localPath, item.content)
+
+				local localPath = fs.join(dir, path)
+				dirsToCreate[fs.directory(localPath)] = true
+				filesToWrite[localPath] = item.content
 			end
+			processingContext = nil
+		end
+
+		-- Now actually write everything to disk
+		for path in pairs(dirsToCreate) do
+			processingContext = path
+			fs.createDirectory(path)
+			processingContext = nil
+		end
+		for path, content in pairs(filesToWrite) do
+			processingContext = path
+			fs.writeFile(path, content)
 			processingContext = nil
 		end
 	end
