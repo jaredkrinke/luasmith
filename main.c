@@ -355,16 +355,6 @@ int l_load_embedded_script(lua_State* L) {
 	return 0;
 }
 
-int l_run_embedded_script(lua_State* L) {
-	const char* str = read_embedded_file(L);
-	if (str) {
-		if (lua_run(L, lua_tostring(L, 1), (const char*)lua_topointer(L, -1)) == LUA_OK) {
-			return 1;
-		}
-	}
-	return 0;
-}
-
 int main(int argc, const char** argv) {
 	int i;
 	lua_State* L = luaL_newstate();
@@ -379,7 +369,6 @@ int main(int argc, const char** argv) {
 	/* Register helper functions */
 	lua_register(L, "_readEmbeddedFile", &l_read_embedded_file);
 	lua_register(L, "_loadEmbeddedScript", &l_load_embedded_script);
-	lua_register(L, "_runEmbeddedScript", &l_run_embedded_script);
 	lua_register(L, "_markdownToHtml", &l_markdown_to_html);
 	lua_register(L, "_isDirectory", &l_is_directory);
 	lua_register(L, "_listDirectory", &l_list_directory);
