@@ -3,7 +3,7 @@ CC=cc
 SED=sed
 MYCFLAGS=-Os -Wall
 MYRC=
-LUA_CFLAGS=-DLUA_USE_POSIX
+LUA_CFLAGS=-DLUA_USE_POSIX -DLUA_USE_DLOPEN
 
 LUA_OBJS=lua/lapi.o lua/lcode.o lua/lctype.o lua/ldebug.o lua/ldo.o lua/ldump.o lua/lfunc.o lua/lgc.o lua/llex.o lua/lmem.o lua/lobject.o lua/lopcodes.o lua/lparser.o lua/lstate.o lua/lstring.o lua/ltable.o lua/ltm.o lua/lundump.o lua/lvm.o lua/lzio.o lua/lauxlib.o lua/lbaselib.o lua/lbitlib.o lua/lcorolib.o lua/ldblib.o lua/liolib.o lua/lmathlib.o lua/loslib.o lua/lstrlib.o lua/ltablib.o lua/loadlib.o lua/linit.o
 LPEG_OBJS=lpeg/lpcap.o lpeg/lpcode.o lpeg/lpcset.o lpeg/lpprint.o lpeg/lptree.o lpeg/lpvm.o
