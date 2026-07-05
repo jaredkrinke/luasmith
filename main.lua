@@ -1,3 +1,26 @@
+-- Global error context
+local processingContext = nil
+local processingContext2 = nil
+local onError = function (err)
+	local message = ""
+	if processingContext then
+		message = "While processing \"" .. processingContext .. "\""
+		if processingContext2 then
+			message = message .. " (" .. processingContext2 .. ")"
+		end
+		message = message .. ":\n\n"
+	end
+	return message .. debug.traceback(err, 3)
+end
+
+local function withErrorLogging(f)
+	local success, err = xpcall(f, onError)
+	if not success then
+		log.error(err)
+		os.exit(-1)
+	end
+end
+
 -- Support embedded scripts
 local embeddedFiles = {}
 local builtInThemes = {}
@@ -32,6 +55,14 @@ table.insert(package.searchers, function (name)
 end)
 
 -- Helpers
+local function check(f, ...)
+	local result, err = f(...)
+	if result then
+		return result
+	end
+	error(err)
+end
+
 local function loadOrError(ld, source, mode)
 	local result, err = load(ld, source, mode)
 	return result or error(err)
@@ -46,6 +77,11 @@ local function loadOrErrorInEnvironment(ld, source, mode, env)
 end
 
 log = {}
+function log.error(message)
+	print("*** ERROR ***")
+	print(message)
+end
+
 function log.warn(message)
 	print("WARN:\t" .. message)
 end
@@ -495,6 +531,7 @@ function createTransformNode(transform, pattern)
 	return function (items)
 		local changes = {}
 		for path, item in pairs(items) do
+			processingContext = path
 			if shouldInclude(path, pattern) then
 				local originalPath = path
 				item.self = item
@@ -505,6 +542,7 @@ function createTransformNode(transform, pattern)
 				end
 				enrichItem(item.path, item)
 			end
+			processingContext = nil
 		end
 
 		for _, change in ipairs(changes) do
@@ -547,9 +585,11 @@ end
 readFromSource = function (dir)
 	return function (items)
 		for _, path in ipairs(fs.enumerateFiles(dir)) do
+			processingContext = path
 			local item = { content = fs.readFile(fs.join(dir, path)), }
 			enrichItem(path, item)
 			items[path] = item
+			processingContext = nil
 		end
 	end
 end
@@ -558,6 +598,7 @@ writeToDestination = function (dir, pattern)
 	return function (items)
 		local dirsMade = {}
 		for path, item in pairs(items) do
+			processingContext = path
 			if shouldInclude(path, pattern) then
 				local localPath = fs.join(dir, path)
 				local localDir = fs.directory(localPath)
@@ -567,6 +608,7 @@ writeToDestination = function (dir, pattern)
 				end
 				fs.writeFile(localPath, item.content)
 			end
+			processingContext = nil
 		end
 	end
 end
@@ -575,9 +617,11 @@ omitWhen = function (test, pattern)
 	return function (items)
 		local deletes = {}
 		for path, item in pairs(items) do
+			processingContext = path
 			if shouldInclude(path, pattern) and test(item) then
 				table.insert(deletes, path)
 			end
+			processingContext = nil
 		end
 
 		for _, path in ipairs(deletes) do
@@ -874,10 +918,22 @@ end
 -- Note: Needed to rename etlua's module to not collide with any etlua lexer...
 etlua = require("_etlua")
 
+-- Wrap etlua to ensure errors are fatal
+local function wrapEtlua(f)
+	return function (...)
+		return check(f, ...)
+	end
+end
+
+etlua.compile = wrapEtlua(etlua.compile)
+etlua.render = wrapEtlua(etlua.render)
+
 applyTemplates = function(templates)
 	local compiled = {}
 	for _, pair in ipairs(templates) do
+		processingContext = pair[1]
 		table.insert(compiled, { pair[1], etlua.compile(pair[2]) })
+		processingContext = nil
 	end
 
 	return createTransformNode(function (item)
@@ -893,12 +949,9 @@ applyTemplates = function(templates)
 		end
 
 		if matchingTemplate then
-			local success, content = pcall(matchingTemplate, item)
-			if success then
-				item.content = content
-			else
-				error("Error filling in template \"" .. matchingPattern .. "\" on item \"" .. path .. "\":\n\n\t" .. content .. "\n")
-			end
+			processingContext2 = matchingPattern
+			item.content = check(matchingTemplate, item)
+			processingContext2 = nil
 		end
 	end)
 end
@@ -1041,17 +1094,29 @@ if #args < 2 or args[2] == "--help" then
 	os.exit(-1)
 end
 
-local pipeline = nil
-local theme = fs.normalize(args[2])
-if string.find(theme, "%.lua$") then
-	-- Use the provided file as the theme
-	themeDirectory = fs.directory(theme)
-	pipeline = dofile(theme)
-else
-	-- Use built-in theme
-	themeDirectory = fs.join("themes", theme)
-	pipeline = require("themes." .. theme  .. ".theme")
+local function loadTheme(theme)
+	local pipeline = nil
+	if string.find(theme, "%.lua$") then
+		-- Use the provided file as the theme
+		themeDirectory = fs.directory(theme)
+		pipeline = dofile(theme)
+	else
+		-- Use built-in theme
+		themeDirectory = fs.join("themes", theme)
+		pipeline = require("themes." .. theme  .. ".theme")
+	end
+	return pipeline
 end
 
-build(pipeline)
+-- With error handling
+withErrorLogging(function ()
+	local theme = fs.normalize(args[2])
+	local pipeline = loadTheme(theme)
+
+	if not pipeline or type(pipeline) ~= "table" then
+		error("The theme script did not return a valid build pipeline! It should return an (array) table.")
+	end
+
+	build(pipeline)
+end)
 
