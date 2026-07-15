@@ -1,6 +1,6 @@
 [submodule "lua"]
 	path = lua
-	url = https://github.com/jaredkrinke/lua
+	url = https://github.com/lua/lua.git
 [submodule "md4c"]
 	path = md4c
 	url = https://github.com/jaredkrinke/md4c.git
