@@ -39,7 +39,7 @@ To get a feel for luasmith, either [read over the design](#architecture) or [go 
 Note that luasmith is still an experimental project, subject to breaking changes. If you like *the idea* of luasmith, let me know and I can put some work into stabilizing and polishing it--for now, I'm assuming I'm probably the only person writing plugins.
 
 ### Supported platforms
-There are multiple builds of luasmith available from [the releases page](https://github.com/jaredkrinke/luasmith/releases):
+There are multiple builds of luasmith available from [the releases page](https://codeberg.org/jaredkrinke/luasmith/releases):
 
 * Statically-linked, native **Linux** build: `luasmith-*-linux-x86_64.tar.gz`
 * **Windows** build: `luasmith-*-windows-x86_64.zip`
