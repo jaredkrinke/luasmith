@@ -416,6 +416,10 @@ function fs.writeFile(path, content)
 	f:close()
 end
 
+function fs.copyFile(source, destination)
+	_copyFile(source, destination)
+end
+
 local function computePathToRoot(path)
 	return string.rep("../", iterator.count(string.gmatch(path, "/")))
 end
@@ -572,6 +576,36 @@ function createAggregateNode(aggregate, pattern)
 end
 
 -- Source/sink nodes
+local fileItemMetatable = {
+	__index = function (table, key)
+		if key == "content" then
+			-- Read file and de-virtualize
+			local content = fs.readFile(rawget(table, "__luasmithSourcePath"))
+			rawset(table, "content", content)
+			rawset(table, "__luasmithSourcePath", nil)
+			setmetatable(table, nil)
+		end
+		return rawget(table, key)
+	end,
+
+	__newindex = function (table, key, value)
+		if key == "content" then
+			-- De-virtualize
+			rawset(table, "__luasmithSourcePath", nil)
+			setmetatable(table, nil)
+		end
+		return rawset(table, key, value)
+	end,
+}
+
+local function createFileItem(dir, path)
+	-- Virtualize item, to avoid reading content into memory if never manipulated
+	local item = { __luasmithSourcePath = fs.join(dir, path) }
+	enrichItem(path, item)
+	setmetatable(item, fileItemMetatable)
+	return item
+end
+
 injectFiles = function (files)
 	return function (items)
 		for path, content in pairs(files) do
@@ -587,9 +621,7 @@ readFromSource = function (dir, pattern)
 		for _, path in ipairs(fs.enumerateFiles(dir)) do
 			if shouldInclude(path, pattern) then
 				processingContext = path
-				local item = { content = fs.readFile(fs.join(dir, path)), }
-				enrichItem(path, item)
-				items[path] = item
+				items[path] = createFileItem(dir, path)
 				processingContext = nil
 			end
 		end
@@ -604,13 +636,13 @@ writeToDestination = function (dir, pattern)
 		for path, item in pairs(items) do
 			processingContext = path
 			if shouldInclude(path, pattern) then
-				if not item.content then
+				if not rawget(item, "content") and not rawget(item, "__luasmithSourcePath") then
 					error("Item " .. path .. " does not have any content specified (content property is nil)! Did you forget to apply a template? (To generate an empty file, set the content property to an empty string.)")
 				end
 
 				local localPath = fs.join(dir, path)
 				dirsToCreate[fs.directory(localPath)] = true
-				filesToWrite[localPath] = item.content
+				filesToWrite[localPath] = item
 			end
 			processingContext = nil
 		end
@@ -621,9 +653,18 @@ writeToDestination = function (dir, pattern)
 			fs.createDirectory(path)
 			processingContext = nil
 		end
-		for path, content in pairs(filesToWrite) do
+		for path, item in pairs(filesToWrite) do
 			processingContext = path
-			fs.writeFile(path, content)
+
+			-- Check for virtualized file
+			local rawContent = rawget(item, "content")
+			if rawContent then
+				fs.writeFile(path, rawContent)
+			else
+				local sourcePath = rawget(item, "__luasmithSourcePath")
+				fs.copyFile(sourcePath, path)
+			end
+
 			processingContext = nil
 		end
 	end

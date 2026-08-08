@@ -178,6 +178,7 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 * `fs.loadThemeFile(path)` loads the Lua script at `path` (relative to the current `theme.lua` file) into a Lua chunk (but *does not* execute it), returning a function to execute the code
 * `fs.doThemeFile(path)` loads and executes the Lua script at `path` (relative to the current `theme.lua` file), returning any value that is returned from the script (this is useful for splitting theme code into multiple files and loading them relative to the main script)
 * `fs.writeFile(path, content)` writes file with `content` to `path` (relative to the working directory, i.e. where `luasmith` was invoked)
+* `fs.copyFile(source, destination)` copies file with path `source` to path `destination`
 
 ### `url` Helpers
 * `url.isRelative(url)` returns true if `url` is a relative URL (instead of absolute)

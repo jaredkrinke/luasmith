@@ -100,6 +100,13 @@ int l_mkdir(lua_State* L) {
 	}
 	return 0;
 }
+
+int l_copy_file(lua_State* L) {
+	if (!CopyFile(lua_tostring(L, 1), lua_tostring(L, 2), FALSE)) {
+		luaL_error(L, "Failed to copy file!");
+	}
+	return 0;
+}
 #else
 int l_is_directory(lua_State* L) {
 	struct stat s;
@@ -121,6 +128,45 @@ int l_mkdir(lua_State* L) {
 			luaL_error(L, "Failed to create directory!");
 		}
 	}
+	return 0;
+}
+
+int l_copy_file(lua_State* L) {
+	FILE* source;
+	FILE* destination;
+	size_t bytesRead;
+	size_t bytesWritten;
+	char copyBuffer[BUFSIZ];
+
+	if (!(source = fopen(lua_tostring(L, 1), "rb"))) {
+		luaL_error(L, "Failed to open source file for copy!");
+		return 0;
+	}
+
+	if (!(destination = fopen(lua_tostring(L, 2), "wb"))) {
+		fclose(source);
+		luaL_error(L, "Failed to open destination file for copy!");
+		return 0;
+	}
+
+	while ((bytesRead = fread(copyBuffer, 1, sizeof(copyBuffer), source))) {
+		bytesWritten = fwrite(copyBuffer, 1, bytesRead, destination);
+		if (bytesWritten != bytesRead) {
+			fclose(destination);
+			fclose(source);
+			luaL_error(L, "Failed to write to destination file for copy!");
+			return 0;
+		}
+	}
+
+	fclose(destination);
+	if (ferror(source)) {
+		fclose(source);
+		luaL_error(L, "Failed to read from source file for copy!");
+		return 0;
+	}
+
+	fclose(source);
 	return 0;
 }
 #endif
@@ -373,6 +419,7 @@ int main(int argc, const char** argv) {
 	lua_register(L, "_isDirectory", &l_is_directory);
 	lua_register(L, "_listDirectory", &l_list_directory);
 	lua_register(L, "_mkdir", &l_mkdir);
+	lua_register(L, "_copyFile", &l_copy_file);
 	lua_register(L, "_parseHtml", &l_parse_html);
 
 	/* Load libraries */
