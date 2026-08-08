@@ -582,14 +582,16 @@ injectFiles = function (files)
 	end
 end
 
-readFromSource = function (dir)
+readFromSource = function (dir, pattern)
 	return function (items)
 		for _, path in ipairs(fs.enumerateFiles(dir)) do
-			processingContext = path
-			local item = { content = fs.readFile(fs.join(dir, path)), }
-			enrichItem(path, item)
-			items[path] = item
-			processingContext = nil
+			if shouldInclude(path, pattern) then
+				processingContext = path
+				local item = { content = fs.readFile(fs.join(dir, path)), }
+				enrichItem(path, item)
+				items[path] = item
+				processingContext = nil
+			end
 		end
 	end
 end

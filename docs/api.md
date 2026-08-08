@@ -69,11 +69,11 @@ There are a few different kinds of processing nodes in luasmith (number of input
 * Aggregate nodes: process items as a group (N:M)
 
 ### Source Nodes
-* `readFromSource(dir)` reads files from a directory
+* `readFromSource(dir, pattern)` reads files from a directory (optionally filtered to paths matching `pattern`)
 * `injectFiles(files)` inserts new files; the table format is `{ [path] = content, ... }`
 
 ### Sink Nodes
-* `writeToDestination(dir)` writes items into files in `dir`
+* `writeToDestination(dir, pattern)` writes items into files in `dir` (optionally filtered to paths matching `pattern`)
 * `omitWhen(test, pattern)` calls function `test` on each item matching path `pattern` and removes items that return non-false
 
 ### Transform Nodes
