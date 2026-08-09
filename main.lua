@@ -365,7 +365,7 @@ function fs.enumerateFiles(dir)
 end
 
 function fs.tryReadFile(path)
-	local f = io.open(path, "rb")
+	local f = (path == "-" and io.stdin) or io.open(path, "rb")
 	if f == nil then
 		return nil
 	end
@@ -1157,6 +1157,9 @@ local function loadTheme(theme)
 		-- Use the provided file as the theme
 		themeDirectory = fs.directory(theme)
 		pipeline = dofile(theme)
+	elseif theme == "-" then
+		themeDirectory = ""
+		pipeline = loadOrError(fs.readFile(theme))()
 	else
 		-- Use built-in theme
 		themeDirectory = fs.join("themes", theme)

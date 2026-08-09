@@ -28,3 +28,11 @@ for i in filter lua-eval prev-next syntax-new syntax-override virtual; do
 	fi
 done
 
+for i in stdin; do
+	echo "Running test $i..."
+	echo 'return { injectFiles({ ["out.txt"] = "hello\\n" }), writeToDestination(args[4]) }' | ../luasmith - "$i" "actual/$i"
+	if ! diff -qr "baseline/$i" "actual/$i" ; then
+		echo "*** TEST FAILED ***"
+	fi
+done
+
