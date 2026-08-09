@@ -809,7 +809,13 @@ local function tryLoadGrammar(language, aliases)
 			end
 		end
 
-		log.info("Syntax highlighting not available for: " .. language)
+		-- Distinguish "not found" from error
+		if package.searchpath(language, package.path) then
+			log.info("Error occurred while loading highlighter for: " .. language)
+			lexer.load(language)
+		else
+			log.info("Syntax highlighting not available for: " .. language)
+		end
 		grammars[language] = false
 		return nil
 	else
