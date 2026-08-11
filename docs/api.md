@@ -8,9 +8,9 @@ This documentation is split into a few sections:
 * Infrastructure for creating new processing nodes (TODO)
 
 ## Lua
-luasmith exposes Lua 5.2's standard library. See the [Lua 5.2 manual](https://www.lua.org/manual/5.2/manual.html#6) for information about basic Lua functions such as `pairs`, `string.find`, etc.
+luasmith exposes Lua 5.5's standard library. See the [Lua 5.5 manual](https://www.lua.org/manual/5.5/manual.html#6) for information about basic Lua functions such as `pairs`, `string.find`, etc.
 
-In particular, note that luasmith builds on top of [Lua's string matching patterns](https://www.lua.org/manual/5.2/manual.html#6.4.1) (which are similar to Regular Expressions).
+In particular, note that luasmith builds on top of [Lua's string matching patterns](https://www.lua.org/manual/5.5/manual.html#6.5.1) (which are similar to Regular Expressions).
 
 ## Site Schema
 The built-in themes each support site-level metadata, as returned by a script in the input directory named `site.lua`.
@@ -69,7 +69,7 @@ There are a few different kinds of processing nodes in luasmith (number of input
 * Aggregate nodes: process items as a group (N:M)
 
 ### Filtering items
-**Note on item filtering**: Many nodes accept a filtering argument named `pattern`. This can either be a [Lua pattern](https://www.lua.org/manual/5.2/manual.html#6.4.1) (a string), in which case items with paths matching the pattern are included *or*, for more complex filtering, a function that accepts the item and returns true if the item should be included.
+**Note on item filtering**: Many nodes accept a filtering argument named `pattern`. This can either be a [Lua pattern](https://www.lua.org/manual/5.5/manual.html#6.5.1) (a string), in which case items with paths matching the pattern are included *or*, for more complex filtering, a function that accepts the item and returns true if the item should be included.
 
 ### Source Nodes
 * `readFromSource(dir, pattern)` reads files from a directory (optionally filtered as noted above)
