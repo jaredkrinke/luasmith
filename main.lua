@@ -1071,6 +1071,7 @@ checkLinks = function ()
 			-- Enumerate anchors and relative links
 			local pathToAnchors = {}
 			local pathToLinks = {}
+			local hasRootRelativeLinks = false
 			for _, item in ipairs(items) do
 				-- Obviously, only parse HTML files
 				if string.sub(item.path, -5) == ".html" then
@@ -1086,8 +1087,18 @@ checkLinks = function ()
 								and url.isRelative(event.value) -- Local/relative links only
 							then
 								local target = event.value
-								if string.sub(event.value, 1, 1) ~= "#" then
-									target = fs.resolveRelative(item.path, event.value)
+								local rootRelativeLink = string.match(target, "^/(.*)$")
+								if rootRelativeLink then
+									-- Warn about root-relative links (once only)
+									if not hasRootRelativeLinks then
+										log.warn("One or more root-relative links (links starting with \"/\") were found. Note that these links are only valid when the site is served from the root of a domain!")
+										hasRootRelativeLinks = true
+									end
+									target = rootRelativeLink
+								end
+
+								if string.sub(target, 1, 1) ~= "#" then
+									target = fs.resolveRelative(item.path, target)
 								end
 								table.insert(links, target)
 							elseif event.attribute == "id" or event.attribute == "name" then

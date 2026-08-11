@@ -31,6 +31,34 @@ for i in filter filter-func lua-eval prev-next syntax-new syntax-override virtua
 	fi
 done
 
+# Link-checking tests
+i=valid-link
+echo "Running test $i..."
+if echo 'return { injectFiles({ ["foo.html"] = [[<h1 id="baz"><a href="foo.html#baz">link</a></h1>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED ***"
+fi
+
+i=broken-link
+echo "Running test $i..."
+if ! echo 'return { injectFiles({ ["foo.html"] = [[<a href="bar.html">link</a>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED ***"
+fi
+
+i=broken-root-relative-link
+echo "Running test $i..."
+if ! echo 'return { injectFiles({ ["foo.html"] = [[<a href="/bar.html">link</a>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED ***"
+fi
+
+i=root-relative-link
+echo "Running test $i..."
+if ! echo 'return { injectFiles({ ["foo.html"] = [[<h1 id="baz"><a href="/foo.html#baz">link</a></h1>]] }), checkLinks() }' | ../luasmith - |grep -qi 'root-relative' ; then
+	echo "*** TEST FAILED ***"
+fi
+if echo 'return { injectFiles({ ["foo.html"] = [[<h1 id="baz"><a href="/foo.html#baz">link</a></h1>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED (2) ***"
+fi
+
 # Misc. tests
 i=stdin
 echo "Running test $i..."
