@@ -524,9 +524,13 @@ local function enrichItems(items)
 	end
 end
 
-local function shouldInclude(path, pattern)
+local function shouldInclude(path, pattern, item)
 	if pattern then
-		return string.match(path, pattern)
+		if type(pattern) == "string" then
+			return string.match(path, pattern)
+		elseif type(pattern) == "function" then
+			return pattern(item)
+		end
 	end
 	return true
 end
@@ -536,7 +540,7 @@ function createTransformNode(transform, pattern)
 		local changes = {}
 		for path, item in pairs(items) do
 			processingContext = path
-			if shouldInclude(path, pattern) then
+			if shouldInclude(path, pattern, item) then
 				local originalPath = path
 				item.self = item
 				transform(item)
@@ -561,7 +565,7 @@ function createAggregateNode(aggregate, pattern)
 		-- Find items
 		local included = {}
 		for path, item in pairs(items) do
-			if shouldInclude(path, pattern) then
+			if shouldInclude(path, pattern, item) then
 				table.insert(included, item)
 			end
 		end
@@ -617,9 +621,11 @@ injectFiles = function (files)
 end
 
 readFromSource = function (dir, pattern)
+	local item = {}
 	return function (items)
 		for _, path in ipairs(fs.enumerateFiles(dir)) do
-			if shouldInclude(path, pattern) then
+			item.path = path
+			if shouldInclude(path, pattern, item) then
 				processingContext = path
 				items[path] = createFileItem(dir, path)
 				processingContext = nil
@@ -635,7 +641,7 @@ writeToDestination = function (dir, pattern)
 		local filesToWrite = {}
 		for path, item in pairs(items) do
 			processingContext = path
-			if shouldInclude(path, pattern) then
+			if shouldInclude(path, pattern, item) then
 				if not rawget(item, "content") and not rawget(item, "__luasmithSourcePath") then
 					error("Item " .. path .. " does not have any content specified (content property is nil)! Did you forget to apply a template? (To generate an empty file, set the content property to an empty string.)")
 				end

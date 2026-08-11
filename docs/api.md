@@ -68,19 +68,22 @@ There are a few different kinds of processing nodes in luasmith (number of input
 * Transform nodes: process items in isolation (1:M)
 * Aggregate nodes: process items as a group (N:M)
 
+### Filtering items
+**Note on item filtering**: Many nodes accept a filtering argument named `pattern`. This can either be a [Lua pattern](https://www.lua.org/manual/5.2/manual.html#6.4.1) (a string), in which case items with paths matching the pattern are included *or*, for more complex filtering, a function that accepts the item and returns true if the item should be included.
+
 ### Source Nodes
-* `readFromSource(dir, pattern)` reads files from a directory (optionally filtered to paths matching `pattern`)
+* `readFromSource(dir, pattern)` reads files from a directory (optionally filtered as noted above)
 * `injectFiles(files)` inserts new files; the table format is `{ [path] = content, ... }`
 
 ### Sink Nodes
-* `writeToDestination(dir, pattern)` writes items into files in `dir` (optionally filtered to paths matching `pattern`)
+* `writeToDestination(dir, pattern)` writes items into files in `dir` (optionally filtered; see filter note above)
 * `omitWhen(test, pattern)` calls function `test` on each item matching path `pattern` and removes items that return non-false
 
 ### Transform Nodes
 * `processMarkdown()` converts `*.md` files from Markdown to HTML (`.html`), extracting either Lua, (limited) YAML, or (limited) TOML frontmatter metadata in the process
 * `highlightSyntax(options?)` adds HTML spans with `.hl-*` CSS classes to fenced code blocks (see notes [below](#syntax-highlighting) for more detail)
 * `processEtlua(pattern?)` evaluates any [etlua](https://github.com/leafo/etlua) blocks in item content, similar to Hugo shortcodes, but using Lua (note: due to Markdown processing escaping angle brackets, be sure to use this node *prior* to `processMarkdown()`); `pattern` defaults to `%.md$` ("*.md")
-* `injectMetadata(properties, pattern)` merges `properties` into items that match path `pattern`
+* `injectMetadata(properties, pattern)` merges `properties` into items, filtered as explained in the filtering note above
 * `deriveMetadata(derivations, pattern)` similar to `injectMetadata` but instead of adding fixed metadata, it runs functions on the item; the format of `derivations` is `{ [property] = f, ... }` where `f` takes in the item and returns the new value
 * `applyTemplates(templates)` applies a single template to each matched item; note that `templates` is an array of the format `{ [pattern] = template }` and the last match wins (e.g. so you can match "all HTML files" but then override that logic for specific items using more specific patterns)
 
@@ -94,8 +97,8 @@ luasmith's embedded copy of Scintillua may be slightly out of date, but, for ref
 Note: if you need to tweak or add a lexer, you can simply add a lexer on Lua's search path (usually the current working directory) and it will take precedence over any embedded lexer.
 
 ### Aggregate Nodes
-* `aggregate(path, pattern)` creates a new item at `path` with empty `content`, but with an `items` property that is an array of all items matched by `pattern`
-* `createIndexes(createPath, property, pattern)` creates multiple new "index" items, one for each unique value of the property `property` on items matching `pattern`, at the path computed by `createPath(value)`; the "index" item format includes `{ key = <the unique value>, items = <array of items with that value>, groups = <map of unique values to items for ALL unique values> }`
+* `aggregate(path, pattern)` creates a new item at `path` with empty `content`, but with an `items` property that is an array of all items matching the filter (see filtering note above)
+* `createIndexes(createPath, property, pattern)` creates multiple new "index" items, one for each unique value of the property `property` on filtered items (see filtering note above), at the path computed by `createPath(value)`; the "index" item format includes `{ key = <the unique value>, items = <array of items with that value>, groups = <map of unique values to items for ALL unique values> }`
 * `checkLinks()` verifies that relative link targets in HTML files exist, including hash/fragments/anchors (i.e. "checks for broken links")
 
 Note: `aggregate()` can be easily used to create a blog index/home page with a list of posts. `createIndexes()` can be used to create e.g. "keyword index" pages.

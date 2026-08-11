@@ -20,7 +20,7 @@ for i in footnotes; do
 	fi
 done
 
-for i in filter lua-eval prev-next syntax-new syntax-override virtual; do
+for i in filter filter-func lua-eval prev-next syntax-new syntax-override virtual; do
 	echo "Running test $i..."
 	../luasmith "$i.lua" "$i" "actual/$i"
 	if ! diff -qr "baseline/$i" "actual/$i" ; then
