@@ -118,6 +118,7 @@ GRAMMARS = \
 	nsis.lua \
 	null.lua \
 	objective_c.lua \
+	odin.lua \
 	org.lua \
 	output.lua \
 	pascal.lua \
