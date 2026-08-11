@@ -80,7 +80,6 @@ GRAMMARS = \
 	elixir.lua \
 	elm.lua \
 	erlang.lua \
-	etlua.lua \
 	factor.lua \
 	fennel.lua \
 	forth.lua \
@@ -170,13 +169,17 @@ GRAMMARS = \
 	vhdl.lua \
 	xml.lua \
 	xs.lua \
-	yaml.lua \
 	zig.lua \
 
-scripts.lua.h: etlua/etlua.lua $(GRAMMARS) $(THEME_FILES)
+GRAMMARS_CUSTOM = \
+	etlua.lua \
+	yaml.lua \
+
+scripts.lua.h: etlua/etlua.lua $(GRAMMARS) lexers/etlua.lua $(THEME_FILES)
 	echo "char* _embedded_scripts[] = {" > $@
 	cat etlua/etlua.lua |$(SED) -f stringify.sed -e '$$s/\(.*\)/\1,/' -e '1s/\(.*\)/"_etlua.lua",\1/' >> $@
 	for grammar in $(GRAMMARS); do cat "scintillua/lexers/$$grammar" |$(SED) -f stringify.sed -e '$$s/\(.*\)/\1,/' -e "1s/\\(.*\\)/\"$$grammar\",\\1/"; done >> $@
+	for grammar in $(GRAMMARS_CUSTOM); do cat "lexers/$$grammar" |$(SED) -f stringify.sed -e '$$s/\(.*\)/\1,/' -e "1s/\\(.*\\)/\"$$grammar\",\\1/"; done >> $@
 	for themefile in $(THEME_FILES); do cat "$$themefile" |$(SED) -f stringify.sed -e '$$s/\(.*\)/\1,/' -e "1s/\\(.*\\)/\"$$(echo $$themefile |$(SED) -e s/\\//\\\\\\//g)\",\\1/"; done >> $@
 	echo "NULL };" >> $@
 
