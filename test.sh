@@ -23,9 +23,9 @@ for i in footnotes; do
 done
 
 # Specific input-based tests
-for i in filter filter-func lua-eval prev-next syntax-new syntax-override virtual; do
+for i in filter filter-func lua-eval prev-next reachability syntax-new syntax-override virtual; do
 	echo "Running test $i..."
-	../luasmith "$i.lua" "$i" "actual/$i"
+	../luasmith "$i.lua" "$i" "actual/$i" >/dev/null
 	if ! diff -qr "baseline/$i" "actual/$i" ; then
 		echo "*** TEST FAILED ***"
 	fi
@@ -57,6 +57,12 @@ if ! echo 'return { injectFiles({ ["foo.html"] = [[<h1 id="baz"><a href="/foo.ht
 fi
 if echo 'return { injectFiles({ ["foo.html"] = [[<h1 id="baz"><a href="/foo.html#baz">link</a></h1>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
 	echo "*** TEST FAILED (2) ***"
+fi
+
+i=unreachable-item
+echo "Running test $i..."
+if ! echo 'return { injectFiles({ ["site.css"] = ";", ["foo.html"] = [[Hi]] }), checkLinks({ entryPoints = { "foo.html" } }) }' | ../luasmith - |grep -qi 'unreachable' ; then
+	echo "*** TEST FAILED ***"
 fi
 
 # Misc. tests

@@ -8,6 +8,7 @@ local site = {
 	footer = nil,
 	keywordDirectoryPattern = "^posts/(.-)/.+%.html$",
 	syntaxAliases = nil,
+	checkLinks = nil,
 }
 
 -- Helpers
@@ -133,7 +134,7 @@ return {
 	}),
 	applyTemplates({ { "%.html$", fs.readThemeFile("outer.etlua") } }),
 
-	checkLinks(),
+	checkLinks(site.checkLinks),
 	writeToDestination(destination),
 }
 

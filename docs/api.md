@@ -29,6 +29,7 @@ Optional:
 * `footer`: Footer (raw HTML) to append to the end of every page (default: `nil`/none)
 * `keywordDirectoryPattern`: Lua pattern for deriving keywords from the first capture group of item paths (default: `"^posts/(.-)/.+%.html$"`, meaning the (first) subdirectory of `posts/` is the name of a keyword)
 * `syntaxAliases`: Aliases for syntax highlighting, e.g. to have a code block tagged as `sh` use the Scintillua highlighter ("lexer") for Bash, you could set `syntaxAliases = { sh = "bash" }`
+* `checkLinks`: Options to pass to `checkLinks()` (links are still checked by default, but this enables filtering out unreachable items, such as assets linked only from drafts)
 
 ### `md2blog` Theme
 * `title`: Title for the site
@@ -99,7 +100,9 @@ Note: if you need to tweak or add a lexer, you can simply add a lexer on Lua's s
 ### Aggregate Nodes
 * `aggregate(path, pattern)` creates a new item at `path` with empty `content`, but with an `items` property that is an array of all items matching the filter (see filtering note above)
 * `createIndexes(createPath, property, pattern)` creates multiple new "index" items, one for each unique value of the property `property` on filtered items (see filtering note above), at the path computed by `createPath(value)`; the "index" item format includes `{ key = <the unique value>, items = <array of items with that value>, groups = <map of unique values to items for ALL unique values> }`
-* `checkLinks()` verifies that relative link targets in HTML files exist, including hash/fragments/anchors (i.e. "checks for broken links")
+* `checkLinks(options)` verifies that relative link targets in HTML files exist, including hash/fragments/anchors (i.e. "checks for broken links"); `options` is an optional table with the following keys:
+	* `excludeUnreachable`: if true, remove items that aren't reachable from entry points
+	* `entryPoints`: array table of entry points (defaults to `{ "index.html" }`) (warnings will be emitted instead of removing items if `excludeUnreachable` is false/nil)
 
 Note: `aggregate()` can be easily used to create a blog index/home page with a list of posts. `createIndexes()` can be used to create e.g. "keyword index" pages.
 

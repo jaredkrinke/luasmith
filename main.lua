@@ -1066,83 +1066,124 @@ createIndexes = function (createIndexPath, property, pattern)
 		pattern)
 end
 
-checkLinks = function ()
-	return createAggregateNode(function (items)
-			-- Enumerate anchors and relative links
-			local pathToAnchors = {}
-			local pathToLinks = {}
-			local hasRootRelativeLinks = false
-			for _, item in ipairs(items) do
-				-- Obviously, only parse HTML files
-				if string.sub(item.path, -5) == ".html" then
-					local anchors = {}
-					local links = {}
+checkLinks = function (options)
+	options = options or {}
+	return function (items)
+		-- Enumerate anchors and relative links
+		local pathToAnchors = {}
+		local pathToLinks = {}
+		local hasRootRelativeLinks = false
+		for path, item in pairs(items) do
+			-- Obviously, only parse HTML files
+			if string.sub(path, -5) == ".html" then
+				local anchors = {}
+				local links = {}
 
-					_parseHtml(item.content, function (event)
-						if event.attribute and event.value then
-							if ((event.tag == "a" and event.attribute == "href") -- Check for links
-								or (event.tag == "link" and event.attribute == "href")
-								or (event.tag == "script" and event.attribute == "src")
-								or (event.tag == "img" and event.attribute == "src"))
-								and url.isRelative(event.value) -- Local/relative links only
-							then
-								local target = event.value
-								local rootRelativeLink = string.match(target, "^/(.*)$")
-								if rootRelativeLink then
-									-- Warn about root-relative links (once only)
-									if not hasRootRelativeLinks then
-										log.warn("One or more root-relative links (links starting with \"/\") were found. Note that these links are only valid when the site is served from the root of a domain!")
-										hasRootRelativeLinks = true
-									end
-									target = rootRelativeLink
+				_parseHtml(item.content, function (event)
+					if event.attribute and event.value then
+						if ((event.tag == "a" and event.attribute == "href") -- Check for links
+							or (event.tag == "link" and event.attribute == "href")
+							or (event.tag == "script" and event.attribute == "src")
+							or (event.tag == "img" and event.attribute == "src"))
+							and url.isRelative(event.value) -- Local/relative links only
+						then
+							local target = event.value
+							local rootRelativeLink = string.match(target, "^/(.*)$")
+							if rootRelativeLink then
+								-- Warn about root-relative links (once only)
+								if not hasRootRelativeLinks then
+									log.warn("One or more root-relative links (links starting with \"/\") were found. Note that these links are only valid when the site is served from the root of a domain!")
+									hasRootRelativeLinks = true
 								end
+								target = rootRelativeLink
+							end
 
-								if string.sub(target, 1, 1) ~= "#" then
-									target = fs.resolveRelative(item.path, target)
-								end
-								table.insert(links, target)
-							elseif event.attribute == "id" or event.attribute == "name" then
-								anchors[event.value] = true
+							if string.sub(target, 1, 1) ~= "#" then
+								target = fs.resolveRelative(path, target)
+							end
+							table.insert(links, target)
+						elseif event.attribute == "id" or event.attribute == "name" then
+							anchors[event.value] = true
+						end
+					end
+				end)
+
+				pathToAnchors[path] = anchors
+				pathToLinks[path] = links
+			else
+				pathToAnchors[path] = true
+			end
+		end
+
+		-- Check all links (including hash/anchor)
+		local pathToPaths = {}
+		for source, links in pairs(pathToLinks) do
+			pathToPaths[source] = {}
+			for _, target in ipairs(links) do
+				-- Check for #fragment
+				local destination = target
+				local anchor = nil
+				local hash = string.find(target, "#", 1, true)
+				if hash then
+					if hash == 1 then
+						destination = source
+					else
+						destination = string.sub(target, 1, hash - 1)
+					end
+					anchor = string.sub(target, hash + 1)
+				end
+
+				table.insert(pathToPaths[source], destination)
+
+				local anchors = pathToAnchors[destination]
+				if anchors then
+					if anchor and not anchors[anchor] then
+						log.warn("Broken link from \"" .. source .. "\" to \"" .. destination .. "\" (no such fragment: \"#" .. anchor .. "\")")
+					end
+				else
+					log.warn("Broken link from \"" .. source .. "\" to \"" .. target .. "\"")
+				end
+			end
+		end
+
+		-- Check reachability and exclude unreachable, if requested
+		if options.entryPoints or options.excludeUnreachable then
+			local pathProcessed = {}
+			local queue = table.copy(options.entryPoints or { "index.html" })
+			while #queue > 0 do
+				local source = table.remove(queue)
+				if not pathProcessed[source] then
+					pathProcessed[source] = true
+					if pathToPaths[source] then
+						for _, destination in ipairs(pathToPaths[source]) do
+							if not pathProcessed[destination] then
+								table.insert(queue, destination)
 							end
 						end
-					end)
-
-					pathToAnchors[item.path] = anchors
-					pathToLinks[item.path] = links
-				else
-					pathToAnchors[item.path] = true
+					end
 				end
 			end
 
-			-- Check all links (including hash/anchor)
-			for source, links in pairs(pathToLinks) do
-				for _, target in ipairs(links) do
-					-- Check for #fragment
-					local destination = target
-					local anchor = nil
-					local hash = string.find(target, "#", 1, true)
-					if hash then
-						if hash == 1 then
-							destination = source
-						else
-							destination = string.sub(target, 1, hash - 1)
-						end
-						anchor = string.sub(target, hash + 1)
-					end
-
-					local anchors = pathToAnchors[destination]
-					if anchors then
-						if anchor and not anchors[anchor] then
-							log.warn("Broken link from \"" .. source .. "\" to \"" .. destination .. "\" (no such fragment: \"#" .. anchor .. "\")")
-						end
+			local itemsToExclude = {}
+			for path, item in pairs(items) do
+				if not pathProcessed[path] then
+					if options.excludeUnreachable then
+						table.insert(itemsToExclude, path)
 					else
-						log.warn("Broken link from \"" .. source .. "\" to \"" .. target .. "\"")
+						log.warn("Item is unreachable from index.html: \"" .. path .. "\"")
 					end
 				end
 			end
 
-			return {}
-		end)
+			if options.excludeUnreachable then
+				while #itemsToExclude > 0 do
+					local path = table.remove(itemsToExclude)
+					log.info("Removing unreachable item: \"" .. path .. "\"")
+					items[path] = nil
+				end
+			end
+		end
+	end
 end
 
 processItems = function (process)
