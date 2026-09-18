@@ -1117,6 +1117,7 @@ checkLinks = function (options)
 
 		-- Check all links (including hash/anchor)
 		local pathToPaths = {}
+		local hasPrettyLinks = false
 		for source, links in pairs(pathToLinks) do
 			pathToPaths[source] = {}
 			for _, target in ipairs(links) do
@@ -1136,6 +1137,14 @@ checkLinks = function (options)
 				table.insert(pathToPaths[source], destination)
 
 				local anchors = pathToAnchors[destination]
+				if not anchors then
+					anchors = pathToAnchors[destination .. "index.html"]
+						or pathToAnchors[destination .. "/index.html"]
+					if anchors and not hasPrettyLinks then
+						log.warn("One or more pretty links (links requiring a redirect from a clean resource path to a full path with implementation details) were found. Note that these links are only valid when the redirects are properly set up!")
+						hasPrettyLinks = true
+					end
+				end
 				if anchors then
 					if anchor and not anchors[anchor] then
 						log.warn("Broken link from \"" .. source .. "\" to \"" .. destination .. "\" (no such fragment: \"#" .. anchor .. "\")")
