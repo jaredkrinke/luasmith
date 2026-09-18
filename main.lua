@@ -1095,7 +1095,7 @@ checkLinks = function (options)
 									log.warn("One or more root-relative links (links starting with \"/\") were found. Note that these links are only valid when the site is served from the root of a domain!")
 									hasRootRelativeLinks = true
 								end
-								target = rootRelativeLink
+								target = computePathToRoot(rootRelativeLink) .. rootRelativeLink
 							end
 
 							if string.sub(target, 1, 1) ~= "#" then
