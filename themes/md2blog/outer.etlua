@@ -5,7 +5,7 @@
 <title><%= title or site.title %></title>
 <% if description then %><meta name="description" content="<%= description %>" /><% end %>
 <% if keywords then %><meta name="keywords" content="<%= table.concat(keywords, ",") %>" /><% end %>
-<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="stylesheet" href="<%= pathToRoot %>css/style.css" />
 <% if path == "index.html" then %><link rel="alternate" type="application/rss+xml" href="feed.xml" /><% end %>
 <% if title and description and date then -%>
