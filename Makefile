@@ -11,6 +11,7 @@ MD4C_OBJS=md4c/src/entity.o md4c/src/md4c.o md4c/src/md4c-html.o
 OBJS=main.o $(MD4C_OBJS) $(LUA_OBJS) $(LPEG_OBJS) chtml/chtml.o
 
 CFLAGS=$(MYCFLAGS) -I lua -I md4c/src -I chtml $(LUA_CFLAGS)
+LDFLAGS=-Wl,--export-dynamic
 
 all: luasmith
 
@@ -27,7 +28,7 @@ main.o: main.c main.lua.h scripts.lua.h
 	$(CC) $(CFLAGS) -c main.c -o $@
 
 luasmith: $(OBJS)
-	$(CC) -o luasmith $(OBJS) $(MYRC) -lm
+	$(CC) -o luasmith $(OBJS) $(MYRC) $(LDFLAGS) -lm
 
 # Embedded Lua scripts (mostly related to syntax highlighting)
 VPATH = scintillua/lexers

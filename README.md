@@ -41,8 +41,14 @@ Note that luasmith is still an experimental project, subject to breaking changes
 ### Supported platforms
 There are multiple builds of luasmith available from the releases page [on Codeberg](https://codeberg.org/jaredkrinke/luasmith/releases) or [on GitHub](https://github.com/jaredkrinke/luasmith/releases):
 
+#### Linux
 * Statically-linked, native **Linux** build: `luasmith-*-linux-x86_64.tar.gz`
+* glibc-based native Linux build, with support for native Lua modules: `luasmith-*-linux-x86_64-dynamic.tar.gz`
+
+#### Windows
 * **Windows** build: `luasmith-*-windows-x86_64.zip`
+
+#### Universal
 * "Actually Portable Executable" build (using [Cosmopolitan](https://github.com/jart/cosmopolitan)) that should run on **Windows**, **macOS**, **Linux**, and most **BSDs**: `luasmith-*-universal.zip`
 * There's also a source archive that actually includes submodule code (unlike GitHub's automatic source archives)
 
