@@ -52,10 +52,10 @@ fi
 
 i=root-relative-link
 echo "Running test $i..."
-if ! echo 'return { injectFiles({ ["foo.html"] = [[<h1 id="baz"><a href="/foo.html#baz">link</a></h1>]] }), checkLinks() }' | ../luasmith - |grep -qi 'root-relative' ; then
+if ! echo 'return { injectFiles({ ["bar/foo.html"] = [[<h1 id="baz"><a href="/bar/foo.html#baz">link</a></h1>]] }), checkLinks() }' | ../luasmith - |grep -qi 'root-relative' ; then
 	echo "*** TEST FAILED ***"
 fi
-if echo 'return { injectFiles({ ["foo.html"] = [[<h1 id="baz"><a href="/foo.html#baz">link</a></h1>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+if echo 'return { injectFiles({ ["bar/foo.html"] = [[<h1 id="baz"><a href="/bar/foo.html#baz">link</a></h1>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
 	echo "*** TEST FAILED (2) ***"
 fi
 
