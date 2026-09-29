@@ -11,7 +11,12 @@ MD4C_OBJS=md4c/src/entity.o md4c/src/md4c.o md4c/src/md4c-html.o
 OBJS=main.o $(MD4C_OBJS) $(LUA_OBJS) $(LPEG_OBJS) chtml/chtml.o
 
 CFLAGS=$(MYCFLAGS) -I lua -I md4c/src -I chtml $(LUA_CFLAGS)
-LDFLAGS=-Wl,--export-dynamic
+OS := $(shell uname)
+ifeq ($(OS),Darwin)
+ 	LDFLAGS=-Wl,-export_dynamic
+else
+ 	LDFLAGS=-Wl,--export-dynamic
+endif
 
 all: luasmith
 
