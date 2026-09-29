@@ -1094,7 +1094,7 @@ checkLinks = function (options)
 									log.warn("One or more root-relative links (links starting with \"/\") were found. Note that these links are only valid when the site is served from the root of a domain!")
 									hasRootRelativeLinks = true
 								end
-								target = computePathToRoot(rootRelativeLink) .. rootRelativeLink
+								target = computePathToRoot(item.path) .. rootRelativeLink
 							end
 
 							if string.sub(target, 1, 1) ~= "#" then
@@ -1137,10 +1137,13 @@ checkLinks = function (options)
 
 				local anchors = pathToAnchors[destination]
 				if not anchors then
-					anchors = pathToAnchors[destination .. "index.html"]
-						or pathToAnchors[destination .. "/index.html"]
+					if string.sub(destination, -1) == "/" then
+						anchors = pathToAnchors[destination .. "index.html"]
+					else
+						anchors = pathToAnchors[destination .. "/index.html"]
+					end
 					if anchors and not hasPrettyLinks then
-						log.warn("One or more pretty links (links requiring a redirect from a clean resource path to a full path with implementation details) were found. Note that these links are only valid when the redirects are properly set up!")
+						log.warn([[One or more "pretty links" (links ending in "/dir/" instead of "/dir/index.html") were found. These will work with most web servers by default, but not when viewed directly from the file system.]])
 						hasPrettyLinks = true
 					end
 				end

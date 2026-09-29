@@ -65,6 +65,21 @@ if ! echo 'return { injectFiles({ ["site.css"] = ";", ["foo.html"] = [[Hi]] }), 
 	echo "*** TEST FAILED ***"
 fi
 
+i=pretty-links
+echo "Running test $i..."
+if echo 'return { injectFiles({ ["bar/index.html"] = [[<a href="/bar/">link</a>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED ***"
+fi
+if echo 'return { injectFiles({ ["bar/index.html"] = [[<a href="/bar">link</a>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED (2) ***"
+fi
+if ! echo 'return { injectFiles({ ["barindex.html"] = [[<a href="/bar/">link</a>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED (3) ***"
+fi
+if ! echo 'return { injectFiles({ ["barindex.html"] = [[<a href="/bar">link</a>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED (4) ***"
+fi
+
 # Misc. tests
 i=stdin
 echo "Running test $i..."
