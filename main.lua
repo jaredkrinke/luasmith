@@ -43,7 +43,7 @@ loadfile = function(filename)
 	if name and embeddedFiles[name] then
 		return _loadEmbeddedScript(name)
 	end
-	return originalLoadFile(filename)
+	return originalLoadFile(filename, "t")
 end
 
 -- Add a searcher to support "require" (note: built-ins are lowest priority, so they can be overridden locally)
@@ -63,16 +63,15 @@ local function check(f, ...)
 	error(err)
 end
 
-local function loadOrError(ld, source, mode)
-	local result, err = load(ld, source, mode)
+local function loadOrError(ld, source)
+	local result, err = load(ld, source, "t")
 	return result or error(err)
 end
 
-local function loadOrErrorInEnvironment(ld, source, mode, env)
+local function loadOrErrorInEnvironment(ld, source, env)
 	-- Note: load()'s env argument distinguishes nil from "no argument", so
 	-- this needs to be a separate helper from loadOrError() above!
-	local result, err = load(ld,
-	source, mode, env)
+	local result, err = load(ld, source, "t", env)
 	return result or error(err)
 end
 
@@ -235,7 +234,7 @@ end
 -- Frontmatter parsing
 local function parseLua(lua, file)
 	local o = {}
-	loadOrErrorInEnvironment(lua, file or "frontmatter", "t", o)()
+	loadOrErrorInEnvironment(lua, file or "frontmatter", o)()
 	return o
 end
 
@@ -390,7 +389,7 @@ end
 function fs.tryLoadFile(path)
 	local content = fs.tryReadFile(path)
 	if content then
-		return loadOrError(content, path, "t")
+		return loadOrError(content, path)
 	else
 		return nil
 	end
@@ -403,7 +402,7 @@ end
 
 function fs.loadThemeFile(path)
 	local p = fs.join(themeDirectory, path)
-	return loadOrError(fs.readFile(p), p, "t")
+	return loadOrError(fs.readFile(p), p)
 end
 
 function fs.doThemeFile(path)
