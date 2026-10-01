@@ -6,8 +6,8 @@
 <link rel="self" href="<%= site.url .. "feed.xml" %>"/>
 <link rel="alternate" href="<%= site.url %>"/>
 <author>
-<name><%= site.title %></name>
-<% if site.author.email then -%>
+<name><%= (site.author and site.author.name) or site.title %></name>
+<% if site.author and site.author.email then -%>
 <email><%= site.author.email %></email>
 <% end -%>
 </author>

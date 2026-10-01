@@ -27,6 +27,8 @@ Optional:
 
 * `subtitle`: Subtitle for the site (default: `nil`/none)
 * `footer`: Footer (raw HTML) to append to the end of every page (default: `nil`/none)
+* `author.name`: Name of the author (added to the Atom feed)
+* `author.email`: Email of the author (added to the Atom feed)
 * `keywordDirectoryPattern`: Lua pattern for deriving keywords from the first capture group of item paths (default: `"^posts/(.-)/.+%.html$"`, meaning the (first) subdirectory of `posts/` is the name of a keyword)
 * `syntaxAliases`: Aliases for syntax highlighting, e.g. to have a code block tagged as `sh` use the Scintillua highlighter ("lexer") for Bash, you could set `syntaxAliases = { sh = "bash" }`
 * `checkLinks`: Options to pass to `checkLinks()` (links are still checked by default, but this enables filtering out unreachable items, such as assets linked only from drafts)
