@@ -7,8 +7,8 @@
 <link rel="alternate" href="<%= site.url %>"/>
 <author>
 <name><%= site.title %></name>
-<% if site.email then -%>
-<email><%= site.email %></email>
+<% if site.author.email then -%>
+<email><%= site.author.email %></email>
 <% end -%>
 </author>
 <updated><%= shared.yamlDateToIso((posts[1] or {date="1970-01-01"}).date) %></updated>
