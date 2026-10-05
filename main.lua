@@ -1010,7 +1010,7 @@ applyTemplates = function(templates)
 		local matchingPattern = nil
 		for _, pair in ipairs(compiled) do
 			-- Note: Last matching template wins
-			if string.find(path, pair[1]) then
+			if shouldInclude(path, pair[1], item) then
 				matchingPattern = pair[1]
 				matchingTemplate = pair[2]
 			end
