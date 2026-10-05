@@ -95,6 +95,16 @@ function table.merge(source, dest)
 	end
 end
 
+function table.mergeRecursive(source, dest)
+	for k, v in pairs(source) do
+		if type(v) == "table" and type(dest[k]) == "table" then
+			table.mergeRecursive(v, dest[k])
+		else
+			dest[k] = v
+		end
+	end
+end
+
 function table.copy(t)
 	local r = {}
 	table.merge(t, r)
