@@ -1137,7 +1137,7 @@ checkLinks = function (options)
 
 				local anchors = pathToAnchors[destination]
 				if not anchors then
-					if string.sub(destination, -1) == "/" then
+					if string.sub(destination, -1) == "/" or #destination == 0 then
 						anchors = pathToAnchors[destination .. "index.html"]
 					else
 						anchors = pathToAnchors[destination .. "/index.html"]
