@@ -86,7 +86,7 @@ There are a few different kinds of processing nodes in luasmith (number of input
 * `processMarkdown()` converts `*.md` files from Markdown to HTML (`.html`), extracting either Lua, (limited) YAML, or (limited) TOML frontmatter metadata in the process
 * `highlightSyntax(options?)` adds HTML spans with `.hl-*` CSS classes to fenced code blocks (see notes [below](#syntax-highlighting) for more detail)
 * `processEtlua(pattern?)` evaluates any [etlua](https://github.com/leafo/etlua) blocks in item content, similar to Hugo shortcodes, but using Lua (note: due to Markdown processing escaping angle brackets, be sure to use this node *prior* to `processMarkdown()`); `pattern` defaults to `%.md$` ("*.md")
-* `injectMetadata(properties, pattern)` merges `properties` into items, filtered as explained in the filtering note above
+* `injectMetadata(properties, pattern)` merges `properties` (shallowly, nested tables are assigned as-is, they are not merged with old values) into items, filtered as explained in the filtering note above
 * `deriveMetadata(derivations, pattern)` similar to `injectMetadata` but instead of adding fixed metadata, it runs functions on the item; the format of `derivations` is `{ [property] = f, ... }` where `f` takes in the item and returns the new value
 * `applyTemplates(templates)` applies a single template to each matched item; note that `templates` is an array of the format `{ [pattern] = template }` and the last match wins (e.g. so you can match "all HTML files" but then override that logic for specific items using more specific patterns)
 
@@ -152,6 +152,7 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 
 ### `table` Helpers
 * `table.merge(source, dest)` copies (shallowly) keys and values from table `source` to `dest`
+* `table.mergeRecursive(source, dest)` copies keys and values from table `source` to `dest` recursively (nested tables are merged too)
 * `table.copy(table)` creates a shallow copy of `table`
 * `table.map(table, func)` creates a new (array) table that is the result of applying `func` to each value in `table`
 * `table.sortBy(table, prop, desc)` creates a new (array) table with items ordered by the value of key `prop`, optionally in descending order (if `desc` is not false)
