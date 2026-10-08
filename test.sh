@@ -79,6 +79,9 @@ fi
 if ! echo 'return { injectFiles({ ["barindex.html"] = [[<a href="/bar">link</a>]] }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
 	echo "*** TEST FAILED (4) ***"
 fi
+if echo 'return { injectFiles({ ["bar/index.html"] = [[<a href="../">link</a>]], ["index.html"] = "" }), checkLinks() }' | ../luasmith - |grep -qi 'broken' ; then
+	echo "*** TEST FAILED (5) ***"
+fi
 
 # Misc. tests
 i=stdin
