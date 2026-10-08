@@ -6,7 +6,14 @@ local onError = function (err)
 	if processingContext then
 		message = "While processing \"" .. processingContext .. "\""
 		if processingContext2 then
-			message = message .. " (" .. processingContext2 .. ")"
+			if type(processingContext2) == "string" then
+				message = message .. " (" .. processingContext2 .. ")"
+			elseif type(processingContext2) == "function" then
+				local info = debug.getinfo(processingContext2, "nS")
+				if info then
+					message = message .. " (" .. (info.short_src or "<unknown source>") .. ":" .. (info.linedefined or "<unknown line>") .. ")"
+				end
+			end
 		end
 		message = message .. ":\n\n"
 	end
@@ -1244,7 +1251,7 @@ local function loadTheme(theme)
 		pipeline = dofile(theme)
 	elseif theme == "-" then
 		themeDirectory = ""
-		pipeline = loadOrError(fs.readFile(theme))()
+		pipeline = loadOrError(fs.readFile(theme), "<standard input>")()
 	else
 		-- Use built-in theme
 		themeDirectory = fs.join("themes", theme)
