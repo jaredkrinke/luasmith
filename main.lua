@@ -413,6 +413,10 @@ function fs.tryLoadFile(path)
 end
 
 local themeDirectory = "."
+function fs.getThemeDirectory()
+	return themeDirectory
+end
+
 function fs.readThemeFile(path)
 	return fs.readFile(fs.join(themeDirectory, path))
 end
