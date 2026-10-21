@@ -58,7 +58,34 @@ void flush(chtml_event_t event, state_t* state) {
 	}
 }
 
-void parse_value(state_t* state) {
+void flush_other(state_t* state) {
+	flush(CHTML_EVENT_OTHER, state);
+}
+
+void flush_tag_enter(state_t* state) {
+	flush(CHTML_EVENT_TAG_ENTER, state);
+}
+
+void flush_tag_exit(state_t* state) {
+	flush(CHTML_EVENT_TAG_EXIT, state);
+}
+
+void flush_attribute(state_t* state, const char* attribute, size_t attribute_size, const char* value, size_t value_size) {
+	state->ctx.attribute = attribute;
+	state->ctx.attribute_size = attribute_size;
+	state->ctx.value = value;
+	state->ctx.value_size = value_size;
+	flush(CHTML_EVENT_ATTRIBUTE, state);
+	state->ctx.attribute = NULL;
+	state->ctx.attribute_size = 0;
+	state->ctx.value = NULL;
+	state->ctx.value_size = 0;
+}
+
+void parse_value(state_t* state, const char* attribute, size_t attribute_size) {
+	const char* value = NULL;
+	size_t value_size = 0;
+
 	/* Three cases: no quotation, apostrophes, or quotation marks */
 	class_t start = peek(state);
 	switch (start) {
@@ -66,7 +93,7 @@ void parse_value(state_t* state) {
 		case C_QUOT:
 			/* Look for matching apostrophe/quotation mark */
 			state->c++;
-			state->ctx.value = state->c;
+			value = state->c;
 
 			for (;;) {
 				class_t next = peek(state);
@@ -74,9 +101,9 @@ void parse_value(state_t* state) {
 					case C_APOS:
 					case C_QUOT:
 						if (next == start) {
-							state->ctx.value_size = (size_t)(state->c - state->ctx.value);
+							value_size = (size_t)(state->c - value);
 							state->c++;
-							flush(CHTML_EVENT_ATTRIBUTE, state);
+							flush_attribute(state, attribute, attribute_size, value, value_size);
 							return;
 						}
 						else {
@@ -99,10 +126,9 @@ void parse_value(state_t* state) {
 
 		case C_TEXT:
 			/* No quotation */
-			state->ctx.value = state->c;
+			value = state->c;
 			coalesce(C_TEXT, state);
-			state->ctx.value_size = (size_t)(state->c - state->ctx.value);
-			flush(CHTML_EVENT_ATTRIBUTE, state);
+			flush_attribute(state, attribute, attribute_size, value, (size_t)(state->c - value));
 			return;
 
 		default:
@@ -111,19 +137,17 @@ void parse_value(state_t* state) {
 	}
 }
 
-void parse_attribute(state_t *state) {
+void parse_attribute(state_t *state, const char* attribute, size_t attribute_size) {
 	switch (peek(state)) {
 		case C_SPACE:
 		case C_BRCLOSE:
 			/* No equal sign */
-			state->ctx.value = NULL;
-			state->ctx.value_size = 0;
-			flush(CHTML_EVENT_ATTRIBUTE, state);
+			flush_attribute(state, attribute, attribute_size, NULL, 0);
 			break;
 
 		case C_EQUAL:
 			state->c++;
-			parse_value(state);
+			parse_value(state, attribute, attribute_size);
 			break;
 
 		default:
@@ -133,50 +157,43 @@ void parse_attribute(state_t *state) {
 }
 
 void parse_tag(state_t* state) {
+	const char* attribute = NULL;
+	size_t attribute_size = 0;
+
 	state->c++;
 	state->ctx.tag = state->c;
 	state->ctx.tag_size = 0;
-	state->ctx.attribute = NULL;
-	state->ctx.attribute_size = 0;
-	state->ctx.value = NULL;
-	state->ctx.value_size = 0;
 
 	coalesce(C_TEXT, state);
 	state->ctx.tag_size = (size_t)(state->c - state->ctx.tag);
-	flush(CHTML_EVENT_TAG_ENTER, state);
+	flush_tag_enter(state);
 
 	for (;;) {
 		coalesce(C_SPACE, state);
 
 		switch (peek(state)) {
 			case C_BRCLOSE:
-				state->ctx.attribute = NULL;
-				state->ctx.attribute_size = 0;
-				state->ctx.value = NULL;
-				state->ctx.value_size = 0;
-				flush(CHTML_EVENT_OTHER, state);
+				flush_other(state);
 
 				state->c++;
-				flush(CHTML_EVENT_TAG_EXIT, state);
+				flush_tag_exit(state);
 				return;
 
 			case C_NULL:
 				return;
 
 			case C_TEXT:
-				flush(CHTML_EVENT_OTHER, state);
-				state->ctx.attribute = state->c;
+				flush_other(state);
+				attribute = state->c;
 				coalesce(C_TEXT, state);
-				state->ctx.attribute_size = (size_t)(state->c - state->ctx.attribute);
+				attribute_size = (size_t)(state->c - attribute);
 
 				/* Check for XML-style self-closing tag */
-				if (state->ctx.attribute_size == 1 && state->ctx.attribute[0] == '/') {
-					state->ctx.attribute = NULL;
-					state->ctx.attribute_size = 0;
-					flush(CHTML_EVENT_OTHER, state);
+				if (attribute_size == 1 && attribute[0] == '/') {
+					flush_other(state);
 				}
 				else {
-					parse_attribute(state);
+					parse_attribute(state, attribute, attribute_size);
 				}
 				break;
 
@@ -205,7 +222,7 @@ void parse_html(const char* html, chtml_callback_t cb, void* user_data) {
 	while ((next = peek(&state)) != C_NULL) {
 		switch (next) {
 			case C_BROPEN:
-				flush(CHTML_EVENT_OTHER, &state);
+				flush_other(&state);
 				parse_tag(&state);
 				break;
 
@@ -215,5 +232,5 @@ void parse_html(const char* html, chtml_callback_t cb, void* user_data) {
 		}
 	}
 
-	flush(CHTML_EVENT_OTHER, &state);
+	flush_other(&state);
 }
