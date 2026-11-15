@@ -39,6 +39,12 @@ Optional:
 * `url`: Root URL for the site (e.g. `https://example.com/`) -- this is used to provide absolute links in the Atom feed
 * `links`: List of links to include at the top of each page, example: `links = { { "About", "about.html" }, { "Contact", "mailto:contact@example.com" } }`
 
+### `generic` Theme
+Optional:
+
+* `syntaxAliases`: Aliases for syntax highlighting, e.g. to have a code block tagged as `sh` use the Scintillua highlighter ("lexer") for Bash, you could set `syntaxAliases = { sh = "bash" }`
+* `checkLinks`: Options to pass to `checkLinks()` (links are still checked by default, but this enables filtering out unreachable items, such as assets linked only from drafts)
+
 ## Item Schema
 ### Frontmatter
 Both `blog` and `md2blog` items make use of the following frontmatter properties:

@@ -40,6 +40,9 @@ VPATH = scintillua/lexers
 
 THEME_FILES = \
 	themes/check-links/theme.lua \
+	themes/generic/style.css \
+	themes/generic/theme.lua \
+	themes/generic/outer.etlua \
 	themes/shared.lua \
 	themes/shared/feed.etlua \
 	themes/md2blog/theme.lua \

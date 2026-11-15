@@ -60,23 +60,6 @@ function postList(self, level, limit)
 	})
 end
 
--- Hard-code syntax highlighting as normal HTML markup to support non-CSS browsers (e.g. terminal browsers)
-local tagToElement = {}
-for e, list in pairs({
-	i = {"comment", "preprocessor", "bold", "italic", "number", "underline", "string"},
-	b = {"tag", "function", "heading", "label", "annotation", "class", "type", "keyword"},
-	u = {"link", "list", "error", "regex"},
-}) do
-	for _, t in ipairs(list) do
-		tagToElement[t] = e
-	end
-end
-
-local function highlightSpan(verbatim, tag)
-	local element = tagToElement[tag] or "span"
-	return "<" .. element .. " class=\"hl-" .. tag .. "\">" .. verbatim .. "</" .. element .. ">"
-end
-
 local function deriveKeywords(item)
 	local category = string.match(item.path, site.keywordDirectoryPattern)
 	local keywords = item.keywords or {}
@@ -109,7 +92,7 @@ return {
 	omitWhen(function (item) return item.draft or item.path == "site.lua" end),
 	highlightSyntax({
 		aliases = site.syntaxAliases,
-		highlightSpan = highlightSpan,
+		highlightSpan = shared.highlightSpanWithLegacyTag,
 	}),
 	deriveMetadata({ keywords = deriveKeywords }, site.keywordDirectoryPattern),
 

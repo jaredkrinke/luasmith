@@ -91,6 +91,7 @@ Built in themes:
 
 * `blog`: a minimal blog theme ([example site](https://til.schemescape.com))
 * `md2blog`: an opinionated (and slightly less minimal) blog theme, following the structure of [md2blog](https://jaredkrinke.github.io/md2blog/) ([example site](https://log.schemescape.com/))
+* `generic`: a minimal theme for loose Markdown files, without listing or indexing posts
 * `check-links`: read-only utility theme that reads HTML files (from supplied argument or, by default, current directory) and validates internal links, reporting any broken internal links as warnings
 
 Community themes:

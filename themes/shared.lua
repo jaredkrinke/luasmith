@@ -34,11 +34,39 @@ function atomifyItemContent(item, siteUrl)
 	return lib.item.repathRelativeLinks(item, siteUrl)
 end
 
+-- Syntax highlighting for legacy browsers
+local tagToElement = {}
+for e, list in pairs({
+	i = {"comment", "preprocessor", "bold", "italic", "number", "underline", "string"},
+	b = {"tag", "function", "heading", "label", "annotation", "class", "type", "keyword"},
+	u = {"link", "list", "error", "regex"},
+}) do
+	for _, t in ipairs(list) do
+		tagToElement[t] = e
+	end
+end
+
+local function highlightSpanWithLegacyTag(verbatim, tag)
+	local element = tagToElement[tag] or "span"
+	return "<" .. element .. " class=\"hl-" .. tag .. "\">" .. verbatim .. "</" .. element .. ">"
+end
+
+local function highlightSpanWithoutClass(verbatim, tag)
+	local element = tagToElement[tag]
+	if element then
+		return "<" .. element .. ">" .. verbatim .. "</" .. element .. ">"
+	else
+		return verbatim
+	end
+end
+
 return {
 	atomifyItemContent = atomifyItemContent,
 	escapeQuotes = escapeQuotes,
 	formatDate = formatDate,
 	hasDate = hasDate,
+	highlightSpanWithLegacyTag = highlightSpanWithLegacyTag,
+	highlightSpanWithoutClass = highlightSpanWithoutClass,
 	yamlDateToIso = yamlDateToIso,
 }
 
