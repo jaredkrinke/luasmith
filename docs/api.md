@@ -108,7 +108,7 @@ Note: if you need to tweak or add a lexer, you can simply add a lexer on Lua's s
 ### Aggregate Nodes
 * `aggregate(path, pattern)` creates a new item at `path` with empty `content`, but with an `items` property that is an array of all items matching the filter (see [filtering note above](#filtering-items))
 * `createIndexes(createPath, property, pattern)` creates multiple new "index" items, one for each unique value of the property `property` on filtered items (see [filtering note above](#filtering-items)), at the path computed by `createPath(value)`; the "index" item format includes `{ key = <the unique value>, items = <array of items with that value>, groups = <map of unique values to items for ALL unique values> }`
-* `checkLinks(options)` verifies that relative link targets in HTML files exist, including hash/fragments/anchors (i.e. "checks for broken links"); `options` is an optional table with the following keys:
+* `checkLinks(options, pattern)` verifies that relative link targets in HTML files exist, including hash/fragments/anchors (i.e. "checks for broken links"); `options` is an optional table with the following keys:
 	* `excludeUnreachable`: if true, remove items that aren't reachable from entry points
 	* `entryPoints`: array table of entry points (defaults to `{ "index.html" }`) (warnings will be emitted instead of removing items if `excludeUnreachable` is false/nil)
 
@@ -181,7 +181,8 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 
 ### `fs` Helpers
 * `fs.join(part1, part2)` joins `part1` and `part2` with a `/` (note: if one value is an empty string, this just returns the other value)
-* `fs.dir(path)` returns the directory part of `path` (without any trailing slash)
+* `fs.directory(path)` returns the directory part of `path` (without any trailing slash)
+* `fs.reverseDirectory(path)` returns the path from the directory of `path` up to the root (e.g. `foo/bar/baz.html` maps to `../../`)
 * `fs.normalize(path)` normalizes `path` by converting `\` to `/` and resolving `..` and `.`
 * `fs.resolveRelative(base, relative)` resolves path `relative`, relative to `base`
 * `fs.createDirectory(dir)` creates directory at path `dir`, including any necessary parent directories
@@ -201,6 +202,7 @@ For convenience, luasmith exposes some generic Lua helper functions, as document
 
 ### Item/HTML helpers
 * `lib.item.repathRelativeLinks(item, prefix)` rewrites relative HTML links so that they start with the given prefix (this can be used to rewrite relative links as absolute links, e.g. as used when built-in themes produce Atom feeds)
+* `lib.item.repathRelativeLinksCustom(item, transformLink)` rewrites relative HTML links with the result of calling `transformLink(href, sourceDirectory)` (`href` is the link that is in the item that exists in directory `sourceDirectory`)
 * `lib.item.createTableOfContents(item)` generates a table of contents for the given HTML item (see example below)
 
 #### Inserting a table of contents

@@ -299,6 +299,10 @@ end
 -- File system helpers
 fs = {}
 
+local function computePathToRoot(path)
+	return string.rep("../", iterator.count(string.gmatch(path, "/")))
+end
+
 function fs.join(a, b)
 	if a == "" then
 		return b
@@ -312,6 +316,10 @@ end
 function fs.directory(path)
 	local dir = string.match(path, "(.*)/")
 	return dir or ""
+end
+
+function fs.reverseDirectory(path)
+	return computePathToRoot(path)
 end
 
 -- Normalize path by 1) converting "\" to "/" and 2) resolving ".." and "."
@@ -440,10 +448,6 @@ function fs.copyFile(source, destination)
 	_copyFile(source, destination)
 end
 
-local function computePathToRoot(path)
-	return string.rep("../", iterator.count(string.gmatch(path, "/")))
-end
-
 -- URL helpers
 url = {}
 
@@ -455,26 +459,32 @@ end
 lib = {}
 lib.item = {}
 
-function lib.item.repathRelativeLinks(item, prefix)
+function lib.item.repathRelativeLinksCustom(item, transformLink)
 	local parts = {}
 	local pathFromRoot = fs.directory(item.path)
 	_parseHtml(item.content, function (event)
 		local part = event.html
 
 		-- Repath relative links, if needed
-		if pathFromRoot ~= "" and event.attribute and event.value
+		if event.attribute and event.value
 			and((event.tag == "a" and event.attribute == "href") -- Check for links
 			or (event.tag == "link" and event.attribute == "href")
 			or (event.tag == "script" and event.attribute == "src")
 			or (event.tag == "img" and event.attribute == "src"))
 			and not string.find(event.value, ":") -- Local/relative links only
 		then
-			part = event.attribute .. "=\"" .. (prefix or "") .. fs.join(pathFromRoot, event.value) .. "\""
+			part = event.attribute .. "=\"" .. transformLink(event.value, pathFromRoot) .. "\""
 		end
 
 		table.insert(parts, part)
 	end)
 	return table.concat(parts)
+end
+
+function lib.item.repathRelativeLinks(item, prefix)
+	return lib.item.repathRelativeLinksCustom(item, function (destination, pathFromRoot)
+		return (prefix or "") .. fs.join(pathFromRoot, destination)
+	end)
 end
 
 function lib.item.createTableOfContents(item)
@@ -1086,7 +1096,7 @@ createIndexes = function (createIndexPath, property, pattern)
 		pattern)
 end
 
-checkLinks = function (options)
+checkLinks = function (options, pattern)
 	options = options or {}
 	return function (items)
 		-- Enumerate anchors and relative links
@@ -1129,7 +1139,10 @@ checkLinks = function (options)
 				end)
 
 				pathToAnchors[path] = anchors
-				pathToLinks[path] = links
+
+				if shouldInclude(path, pattern, item) then
+					pathToLinks[path] = links
+				end
 			else
 				pathToAnchors[path] = true
 			end
