@@ -40,6 +40,8 @@ VPATH = scintillua/lexers
 
 THEME_FILES = \
 	themes/check-links/theme.lua \
+	themes/docs/html.etlua \
+	themes/docs/theme.lua \
 	themes/generic/style.css \
 	themes/generic/theme.lua \
 	themes/generic/outer.etlua \

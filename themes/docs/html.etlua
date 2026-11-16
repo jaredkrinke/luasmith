@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<% if title then %><title><%= title or "" %></title><% end %>
+<style>
+<%- stylesheet -%>
+</style>
+<link rel="icon" href="data:," />
+</head>
+<body>
+<%- content -%>
+</body>
+</html>
